@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sanchora/features/profile/screens/profile_screen.dart';
+import 'package:sanchora/core/widgets/app_header.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -26,9 +27,11 @@ class _HomeScreenState extends State<HomeScreen> {
         body: SafeArea(
           child: Column(
             children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(20, 10, 20, 12),
-                child: _buildTopBar(),
+              AppHeader(
+                title: 'Home',
+                leading: _buildMenuButton(),
+                center: _buildLogo(),
+                actions: [_buildNotificationButton()],
               ),
               Expanded(
                 child: SingleChildScrollView(
@@ -74,13 +77,59 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildTopBar() {
+  Widget _buildLogo() {
     return Row(
+      mainAxisSize: MainAxisSize.min,
       children: [
-        InkWell(
-          onTap: () => _scaffoldKey.currentState?.openDrawer(),
+        Image.asset(
+          'assets/images/sanchora_logo.png',
+          width: 28,
+          fit: BoxFit.contain,
+        ),
+        const SizedBox(width: 8),
+        const Text(
+          'Sanchora',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w800,
+            color: Color(0xFF0B1F4D),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMenuButton() {
+    return InkWell(
+      onTap: () => _scaffoldKey.currentState?.openDrawer(),
+      borderRadius: BorderRadius.circular(14),
+      child: Container(
+        width: 40,
+        height: 40,
+        decoration: BoxDecoration(
+          color: Colors.white,
           borderRadius: BorderRadius.circular(14),
-          child: Container(
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x140B1F4D),
+              blurRadius: 10,
+              offset: Offset(0, 3),
+            ),
+          ],
+        ),
+        child: const Icon(Icons.menu_rounded, color: Color(0xFF0B1F4D)),
+      ),
+    );
+  }
+
+  Widget _buildNotificationButton() {
+    return InkWell(
+      onTap: () => pushScreen(const NotificationPlaceholderScreen()),
+      borderRadius: BorderRadius.circular(14),
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Container(
             width: 40,
             height: 40,
             decoration: BoxDecoration(
@@ -94,67 +143,22 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ],
             ),
-            child: const Icon(Icons.menu_rounded, color: Color(0xFF0B1F4D)),
+            child: const Icon(Icons.notifications_none_rounded, color: Color(0xFF0B1F4D)),
           ),
-        ),
-        const Spacer(),
-        Row(
-          children: [
-            Image.asset(
-              'assets/images/sanchora_logo.png',
-              width: 28,
-              fit: BoxFit.contain,
-            ),
-            const SizedBox(width: 8),
-            const Text(
-              'Sanchora',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w800,
-                color: Color(0xFF0B1F4D),
+          Positioned(
+            top: 7,
+            right: 7,
+            child: Container(
+              width: 10,
+              height: 10,
+              decoration: BoxDecoration(
+                color: const Color(0xFF1677FF),
+                borderRadius: BorderRadius.circular(999),
               ),
             ),
-          ],
-        ),
-        const Spacer(),
-        InkWell(
-          onTap: () => pushScreen(const NotificationPlaceholderScreen()),
-          borderRadius: BorderRadius.circular(14),
-          child: Stack(
-            clipBehavior: Clip.none,
-            children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(14),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Color(0x140B1F4D),
-                      blurRadius: 10,
-                      offset: Offset(0, 3),
-                    ),
-                  ],
-                ),
-                child: const Icon(Icons.notifications_none_rounded, color: Color(0xFF0B1F4D)),
-              ),
-              Positioned(
-                top: 7,
-                right: 7,
-                child: Container(
-                  width: 10,
-                  height: 10,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF1677FF),
-                    borderRadius: BorderRadius.circular(999),
-                  ),
-                ),
-              ),
-            ],
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -907,18 +911,34 @@ class PlaceholderScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(title),
-        leading: IconButton(
-          onPressed: () => Navigator.of(context).pop(),
-          icon: const Icon(Icons.arrow_back_rounded),
-        ),
-      ),
-      body: Center(
-        child: Text(
-          message,
-          textAlign: TextAlign.center,
-          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+      body: SafeArea(
+        child: Column(
+          children: [
+            AppHeader(
+              title: title,
+              leading: InkWell(
+                onTap: () => Navigator.of(context).pop(),
+                borderRadius: BorderRadius.circular(14),
+                child: const SizedBox(
+                  width: 40,
+                  height: 40,
+                  child: Icon(Icons.arrow_back_rounded, color: Color(0xFF0B1F4D)),
+                ),
+              ),
+            ),
+            Expanded(
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    children: [
+                      // Placeholder content
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
