@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sanchora/features/auth/screens/login_screen.dart';
 import 'package:sanchora/features/home/screens/home_screen.dart';
+import 'package:sanchora/core/theme/app_colors.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -27,6 +28,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               seedColor: const Color(0xFF1677FF),
               brightness: Brightness.light,
             ),
+            scaffoldBackgroundColor: AppColors.background,
           );
 
     return Theme(
@@ -46,7 +48,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const SizedBox(height: 4),
-                      _buildHeader(),
+                      _buildHeader(theme),
                       const SizedBox(height: 20),
                       _buildProfileCard(theme),
                       const SizedBox(height: 20),
@@ -177,24 +179,32 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(ThemeData theme) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: const [
+      children: [
         Text(
           'Profile',
-          style: TextStyle(
+          style: theme.textTheme.headlineMedium?.copyWith(
             fontSize: 28,
             fontWeight: FontWeight.w800,
-            color: Color(0xFF0B1F4D),
+            color: theme.colorScheme.onSurface,
+          ) ?? TextStyle(
+            fontSize: 28,
+            fontWeight: FontWeight.w800,
+            color: theme.colorScheme.onSurface,
           ),
         ),
-        SizedBox(height: 6),
+        const SizedBox(height: 6),
         Text(
           'Manage your account and preferences.',
-          style: TextStyle(
+          style: theme.textTheme.bodyMedium?.copyWith(
             fontSize: 14.5,
-            color: Color(0xFF64748B),
+            color: theme.colorScheme.onSurfaceVariant,
+            height: 1.45,
+          ) ?? TextStyle(
+            fontSize: 14.5,
+            color: theme.colorScheme.onSurfaceVariant,
             height: 1.45,
           ),
         ),
@@ -576,7 +586,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _openScreen(context, const HomeScreen());
         break;
       case 1:
-        _openScreen(context, const SubscriptionsScreen());
+        _openScreen(context, const SubscriptionsPlaceholderScreen());
         break;
       case 2:
         _openScreen(context, const AddSubscriptionScreen());
@@ -754,8 +764,8 @@ class ProfileDetailsScreen extends StatelessWidget {
   }
 }
 
-class SubscriptionsScreen extends StatelessWidget {
-  const SubscriptionsScreen({super.key});
+class SubscriptionsPlaceholderScreen extends StatelessWidget {
+  const SubscriptionsPlaceholderScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

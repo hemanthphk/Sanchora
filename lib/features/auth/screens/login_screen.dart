@@ -92,12 +92,6 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget _buildBrandHeader(double logoSize) {
     return Column(
       children: [
-        Image.asset(
-          'assets/images/sanchora_logo.png',
-          width: logoSize,
-          fit: BoxFit.contain,
-        ),
-        const SizedBox(height: 10),
         const Text(
           'Sanchora',
           style: TextStyle(

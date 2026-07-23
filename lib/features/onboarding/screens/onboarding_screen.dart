@@ -12,23 +12,23 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
 
-  final List<_OnboardingPageData> _pages = [
-    const _OnboardingPageData(
+  List<_OnboardingPageData> get _pages => [
+    _OnboardingPageData(
       title: 'Track. Manage.\nNever Miss.',
       subtitle: 'All your subscriptions in one place.\nStay on top, save more.',
-      accentColor: Color(0xFF1677FF),
+      accentColor: const Color(0xFF0A84FF),
       showPremiumPhone: true,
     ),
-    const _OnboardingPageData(
+    _OnboardingPageData(
       title: 'Get Reminded.\nStay Ahead.',
       subtitle: 'Smart reminders before every due date\nso you never miss a payment.',
-      accentColor: Color(0xFF3B82F6),
+      accentColor: const Color(0xFF0A84FF),
       showPremiumPhone: false,
     ),
-    const _OnboardingPageData(
+    _OnboardingPageData(
       title: 'Stay in control',
       subtitle: 'Manage renewals and plans without the hassle.',
-      accentColor: Color(0xFF60A5FA),
+      accentColor: const Color(0xFF0A84FF),
       showPremiumPhone: false,
     ),
   ];
@@ -42,7 +42,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   void _goToNextPage() {
     if (_currentPage < _pages.length - 1) {
       _pageController.nextPage(
-        duration: const Duration(milliseconds: 350),
+        duration: Duration(milliseconds: 350),
         curve: Curves.easeInOut,
       );
     } else {
@@ -53,7 +53,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   void _goToLogin() {
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (_) => const LoginScreen()),
+      MaterialPageRoute(builder: (_) => LoginScreen()),
     );
   }
 
@@ -64,7 +64,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     return Theme(
       data: ThemeData(useMaterial3: true),
       child: Scaffold(
-        backgroundColor: const Color(0xFFFFFFFF),
+        backgroundColor: Theme.of(context).cardColor,
         body: SafeArea(
           child: Column(
             children: [
@@ -88,36 +88,36 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     }
 
                     return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      padding: EdgeInsets.symmetric(horizontal: 24),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Container(
                             height: 220,
                             decoration: BoxDecoration(
-                              color: const Color(0xFFF8FAFC),
+                              color: Theme.of(context).scaffoldBackgroundColor,
                               borderRadius: BorderRadius.circular(28),
                             ),
                           ),
-                          const SizedBox(height: 24),
+                          SizedBox(height: 24),
                           Text(
                             page.title,
                             textAlign: TextAlign.center,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 28,
                               fontWeight: FontWeight.w800,
-                              color: Color(0xFF0B1F4D),
+                              color: Theme.of(context).colorScheme.onSurface,
                             ),
                           ),
-                          const SizedBox(height: 12),
+                          SizedBox(height: 12),
                           Text(
                             page.subtitle,
                             textAlign: TextAlign.center,
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 16,
-                              color: Color(0xFF64748B),
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
                               height: 1.4,
                             ),
                           ),
@@ -128,7 +128,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+                padding: EdgeInsets.fromLTRB(24, 0, 24, 24),
                 child: Column(
                   children: [
                     Row(
@@ -136,20 +136,20 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       children: List.generate(_pages.length, (index) {
                         final active = index == _currentPage;
                         return AnimatedContainer(
-                          duration: const Duration(milliseconds: 250),
+                          duration: Duration(milliseconds: 250),
                           width: active ? 28 : 8,
                           height: 8,
-                          margin: const EdgeInsets.symmetric(horizontal: 4),
+                          margin: EdgeInsets.symmetric(horizontal: 4),
                           decoration: BoxDecoration(
                             color: active
-                                ? const Color(0xFF1677FF)
-                                : const Color(0xFFE2E8F0),
+                                ? const Color(0xFF0A84FF)
+                                : Theme.of(context).colorScheme.outlineVariant,
                             borderRadius: BorderRadius.circular(999),
                           ),
                         );
                       }),
                     ),
-                    const SizedBox(height: 20),
+                    SizedBox(height: 20),
                     if (_currentPage == 1)
                       Column(
                         children: [
@@ -157,11 +157,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                             width: double.infinity,
                             child: ElevatedButton.icon(
                               onPressed: _goToNextPage,
-                              icon: const Icon(
+                              icon: Icon(
                                 Icons.arrow_forward_rounded,
                                 size: 18,
                               ),
-                              label: const Text(
+                              label: Text(
                                 'Next',
                                 style: TextStyle(
                                   fontSize: 16,
@@ -169,10 +169,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                 ),
                               ),
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF1677FF),
-                                foregroundColor: Colors.white,
+                                backgroundColor: const Color(0xFF0A84FF),
+                                foregroundColor: Theme.of(context).cardColor,
                                 padding:
-                                    const EdgeInsets.symmetric(vertical: 16),
+                                    EdgeInsets.symmetric(vertical: 16),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(18),
                                 ),
@@ -180,18 +180,18 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                               ),
                             ),
                           ),
-                          const SizedBox(height: 12),
+                          SizedBox(height: 12),
                           TextButton(
                             onPressed: () {
                               _pageController.previousPage(
-                                duration: const Duration(milliseconds: 350),
+                                duration: Duration(milliseconds: 350),
                                 curve: Curves.easeInOut,
                               );
                             },
-                            child: const Text(
+                            child: Text(
                               'Back',
                               style: TextStyle(
-                                color: Color(0xFF64748B),
+                                color: Theme.of(context).colorScheme.onSurfaceVariant,
                                 fontSize: 15,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -206,22 +206,22 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                             width: double.infinity,
                             child: ElevatedButton.icon(
                               onPressed: _goToNextPage,
-                              icon: const Icon(
+                              icon: Icon(
                                 Icons.arrow_forward_rounded,
                                 size: 18,
                               ),
                               label: Text(
                                 isLastPage ? 'Get Started' : 'Next',
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w700,
                                 ),
                               ),
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF1677FF),
-                                foregroundColor: Colors.white,
+                                backgroundColor: const Color(0xFF0A84FF),
+                                foregroundColor: Theme.of(context).cardColor,
                                 padding:
-                                    const EdgeInsets.symmetric(vertical: 16),
+                                    EdgeInsets.symmetric(vertical: 16),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(18),
                                 ),
@@ -229,14 +229,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                               ),
                             ),
                           ),
-                          const SizedBox(height: 12),
+                          SizedBox(height: 12),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              const Text(
+                              Text(
                                 'Already have an account? ',
                                 style: TextStyle(
-                                  color: Color(0xFF64748B),
+                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                                   fontSize: 15,
                                 ),
                               ),
@@ -244,12 +244,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                 onPressed: _goToLogin,
                                 style: TextButton.styleFrom(
                                   padding: EdgeInsets.zero,
-                                  minimumSize: const Size(0, 0),
+                                  minimumSize: Size(0, 0),
                                 ),
-                                child: const Text(
+                                child: Text(
                                   'Log in',
                                   style: TextStyle(
-                                    color: Color(0xFF1677FF),
+                                    color: const Color(0xFF0A84FF),
                                     fontWeight: FontWeight.w700,
                                   ),
                                 ),
@@ -270,10 +270,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   Widget _buildSecondPage(_OnboardingPageData page) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
+      padding: EdgeInsets.symmetric(horizontal: 24),
       child: Column(
         children: [
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
           Expanded(
             child: Stack(
               alignment: Alignment.center,
@@ -286,7 +286,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 Positioned(
                   bottom: 34,
                   right: -18,
-                  child: _buildRing(150, 0x0F1677FF),
+                  child: _buildRing(150, 0x0F0A84FF),
                 ),
                 Positioned(
                   top: 36,
@@ -294,7 +294,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   child: _buildFloatingChip(
                     icon: Icons.notifications_active_rounded,
                     size: 24,
-                    color: const Color(0xFF1677FF),
+                    color: const Color(0xFF0A84FF),
                   ),
                 ),
                 Positioned(
@@ -303,7 +303,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   child: _buildFloatingChip(
                     icon: Icons.calendar_today_rounded,
                     size: 22,
-                    color: const Color(0xFF64748B),
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                 ),
                 Positioned(
@@ -312,7 +312,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   child: _buildFloatingChip(
                     icon: Icons.credit_card_rounded,
                     size: 24,
-                    color: const Color(0xFF0F766E),
+                    color: const Color(0xFF0A84FF),
                   ),
                 ),
                 Positioned(
@@ -321,16 +321,16 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   child: _buildFloatingChip(
                     icon: Icons.check_circle_rounded,
                     size: 24,
-                    color: const Color(0xFF22C55E),
+                    color: const Color(0xFF0A84FF),
                   ),
                 ),
                 Container(
                   width: 250,
                   height: 388,
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: const Color(0xFFF3F9FF),
                     borderRadius: BorderRadius.circular(36),
-                    boxShadow: const [
+                    boxShadow: [
                       BoxShadow(
                         color: Color(0x1A0B1F4D),
                         blurRadius: 30,
@@ -339,25 +339,25 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     ],
                   ),
                   child: Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
+                    padding: EdgeInsets.fromLTRB(20, 16, 20, 16),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       mainAxisSize: MainAxisSize.max,
                       children: [
                         Text(
                           'Upcoming Payment',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w700,
-                            color: Color(0xFF0B1F4D),
+                            color: Theme.of(context).colorScheme.onSurface,
                           ),
                         ),
-                        const SizedBox(height: 12),
+                        SizedBox(height: 12),
                         Container(
                           width: double.infinity,
-                          padding: const EdgeInsets.all(16),
+                          padding: EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFF8FAFC),
+                            color: Theme.of(context).scaffoldBackgroundColor,
                             borderRadius: BorderRadius.circular(24),
                           ),
                           child: Column(
@@ -368,11 +368,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                     width: 44,
                                     height: 44,
                                     decoration: BoxDecoration(
-                                      color: const Color(0xFF1DB954)
+                                      color: Color(0xFF1DB954)
                                           .withValues(alpha: 0.16),
                                       borderRadius: BorderRadius.circular(14),
                                     ),
-                                    child: const Center(
+                                    child: Center(
                                       child: Icon(
                                         Icons.music_note_rounded,
                                         color: Color(0xFF1DB954),
@@ -380,58 +380,58 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                       ),
                                     ),
                                   ),
-                                  const SizedBox(width: 12),
+                                  SizedBox(width: 12),
                                   Expanded(
                                     child: Column(
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
                                       children: [
-                                        const Text(
+                                        Text(
                                           'Spotify Premium',
                                           style: TextStyle(
                                             fontSize: 14,
                                             fontWeight: FontWeight.w700,
-                                            color: Color(0xFF0B1F4D),
+                                            color: Theme.of(context).colorScheme.onSurface,
                                           ),
                                         ),
-                                        const Text(
+                                        Text(
                                           '₹119 / month',
                                           style: TextStyle(
                                             fontSize: 12,
-                                            color: Color(0xFF64748B),
+                                            color: Theme.of(context).colorScheme.onSurfaceVariant,
                                           ),
                                         ),
                                       ],
                                     ),
                                   ),
                                   Container(
-                                    padding: const EdgeInsets.symmetric(
+                                    padding: EdgeInsets.symmetric(
                                       horizontal: 8,
                                       vertical: 4,
                                     ),
                                     decoration: BoxDecoration(
-                                      color: const Color(0xFFDCFCE7),
+                                      color: const Color(0xFFEAF4FF),
                                       borderRadius: BorderRadius.circular(999),
                                     ),
-                                    child: const Text(
+                                    child: Text(
                                       'Active',
                                       style: TextStyle(
                                         fontSize: 10,
                                         fontWeight: FontWeight.w700,
-                                        color: Color(0xFF166534),
+                                        color: const Color(0xFF0A84FF),
                                       ),
                                     ),
                                   ),
                                 ],
                               ),
-                              const SizedBox(height: 16),
+                              SizedBox(height: 16),
                               Row(
-                                children: const [
+                                children: [
                                   Text(
                                     'Due on',
                                     style: TextStyle(
                                       fontSize: 13,
-                                      color: Color(0xFF64748B),
+                                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                                     ),
                                   ),
                                   Spacer(),
@@ -440,27 +440,27 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                     style: TextStyle(
                                       fontSize: 13,
                                       fontWeight: FontWeight.w700,
-                                      color: Color(0xFF0B1F4D),
+                                      color: Theme.of(context).colorScheme.onSurface,
                                     ),
                                   ),
                                 ],
                               ),
-                              const SizedBox(height: 16),
+                              SizedBox(height: 16),
                               SizedBox(
                                 width: double.infinity,
                                 child: ElevatedButton(
                                   onPressed: () {},
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: const Color(0xFF1677FF),
-                                    foregroundColor: Colors.white,
+                                    backgroundColor: const Color(0xFF0A84FF),
+                                    foregroundColor: Theme.of(context).cardColor,
                                     padding:
-                                        const EdgeInsets.symmetric(vertical: 14),
+                                        EdgeInsets.symmetric(vertical: 14),
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(16),
                                     ),
                                     elevation: 0,
                                   ),
-                                  child: const Text(
+                                  child: Text(
                                     'View Details',
                                     style: TextStyle(
                                       fontSize: 14,
@@ -479,34 +479,34 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               ],
             ),
           ),
-          const SizedBox(height: 24),
+          SizedBox(height: 24),
           RichText(
             textAlign: TextAlign.center,
-            text: const TextSpan(
+            text: TextSpan(
               style: TextStyle(
                 fontSize: 30,
                 fontWeight: FontWeight.w800,
                 height: 1.15,
-                color: Color(0xFF0B1F4D),
+                color: Theme.of(context).colorScheme.onSurface,
               ),
               children: [
                 TextSpan(text: 'Get Reminded.\n'),
                 TextSpan(
                   text: 'Stay Ahead.',
-                  style: TextStyle(color: Color(0xFF1677FF)),
+                  style: TextStyle(color: const Color(0xFF0A84FF)),
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 12),
-          const Text(
+          SizedBox(height: 12),
+          Text(
             'Smart reminders before every due date\nso you never miss a payment.',
             textAlign: TextAlign.center,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
               fontSize: 16,
-              color: Color(0xFF64748B),
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
               height: 1.45,
             ),
           ),
@@ -517,7 +517,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   Widget _buildThirdPage(_OnboardingPageData page) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
+      padding: EdgeInsets.symmetric(horizontal: 24),
       child: LayoutBuilder(
         builder: (context, constraints) {
           final availableHeight = constraints.maxHeight;
@@ -534,12 +534,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     Positioned(
                       top: 24,
                       left: -10,
-                      child: _buildGradientRing(120, const Color(0x1A1677FF)),
+                      child: _buildGradientRing(120, const Color(0xFF0A84FF)),
                     ),
                     Positioned(
                       bottom: 30,
                       right: -14,
-                      child: _buildGradientRing(150, const Color(0x1A0F766E)),
+                      child: _buildGradientRing(150, const Color(0xFF2563EB)),
                     ),
                     Positioned(
                       top: 40,
@@ -547,7 +547,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       child: _buildFloatingChip(
                         icon: Icons.trending_up_rounded,
                         size: 22,
-                        color: const Color(0xFF1677FF),
+                        color: const Color(0xFF0A84FF),
                       ),
                     ),
                     Positioned(
@@ -556,7 +556,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       child: _buildFloatingChip(
                         icon: Icons.pie_chart_rounded,
                         size: 22,
-                        color: const Color(0xFF0F766E),
+                        color: const Color(0xFF2563EB),
                       ),
                     ),
                     Positioned(
@@ -565,7 +565,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       child: _buildFloatingChip(
                         icon: Icons.wallet_rounded,
                         size: 22,
-                        color: const Color(0xFF64748B),
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                     ),
                     Positioned(
@@ -574,16 +574,16 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       child: _buildFloatingChip(
                         icon: Icons.savings_rounded,
                         size: 22,
-                        color: const Color(0xFF22C55E),
+                        color: const Color(0xFF0A84FF),
                       ),
                     ),
                     Container(
                       width: 250,
                       height: phoneHeight,
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: const Color(0xFFEEF2FF),
                         borderRadius: BorderRadius.circular(36),
-                        boxShadow: const [
+                        boxShadow: [
                           BoxShadow(
                             color: Color(0x1A0B1F4D),
                             blurRadius: 30,
@@ -592,26 +592,26 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         ],
                       ),
                       child: Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+                        padding: EdgeInsets.fromLTRB(16, 16, 16, 12),
                         child: Column(
                           children: [
                             Container(
                               width: 92,
                               height: 18,
                               decoration: BoxDecoration(
-                                color: const Color(0xFFF1F5F9),
+                                color: Color(0xFFF1F5F9),
                                 borderRadius: BorderRadius.circular(999),
                               ),
                             ),
                             SizedBox(height: contentSpacing),
                             Container(
                               width: double.infinity,
-                              padding: const EdgeInsets.all(12),
+                              padding: EdgeInsets.all(12),
                               decoration: BoxDecoration(
                                 gradient: const LinearGradient(
                                   colors: [
-                                    Color(0xFF1677FF),
-                                    Color(0xFF3B82F6),
+                                    Color(0xFF0A84FF),
+                                    Color(0xFF2563EB),
                                   ],
                                   begin: Alignment.topLeft,
                                   end: Alignment.bottomRight,
@@ -620,12 +620,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                               ),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
-                                children: const [
+                                children: [
                                   Text(
                                     'Monthly Spending',
                                     style: TextStyle(
                                       fontSize: 13,
-                                      color: Colors.white70,
+                                      color: Theme.of(context).cardColor.withValues(alpha: 0.7),
                                     ),
                                   ),
                                   SizedBox(height: 6),
@@ -634,7 +634,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                     style: TextStyle(
                                       fontSize: 24,
                                       fontWeight: FontWeight.w800,
-                                      color: Colors.white,
+                                      color: Theme.of(context).cardColor,
                                     ),
                                   ),
                                   SizedBox(height: 6),
@@ -642,7 +642,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                     '+12% vs last month',
                                     style: TextStyle(
                                       fontSize: 12,
-                                      color: Colors.white70,
+                                      color: Theme.of(context).cardColor.withValues(alpha: 0.7),
                                     ),
                                   ),
                                 ],
@@ -652,9 +652,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                             Expanded(
                               child: Container(
                                 width: double.infinity,
-                                padding: const EdgeInsets.all(12),
+                                padding: EdgeInsets.all(12),
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFFF8FAFC),
+                                  color: const Color(0xFFF3F9FF),
                                   borderRadius: BorderRadius.circular(20),
                                 ),
                                 child: LayoutBuilder(
@@ -668,9 +668,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
                                             _buildAnalyticsRow('Netflix', '₹649'),
-                                            const SizedBox(height: 8),
+                                            SizedBox(height: 8),
                                             _buildAnalyticsRow('Spotify', '₹119'),
-                                            const SizedBox(height: 8),
+                                            SizedBox(height: 8),
                                             _buildAnalyticsRow('Amazon Prime', '₹299'),
                                           ],
                                         ),
@@ -683,27 +683,27 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                             SizedBox(height: contentSpacing),
                             Container(
                               width: double.infinity,
-                              padding: const EdgeInsets.all(10),
+                              padding: EdgeInsets.all(10),
                               decoration: BoxDecoration(
-                                color: Colors.white,
+                                color: const Color(0xFFF3F9FF),
                                 borderRadius: BorderRadius.circular(18),
                                 border: Border.all(
-                                  color: const Color(0xFFE2E8F0),
+                                  color: Theme.of(context).colorScheme.outlineVariant,
                                   width: 1,
                                 ),
                               ),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Text(
+                                  Text(
                                     'Spending trend',
                                     style: TextStyle(
                                       fontSize: 12,
                                       fontWeight: FontWeight.w700,
-                                      color: Color(0xFF0B1F4D),
+                                      color: Theme.of(context).colorScheme.onSurface,
                                     ),
                                   ),
-                                  const SizedBox(height: 10),
+                                  SizedBox(height: 10),
                                   LayoutBuilder(
                                     builder: (context, chartConstraints) {
                                       final barHeight = (chartConstraints.maxWidth * 0.18).clamp(28.0, 86.0);
@@ -712,32 +712,32 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                         children: [
                                           _buildChartBar(
                                             barHeight,
-                                            const Color(0xFF1677FF),
+                                            const Color(0xFF0A84FF),
                                           ),
-                                          const SizedBox(width: 6),
+                                          SizedBox(width: 6),
                                           _buildChartBar(
                                             barHeight + 20,
-                                            const Color(0xFF3B82F6),
+                                            const Color(0xFF2563EB),
                                           ),
-                                          const SizedBox(width: 6),
+                                          SizedBox(width: 6),
                                           _buildChartBar(
                                             barHeight + 36,
-                                            const Color(0xFF60A5FA),
+                                            const Color(0xFF0A84FF),
                                           ),
-                                          const SizedBox(width: 6),
+                                          SizedBox(width: 6),
                                           _buildChartBar(
                                             barHeight + 14,
-                                            const Color(0xFF1677FF),
+                                            const Color(0xFF0A84FF),
                                           ),
-                                          const SizedBox(width: 6),
+                                          SizedBox(width: 6),
                                           _buildChartBar(
                                             barHeight + 46,
-                                            const Color(0xFF3B82F6),
+                                            const Color(0xFF2563EB),
                                           ),
-                                          const SizedBox(width: 6),
+                                          SizedBox(width: 6),
                                           _buildChartBar(
                                             barHeight + 28,
-                                            const Color(0xFF1677FF),
+                                            const Color(0xFF0A84FF),
                                           ),
                                         ],
                                       );
@@ -753,34 +753,34 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   ],
                 ),
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: 12),
               RichText(
                 textAlign: TextAlign.center,
-                text: const TextSpan(
+                text: TextSpan(
                   style: TextStyle(
                     fontSize: 30,
                     fontWeight: FontWeight.w800,
                     height: 1.15,
-                    color: Color(0xFF0B1F4D),
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                   children: [
                     TextSpan(text: 'Understand.\n'),
                     TextSpan(
                       text: 'Save More.',
-                      style: TextStyle(color: Color(0xFF1677FF)),
+                      style: TextStyle(color: const Color(0xFF0A84FF)),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: 8),
-              const Text(
+              SizedBox(height: 8),
+              Text(
                 'Track your monthly and yearly subscription spending with beautiful insights and make smarter financial decisions.',
                 textAlign: TextAlign.center,
                 maxLines: 3,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   fontSize: 15,
-                  color: Color(0xFF64748B),
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                   height: 1.45,
                 ),
               ),
@@ -793,10 +793,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   Widget _buildFirstPage(_OnboardingPageData page) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
+      padding: EdgeInsets.symmetric(horizontal: 24),
       child: Column(
         children: [
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
           Expanded(
             child: Stack(
               alignment: Alignment.center,
@@ -809,14 +809,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 Positioned(
                   bottom: 40,
                   right: -16,
-                  child: _buildRing(140, 0x0F1677FF),
+                  child: _buildRing(140, 0x0F0A84FF),
                 ),
                 Positioned(
                   top: 42,
                   child: _buildFloatingChip(
                     icon: Icons.notifications_active_rounded,
                     size: 44,
-                    color: const Color(0xFF1677FF),
+                    color: const Color(0xFF0A84FF),
                   ),
                 ),
                 Positioned(
@@ -825,7 +825,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   child: _buildFloatingChip(
                     icon: Icons.currency_rupee_rounded,
                     size: 40,
-                    color: const Color(0xFF0B1F4D),
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
                 Positioned(
@@ -834,7 +834,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   child: _buildFloatingChip(
                     icon: Icons.calendar_today_rounded,
                     size: 38,
-                    color: const Color(0xFF64748B),
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                 ),
                 Positioned(
@@ -843,7 +843,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   child: _buildFloatingChip(
                     icon: Icons.insights_rounded,
                     size: 40,
-                    color: const Color(0xFF1677FF),
+                    color: const Color(0xFF0A84FF),
                   ),
                 ),
                 Positioned(
@@ -852,16 +852,16 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   child: _buildFloatingChip(
                     icon: Icons.shield_outlined,
                     size: 40,
-                    color: const Color(0xFF0F766E),
+                    color: const Color(0xFF0A84FF),
                   ),
                 ),
                 Container(
                   width: 240,
                   height: 420,
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: const Color(0xFFEAF4FF),
                     borderRadius: BorderRadius.circular(36),
-                    boxShadow: const [
+                    boxShadow: [
                       BoxShadow(
                         color: Color(0x1A0B1F4D),
                         blurRadius: 30,
@@ -870,47 +870,47 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     ],
                   ),
                   child: Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
+                    padding: EdgeInsets.fromLTRB(16, 14, 16, 16),
                     child: Column(
                       children: [
                         Container(
                           height: 18,
                           width: 92,
                           decoration: BoxDecoration(
-                            color: const Color(0xFFF1F5F9),
+                            color: Color(0xFFF1F5F9),
                             borderRadius: BorderRadius.circular(999),
                           ),
                         ),
-                        const SizedBox(height: 14),
+                        SizedBox(height: 14),
                         Expanded(
                           child: Container(
-                            padding: const EdgeInsets.all(12),
+                            padding: EdgeInsets.all(12),
                             decoration: BoxDecoration(
-                              color: const Color(0xFFF8FAFC),
+                              color: Theme.of(context).scaffoldBackgroundColor,
                               borderRadius: BorderRadius.circular(28),
                             ),
                             child: Column(
                               children: [
                                 _buildSubscriptionCard(
-                                  iconColor: const Color(0xFFFF3B30),
+                                  iconColor: Color(0xFFFF3B30),
                                   title: 'Netflix',
                                   amount: '\$15.99',
                                 ),
-                                const SizedBox(height: 10),
+                                SizedBox(height: 10),
                                 _buildSubscriptionCard(
-                                  iconColor: const Color(0xFF1DB954),
+                                  iconColor: Color(0xFF1DB954),
                                   title: 'Spotify',
                                   amount: '\$9.99',
                                 ),
-                                const SizedBox(height: 10),
+                                SizedBox(height: 10),
                                 _buildSubscriptionCard(
-                                  iconColor: const Color(0xFFFF9900),
+                                  iconColor: Color(0xFFFF9900),
                                   title: 'Amazon Prime',
                                   amount: '\$8.99',
                                 ),
-                                const SizedBox(height: 10),
+                                SizedBox(height: 10),
                                 _buildSubscriptionCard(
-                                  iconColor: const Color(0xFFFF0000),
+                                  iconColor: Color(0xFFFF0000),
                                   title: 'YouTube Premium',
                                   amount: '\$13.99',
                                 ),
@@ -925,34 +925,34 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               ],
             ),
           ),
-          const SizedBox(height: 24),
+          SizedBox(height: 24),
           RichText(
             textAlign: TextAlign.center,
-            text: const TextSpan(
+            text: TextSpan(
               style: TextStyle(
                 fontSize: 30,
                 fontWeight: FontWeight.w800,
                 height: 1.15,
-                color: Color(0xFF0B1F4D),
+                color: Theme.of(context).colorScheme.onSurface,
               ),
               children: [
                 TextSpan(text: 'Track. Manage.\n'),
                 TextSpan(
                   text: 'Never Miss.',
-                  style: TextStyle(color: Color(0xFF1677FF)),
+                  style: TextStyle(color: const Color(0xFF0A84FF)),
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 12),
-          const Text(
+          SizedBox(height: 12),
+          Text(
             'All your subscriptions in one place.\nStay on top, save more.',
             textAlign: TextAlign.center,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
               fontSize: 16,
-              color: Color(0xFF64748B),
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
               height: 1.45,
             ),
           ),
@@ -967,13 +967,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     required String amount,
   }) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: const [
+        boxShadow: [
           BoxShadow(
-            color: Color(0x140B1F4D),
+            color: Theme.of(context).shadowColor.withValues(alpha: 0.08),
             blurRadius: 10,
             offset: Offset(0, 4),
           ),
@@ -999,36 +999,36 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               ),
             ),
           ),
-          const SizedBox(width: 10),
+          SizedBox(width: 10),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
-                    color: Color(0xFF0B1F4D),
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
                 Text(
                   amount,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
-                    color: Color(0xFF64748B),
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                 ),
               ],
             ),
           ),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: const Color(0xFFDCFCE7),
+              color: Color(0xFFDCFCE7),
               borderRadius: BorderRadius.circular(999),
             ),
-            child: const Text(
+            child: Text(
               'Active',
               style: TextStyle(
                 fontSize: 10,
@@ -1047,19 +1047,19 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       children: [
         Text(
           title,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w700,
-            color: Color(0xFF0B1F4D),
+            color: Theme.of(context).colorScheme.onSurface,
           ),
         ),
-        const Spacer(),
+        Spacer(),
         Text(
           amount,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w700,
-            color: Color(0xFF1677FF),
+            color: const Color(0xFF0A84FF),
           ),
         ),
       ],
@@ -1086,9 +1086,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       width: 54,
       height: 54,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         shape: BoxShape.circle,
-        boxShadow: const [
+        boxShadow: [
           BoxShadow(
             color: Color(0x150B1F4D),
             blurRadius: 12,
@@ -1119,7 +1119,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         shape: BoxShape.circle,
         gradient: RadialGradient(
           colors: [color.withValues(alpha: 0.25), color.withValues(alpha: 0.03)],
-          stops: const [0.2, 1.0],
+          stops: [0.2, 1.0],
         ),
         boxShadow: [
           BoxShadow(
@@ -1134,7 +1134,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 }
 
 class _OnboardingPageData {
-  const _OnboardingPageData({
+  _OnboardingPageData({
     required this.title,
     required this.subtitle,
     required this.accentColor,

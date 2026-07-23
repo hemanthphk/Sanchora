@@ -11,7 +11,6 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  int _selectedIndex = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -81,12 +80,6 @@ class _HomeScreenState extends State<HomeScreen> {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Image.asset(
-          'assets/images/sanchora_logo.png',
-          width: 28,
-          fit: BoxFit.contain,
-        ),
-        const SizedBox(width: 8),
         const Text(
           'Sanchora',
           style: TextStyle(
@@ -755,60 +748,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildNavItem({
-    required IconData icon,
-    required String label,
-    required bool active,
-    required VoidCallback onTap,
-  }) {
-    return Expanded(
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 4),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(icon, color: active ? const Color(0xFF1677FF) : const Color(0xFF64748B), size: 22),
-              const SizedBox(height: 2),
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w600,
-                  color: active ? const Color(0xFF1677FF) : const Color(0xFF64748B),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCenterAddButton() {
-    return InkWell(
-      onTap: () => handleBottomNavTap(2),
-      borderRadius: BorderRadius.circular(18),
-      child: Container(
-        width: 48,
-        height: 48,
-        decoration: BoxDecoration(
-          color: const Color(0xFF1677FF),
-          borderRadius: BorderRadius.circular(18),
-          boxShadow: const [
-            BoxShadow(
-              color: Color(0x1A1677FF),
-              blurRadius: 12,
-              offset: Offset(0, 4),
-            ),
-          ],
-        ),
-        child: const Icon(Icons.add_rounded, color: Colors.white, size: 28),
-      ),
-    );
-  }
 
   Widget _buildDrawer() {
     return Drawer(
@@ -830,10 +769,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ListTile(
                 leading: const Icon(Icons.home_rounded),
                 title: const Text('Home'),
-                onTap: () {
-                  Navigator.of(context).pop();
-                  setState(() => _selectedIndex = 0);
-                },
+                onTap: () => Navigator.of(context).pop(),
               ),
               ListTile(
                 leading: const Icon(Icons.subscriptions_rounded),
@@ -875,7 +811,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void handleBottomNavTap(int index) {
-    setState(() => _selectedIndex = index);
 
     switch (index) {
       case 0:
