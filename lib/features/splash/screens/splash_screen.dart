@@ -55,10 +55,8 @@ class _SplashScreenState extends State<SplashScreen>
     final screenHeight = MediaQuery.of(context).size.height;
     final logoSize = (screenHeight * 0.44).clamp(250.0, 290.0);
 
-    return Theme(
-      data: ThemeData(useMaterial3: true),
-      child: Scaffold(
-        backgroundColor: const Color(0xFFFFFFFF),
+    return Scaffold(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         body: SafeArea(
           child: Center(
             child: FadeTransition(
@@ -76,22 +74,22 @@ class _SplashScreenState extends State<SplashScreen>
                         fit: BoxFit.contain,
                       ),
                       const SizedBox(height: 24),
-                      const Text(
+                      Text(
                         'Sanchora',
                         style: TextStyle(
                           fontSize: 36,
                           fontWeight: FontWeight.w800,
-                          color: Color(0xFF0B1F4D),
+                          color: Theme.of(context).colorScheme.onSurface,
                         ),
                       ),
                       const SizedBox(height: 8),
-                      const Text(
+                      Text(
                         'One App. Every Subscription.',
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 17,
                           fontWeight: FontWeight.w500,
-                          color: Color(0xFF64748B),
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                       ),
                       const SizedBox(height: 40),
@@ -99,7 +97,7 @@ class _SplashScreenState extends State<SplashScreen>
                         width: 36,
                         child: LinearProgressIndicator(
                           minHeight: 3,
-                          backgroundColor: const Color(0xFFE2E8F0),
+                          backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
                           valueColor: const AlwaysStoppedAnimation<Color>(
                             Color(0xFF1677FF),
                           ),
@@ -112,7 +110,6 @@ class _SplashScreenState extends State<SplashScreen>
             ),
           ),
         ),
-      ),
     );
   }
 }
@@ -123,7 +120,7 @@ class NextScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFFFFFF),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Center(
         child: Text(
           'Next Screen',

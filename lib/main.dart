@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 
-import 'core/theme/app_theme.dart';
-import 'features/splash/screens/splash_screen.dart';
+import 'package:sanchora/core/theme/app_theme.dart';
+import 'package:sanchora/core/theme/theme_controller.dart';
+import 'package:sanchora/features/splash/screens/splash_screen.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await themeController.init();
   runApp(const SanchoraApp());
 }
 
@@ -12,11 +15,18 @@ class SanchoraApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Sanchora',
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.lightTheme,
-      home: const SplashScreen(),
+    return ListenableBuilder(
+      listenable: themeController,
+      builder: (context, _) {
+        return MaterialApp(
+          title: 'Sanchora',
+          debugShowCheckedModeBanner: false,
+          theme: AppTheme.lightTheme,
+          darkTheme: AppTheme.darkTheme,
+          themeMode: themeController.themeMode,
+          home: const SplashScreen(),
+        );
+      },
     );
   }
 }

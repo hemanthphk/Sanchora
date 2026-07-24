@@ -75,4 +75,14 @@ class AppTheme {
     ),
     dividerTheme: const DividerThemeData(color: AppColors.divider, thickness: 1),
   );
+
+  static ThemeData darkTheme = ThemeData.dark(
+    useMaterial3: true,
+  ).copyWith(
+    textTheme: GoogleFonts.poppinsTextTheme(ThemeData.dark(useMaterial3: true).textTheme),
+    colorScheme: ColorScheme.fromSeed(
+      seedColor: const Color(0xFF1677FF),
+      brightness: Brightness.dark,
+    ),
+  );
 }

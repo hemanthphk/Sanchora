@@ -19,8 +19,8 @@ class AppHeader extends StatelessWidget {
     return Container(
       height: 72,
       padding: const EdgeInsets.symmetric(horizontal: 20),
-      decoration: const BoxDecoration(
-        color: Colors.white,
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
       ),
       child: Row(
         children: [
@@ -34,9 +34,10 @@ class AppHeader extends StatelessWidget {
                 ? Center(child: center)
                 : Text(
                     title,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.w700,
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
           ),

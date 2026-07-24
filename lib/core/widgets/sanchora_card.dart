@@ -17,7 +17,7 @@ class SanchoraCard extends StatelessWidget {
         border: Border.all(color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.18)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
+            color: Theme.of(context).shadowColor.withValues(alpha: 0.04),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),

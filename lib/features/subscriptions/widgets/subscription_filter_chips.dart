@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:sanchora/core/theme/app_colors.dart';
 import 'package:sanchora/core/theme/app_text_styles.dart';
 
 class SubscriptionFilterChips extends StatelessWidget {
@@ -30,16 +29,16 @@ class SubscriptionFilterChips extends StatelessWidget {
               label: Text(filter),
               selected: isSelected,
               onSelected: (_) => onFilterSelected(filter),
-              backgroundColor: AppColors.background,
-              selectedColor: AppColors.primary,
+              backgroundColor: theme.colorScheme.surface,
+              selectedColor: theme.colorScheme.primary,
               labelStyle: AppTextStyles.body.copyWith(
-                color: isSelected ? theme.cardColor : AppColors.textSecondary,
+                color: isSelected ? theme.colorScheme.onPrimary : theme.colorScheme.onSurfaceVariant,
                 fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
               ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(999),
                 side: BorderSide(
-                  color: isSelected ? AppColors.primary : AppColors.divider,
+                  color: isSelected ? theme.colorScheme.primary : theme.colorScheme.outlineVariant,
                   width: 1,
                 ),
               ),

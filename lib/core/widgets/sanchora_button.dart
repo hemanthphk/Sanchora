@@ -26,8 +26,8 @@ class SanchoraButton extends StatelessWidget {
         label: Text(label),
         style: ElevatedButton.styleFrom(
           elevation: 0,
-          backgroundColor: isPrimary ? theme.colorScheme.primary : Colors.white,
-          foregroundColor: isPrimary ? Colors.white : theme.colorScheme.primary,
+          backgroundColor: isPrimary ? theme.colorScheme.primary : theme.colorScheme.surface,
+          foregroundColor: isPrimary ? theme.colorScheme.onPrimary : theme.colorScheme.primary,
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),

@@ -19,7 +19,6 @@ class SanchoraBottomNav extends StatelessWidget {
   final ValueChanged<BottomNavTab> onTabSelected;
 
   static const Color _selectedColor = Color(0xFF1677FF);
-  static const Color _unselectedColor = Color(0xFF64748B);
 
   @override
   Widget build(BuildContext context) {
@@ -31,13 +30,13 @@ class SanchoraBottomNav extends StatelessWidget {
         children: [
           Container(
             height: 78,
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.only(
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surface,
+              borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(24),
                 topRight: Radius.circular(24),
               ),
-              boxShadow: [
+              boxShadow: const [
                 BoxShadow(
                   color: Color(0x14000000),
                   blurRadius: 18,
@@ -48,22 +47,26 @@ class SanchoraBottomNav extends StatelessWidget {
             child: Row(
               children: [
                 _buildItem(
+                  context,
                   icon: Icons.home_rounded,
                   label: 'Home',
                   tab: BottomNavTab.home,
                 ),
                 _buildItem(
+                  context,
                   icon: Icons.subscriptions_rounded,
                   label: 'Subs',
                   tab: BottomNavTab.subs,
                 ),
                 _buildCenterSpacer(),
                 _buildItem(
+                  context,
                   icon: Icons.bar_chart_rounded,
                   label: 'Analytics',
                   tab: BottomNavTab.analytics,
                 ),
                 _buildItem(
+                  context,
                   icon: Icons.person_rounded,
                   label: 'Profile',
                   tab: BottomNavTab.profile,
@@ -73,20 +76,20 @@ class SanchoraBottomNav extends StatelessWidget {
           ),
           Positioned(
             top: -22,
-            child: _buildCenterButton(),
+            child: _buildCenterButton(context),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildItem({
+  Widget _buildItem(BuildContext context, {
     required IconData icon,
     required String label,
     required BottomNavTab tab,
   }) {
     final bool isSelected = selectedTab == tab;
-    final Color color = isSelected ? _selectedColor : _unselectedColor;
+    final Color color = isSelected ? _selectedColor : Theme.of(context).colorScheme.onSurfaceVariant;
 
     return Expanded(
       child: InkWell(
@@ -122,9 +125,9 @@ class SanchoraBottomNav extends StatelessWidget {
     return const SizedBox(width: 80);
   }
 
-  Widget _buildCenterButton() {
+  Widget _buildCenterButton(BuildContext context) {
     final bool isSelected = selectedTab == BottomNavTab.add;
-    final Color labelColor = isSelected ? _selectedColor : _unselectedColor;
+    final Color labelColor = isSelected ? _selectedColor : Theme.of(context).colorScheme.onSurfaceVariant;
 
     return GestureDetector(
       onTap: () => onTabSelected(BottomNavTab.add),

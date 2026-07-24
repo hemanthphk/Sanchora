@@ -48,10 +48,8 @@ class _LoginScreenState extends State<LoginScreen> {
     final logoSize = (screenHeight * 0.20).clamp(124.0, 168.0);
     final topSpacing = (screenHeight * 0.025).clamp(10.0, 18.0);
 
-    return Theme(
-      data: ThemeData(useMaterial3: true),
-      child: Scaffold(
-        backgroundColor: const Color(0xFFFFFFFF),
+    return Scaffold(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         body: SafeArea(
           child: LayoutBuilder(
             builder: (context, constraints) {
@@ -85,29 +83,28 @@ class _LoginScreenState extends State<LoginScreen> {
             },
           ),
         ),
-      ),
     );
   }
 
   Widget _buildBrandHeader(double logoSize) {
     return Column(
       children: [
-        const Text(
+        Text(
           'Sanchora',
           style: TextStyle(
             fontSize: 34,
             fontWeight: FontWeight.w800,
-            color: Color(0xFF0B1F4D),
+            color: Theme.of(context).colorScheme.onSurface,
           ),
         ),
         const SizedBox(height: 3),
-        const Text(
+        Text(
           'One App. Every Subscription.',
           textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.w500,
-            color: Color(0xFF64748B),
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
         ),
       ],
@@ -116,22 +113,22 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Widget _buildWelcomeSection() {
     return Column(
-      children: const [
+      children: [
         Text(
           'Welcome Back',
           style: TextStyle(
             fontSize: 23,
             fontWeight: FontWeight.w800,
-            color: Color(0xFF0B1F4D),
+            color: Theme.of(context).colorScheme.onSurface,
           ),
         ),
-        SizedBox(height: 4),
+        const SizedBox(height: 4),
         Text(
           'Sign in to manage all your subscriptions in one place.',
           textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: 15,
-            color: Color(0xFF64748B),
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
             height: 1.45,
           ),
         ),
@@ -144,7 +141,7 @@ class _LoginScreenState extends State<LoginScreen> {
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(20, 18, 20, 20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(24),
         boxShadow: const [
           BoxShadow(
@@ -157,12 +154,12 @@ class _LoginScreenState extends State<LoginScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Mobile number',
             style: TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w700,
-              color: Color(0xFF0B1F4D),
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
           const SizedBox(height: 10),
@@ -189,15 +186,15 @@ class _LoginScreenState extends State<LoginScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
-                    children: const [
-                      Icon(Icons.phone_rounded, color: Color(0xFF1677FF)),
-                      SizedBox(width: 8),
+                    children: [
+                      const Icon(Icons.phone_rounded, color: Color(0xFF1677FF)),
+                      const SizedBox(width: 8),
                       Text(
                         '+91',
                         style: TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w700,
-                          color: Color(0xFF0B1F4D),
+                          color: Theme.of(context).colorScheme.onSurface,
                         ),
                       ),
                     ],
@@ -207,10 +204,10 @@ class _LoginScreenState extends State<LoginScreen> {
               prefixIconConstraints: const BoxConstraints(minWidth: 92, minHeight: 48),
               contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
               filled: true,
-              fillColor: const Color(0xFFF8FAFC),
+              fillColor: Theme.of(context).cardColor,
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16),
-                borderSide: const BorderSide(color: Color(0xFFE2E8F0), width: 1),
+                borderSide: BorderSide(color: Theme.of(context).dividerColor, width: 1),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16),
@@ -259,20 +256,20 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Widget _buildDividerRow() {
     return Row(
-      children: const [
-        Expanded(child: Divider(color: Color(0xFFE2E8F0), thickness: 0.8)),
+      children: [
+        Expanded(child: Divider(color: Theme.of(context).dividerColor, thickness: 0.8)),
         Padding(
-          padding: EdgeInsets.symmetric(horizontal: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 10),
           child: Text(
             'OR',
             style: TextStyle(
               fontSize: 12.5,
               fontWeight: FontWeight.w600,
-              color: Color(0xFF64748B),
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
         ),
-        Expanded(child: Divider(color: Color(0xFFE2E8F0), thickness: 0.8)),
+        Expanded(child: Divider(color: Theme.of(context).dividerColor, thickness: 0.8)),
       ],
     );
   }
@@ -289,8 +286,8 @@ class _LoginScreenState extends State<LoginScreen> {
           style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
         ),
         style: OutlinedButton.styleFrom(
-          foregroundColor: const Color(0xFF0B1F4D),
-          side: const BorderSide(color: Color(0xFFE2E8F0), width: 1.0),
+          foregroundColor: Theme.of(context).colorScheme.onSurface,
+          side: BorderSide(color: Theme.of(context).dividerColor, width: 1.0),
           padding: const EdgeInsets.symmetric(vertical: 14),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
@@ -306,8 +303,8 @@ class _LoginScreenState extends State<LoginScreen> {
       child: RichText(
         textAlign: TextAlign.center,
         text: TextSpan(
-          style: const TextStyle(
-            color: Color(0xFF64748B),
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
             fontSize: 13,
             height: 1.5,
           ),
@@ -353,7 +350,7 @@ class OtpVerificationScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFFFFFF),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Center(
           child: Padding(
@@ -367,21 +364,21 @@ class OtpVerificationScreen extends StatelessWidget {
                   color: Color(0xFF1677FF),
                 ),
                 const SizedBox(height: 20),
-                const Text(
+                Text(
                   'OTP Verification',
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.w800,
-                    color: Color(0xFF0B1F4D),
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
                 const SizedBox(height: 10),
                 Text(
                   'A placeholder verification screen for $phoneNumber.',
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 15,
-                    color: Color(0xFF64748B),
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                     height: 1.45,
                   ),
                 ),

@@ -17,60 +17,57 @@ class _HomeScreenState extends State<HomeScreen> {
     final size = MediaQuery.of(context).size;
     final isCompact = size.height < 700;
 
-    return Theme(
-      data: ThemeData(useMaterial3: true),
-      child: Scaffold(
-        key: _scaffoldKey,
-        backgroundColor: const Color(0xFFF8FAFC),
-        drawer: _buildDrawer(),
-        body: SafeArea(
-          child: Column(
-            children: [
-              AppHeader(
-                title: 'Home',
-                leading: _buildMenuButton(),
-                center: _buildLogo(),
-                actions: [_buildNotificationButton()],
-              ),
-              Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const SizedBox(height: 4),
-                      const Text(
-                        'Hi, Hemanth 👋',
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.w800,
-                          color: Color(0xFF0B1F4D),
-                        ),
+    return Scaffold(
+      key: _scaffoldKey,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      drawer: _buildDrawer(),
+      body: SafeArea(
+        child: Column(
+          children: [
+            AppHeader(
+              title: 'Home',
+              leading: _buildMenuButton(),
+              center: _buildLogo(),
+              actions: [_buildNotificationButton()],
+            ),
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 4),
+                    Text(
+                      'Hi, Hemanth 👋',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.w800,
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
-                      const SizedBox(height: 6),
-                      const Text(
-                        "Here's what's happening with your subscriptions.",
-                        style: TextStyle(
-                          fontSize: 14.5,
-                          color: Color(0xFF64748B),
-                          height: 1.45,
-                        ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      "Here's what's happening with your subscriptions.",
+                      style: TextStyle(
+                        fontSize: 14.5,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        height: 1.45,
                       ),
-                      const SizedBox(height: 16),
-                      _buildSummaryCard(),
-                      const SizedBox(height: 16),
-                      _buildUpcomingPaymentsCard(),
-                      const SizedBox(height: 16),
-                      _buildSpendingOverviewCard(),
-                      const SizedBox(height: 16),
-                      _buildTopCategoriesCard(),
-                      SizedBox(height: isCompact ? 10 : 8),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(height: 16),
+                    _buildSummaryCard(),
+                    const SizedBox(height: 16),
+                    _buildUpcomingPaymentsCard(),
+                    const SizedBox(height: 16),
+                    _buildSpendingOverviewCard(),
+                    const SizedBox(height: 16),
+                    _buildTopCategoriesCard(),
+                    SizedBox(height: isCompact ? 10 : 8),
+                  ],
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -80,12 +77,12 @@ class _HomeScreenState extends State<HomeScreen> {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        const Text(
+        Text(
           'Sanchora',
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w800,
-            color: Color(0xFF0B1F4D),
+            color: Theme.of(context).colorScheme.onSurface,
           ),
         ),
       ],
@@ -100,7 +97,7 @@ class _HomeScreenState extends State<HomeScreen> {
         width: 40,
         height: 40,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(14),
           boxShadow: const [
             BoxShadow(
@@ -110,7 +107,10 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ],
         ),
-        child: const Icon(Icons.menu_rounded, color: Color(0xFF0B1F4D)),
+        child: Icon(
+          Icons.menu_rounded,
+          color: Theme.of(context).colorScheme.onSurface,
+        ),
       ),
     );
   }
@@ -126,7 +126,7 @@ class _HomeScreenState extends State<HomeScreen> {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: Theme.of(context).colorScheme.surface,
               borderRadius: BorderRadius.circular(14),
               boxShadow: const [
                 BoxShadow(
@@ -136,7 +136,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ],
             ),
-            child: const Icon(Icons.notifications_none_rounded, color: Color(0xFF0B1F4D)),
+            child: Icon(
+              Icons.notifications_none_rounded,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
           ),
           Positioned(
             top: 7,
@@ -156,166 +159,109 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildSummaryCard() {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final useRow = constraints.maxWidth >= 360;
-
-        return Container(
-          width: double.infinity,
-          padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(28),
-            gradient: const LinearGradient(
-              colors: [Color(0xFF1677FF), Color(0xFF3B82F6)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            boxShadow: const [
-              BoxShadow(
-                color: Color(0x1A1677FF),
-                blurRadius: 24,
-                offset: Offset(0, 10),
-              ),
-            ],
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(28),
+        gradient: const LinearGradient(
+          colors: [Color(0xFF1677FF), Color(0xFF3B82F6)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x1A1677FF),
+            blurRadius: 24,
+            offset: Offset(0, 10),
           ),
-          child: useRow
-              ? Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              const Text(
+                'Total Spent This Month',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white70,
+                ),
+              ),
+              const Spacer(),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 6,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.16),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'Total Spent This Month',
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.white70,
-                            ),
-                          ),
-                          const SizedBox(height: 10),
-                          const Text(
-                            '₹2,430',
-                            style: TextStyle(
-                              fontSize: 32,
-                              fontWeight: FontWeight.w800,
-                              color: Colors.white,
-                            ),
-                          ),
-                          const SizedBox(height: 10),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.16),
-                              borderRadius: BorderRadius.circular(999),
-                            ),
-                            child: const Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(Icons.arrow_downward_rounded, size: 14, color: Colors.white),
-                                SizedBox(width: 4),
-                                Text(
-                                  '12% ↓',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w700,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          const Text(
-                            'vs last month',
-                            style: TextStyle(
-                              fontSize: 12.5,
-                              color: Colors.white70,
-                            ),
-                          ),
-                        ],
-                      ),
+                    Icon(
+                      Icons.arrow_downward_rounded,
+                      size: 14,
+                      color: Colors.white,
                     ),
-                    const SizedBox(width: 16),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildSummaryMetric(Icons.subscriptions_rounded, 'Active Subscriptions', '8'),
-                        const SizedBox(height: 10),
-                        _buildSummaryMetric(Icons.calendar_today_rounded, 'Upcoming Payments', '3'),
-                      ],
-                    ),
-                  ],
-                )
-              : Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Total Spent This Month',
+                    SizedBox(width: 4),
+                    Text(
+                      '12% ↓',
                       style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white70,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    const Text(
-                      '₹2,430',
-                      style: TextStyle(
-                        fontSize: 32,
-                        fontWeight: FontWeight.w800,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
                         color: Colors.white,
                       ),
                     ),
-                    const SizedBox(height: 10),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.16),
-                        borderRadius: BorderRadius.circular(999),
-                      ),
-                      child: const Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.arrow_downward_rounded, size: 14, color: Colors.white),
-                          SizedBox(width: 4),
-                          Text(
-                            '12% ↓',
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w700,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    const Text(
-                      'vs last month',
-                      style: TextStyle(
-                        fontSize: 12.5,
-                        color: Colors.white70,
-                      ),
-                    ),
-                    const SizedBox(height: 14),
-                    _buildSummaryMetric(Icons.subscriptions_rounded, 'Active Subscriptions', '8'),
-                    const SizedBox(height: 10),
-                    _buildSummaryMetric(Icons.calendar_today_rounded, 'Upcoming Payments', '3'),
                   ],
                 ),
-        );
-      },
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          const Text(
+            '₹2,430',
+            style: TextStyle(
+              fontSize: 32,
+              fontWeight: FontWeight.w800,
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: _buildSummaryMetric(
+                  Icons.subscriptions_rounded,
+                  'Active Subscriptions',
+                  '8',
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildSummaryMetric(
+                  Icons.calendar_today_rounded,
+                  'Upcoming Payments',
+                  '3',
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
   Widget _buildSummaryMetric(IconData icon, String label, String value) {
     return Container(
-      width: 116,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.16),
+        color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.16),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Column(
@@ -325,7 +271,9 @@ class _HomeScreenState extends State<HomeScreen> {
             width: 34,
             height: 34,
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.2),
+              color: Theme.of(
+                context,
+              ).colorScheme.onPrimary.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(icon, size: 18, color: Colors.white),
@@ -338,7 +286,11 @@ class _HomeScreenState extends State<HomeScreen> {
           const SizedBox(height: 2),
           Text(
             value,
-            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: Colors.white),
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w800,
+              color: Colors.white,
+            ),
           ),
         ],
       ),
@@ -350,13 +302,13 @@ class _HomeScreenState extends State<HomeScreen> {
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(18, 16, 18, 16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(24),
-        boxShadow: const [
+        boxShadow: [
           BoxShadow(
-            color: Color(0x140B1F4D),
+            color: Theme.of(context).shadowColor.withValues(alpha: 0.08),
             blurRadius: 14,
-            offset: Offset(0, 6),
+            offset: const Offset(0, 6),
           ),
         ],
       ),
@@ -364,17 +316,18 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           Row(
             children: [
-              const Text(
+              Text(
                 'Upcoming Payments',
                 style: TextStyle(
                   fontSize: 17,
                   fontWeight: FontWeight.w800,
-                  color: Color(0xFF0B1F4D),
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
               const Spacer(),
               InkWell(
-                onTap: () => pushScreen(const UpcomingPaymentsPlaceholderScreen()),
+                onTap: () =>
+                    pushScreen(const UpcomingPaymentsPlaceholderScreen()),
                 borderRadius: BorderRadius.circular(8),
                 child: const Text(
                   'View All →',
@@ -433,7 +386,7 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: const Color(0xFFF8FAFC),
+          color: Theme.of(context).colorScheme.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(18),
         ),
         child: Row(
@@ -454,16 +407,19 @@ class _HomeScreenState extends State<HomeScreen> {
                 children: [
                   Text(
                     name,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
-                      color: Color(0xFF0B1F4D),
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     date,
-                    style: const TextStyle(fontSize: 12.5, color: Color(0xFF64748B)),
+                    style: TextStyle(
+                      fontSize: 12.5,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
                   ),
                 ],
               ),
@@ -473,25 +429,30 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 Text(
                   amount,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
-                    color: Color(0xFF0B1F4D),
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
                 const SizedBox(height: 6),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFDCFCE7),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.surfaceContainerHighest,
                     borderRadius: BorderRadius.circular(999),
                   ),
                   child: Text(
                     daysLeft,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 10.5,
                       fontWeight: FontWeight.w700,
-                      color: Color(0xFF166534),
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),
                 ),
@@ -508,57 +469,57 @@ class _HomeScreenState extends State<HomeScreen> {
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(18, 16, 18, 16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(24),
-        boxShadow: const [
+        boxShadow: [
           BoxShadow(
-            color: Color(0x140B1F4D),
+            color: Theme.of(context).shadowColor.withValues(alpha: 0.08),
             blurRadius: 14,
-            offset: Offset(0, 6),
+            offset: const Offset(0, 6),
           ),
         ],
       ),
       child: Column(
         children: [
           Row(
-            children: const [
+            children: [
               Text(
                 'Spending Overview',
                 style: TextStyle(
                   fontSize: 17,
                   fontWeight: FontWeight.w800,
-                  color: Color(0xFF0B1F4D),
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
-              Spacer(),
+              const Spacer(),
               Text(
                 'This Month',
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w700,
-                  color: Color(0xFF64748B),
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
             ],
           ),
           const SizedBox(height: 16),
           Row(
-            children: const [
+            children: [
               Text(
                 '₹2,430',
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.w800,
-                  color: Color(0xFF0B1F4D),
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
-              Spacer(),
+              const Spacer(),
               Text(
                 'Total Spent',
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
-                  color: Color(0xFF64748B),
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
             ],
@@ -596,7 +557,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 Container(
                   height: 92 * heightFactor,
                   decoration: BoxDecoration(
-                    color: highlight ? const Color(0xFF1677FF) : const Color(0xFFE2E8F0),
+                    color: highlight
+                        ? const Color(0xFF1677FF)
+                        : Theme.of(context).colorScheme.surfaceContainerHighest,
                     borderRadius: BorderRadius.circular(999),
                   ),
                 ),
@@ -604,14 +567,21 @@ class _HomeScreenState extends State<HomeScreen> {
                   Positioned(
                     top: -8,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 5,
+                      ),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF0B1F4D),
+                        color: Theme.of(context).colorScheme.inverseSurface,
                         borderRadius: BorderRadius.circular(999),
                       ),
-                      child: const Text(
+                      child: Text(
                         '₹2,430',
-                        style: TextStyle(fontSize: 10, color: Colors.white, fontWeight: FontWeight.w700),
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: Theme.of(context).colorScheme.onInverseSurface,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
                     ),
                   ),
@@ -620,7 +590,10 @@ class _HomeScreenState extends State<HomeScreen> {
             const SizedBox(height: 10),
             Text(
               label,
-              style: const TextStyle(fontSize: 12, color: Color(0xFF64748B)),
+              style: TextStyle(
+                fontSize: 12,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
             ),
           ],
         ),
@@ -633,13 +606,13 @@ class _HomeScreenState extends State<HomeScreen> {
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(18, 16, 18, 16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(24),
-        boxShadow: const [
+        boxShadow: [
           BoxShadow(
-            color: Color(0x140B1F4D),
+            color: Theme.of(context).shadowColor.withValues(alpha: 0.08),
             blurRadius: 14,
-            offset: Offset(0, 6),
+            offset: const Offset(0, 6),
           ),
         ],
       ),
@@ -647,12 +620,12 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           Row(
             children: [
-              const Text(
+              Text(
                 'Top Categories',
                 style: TextStyle(
                   fontSize: 17,
                   fontWeight: FontWeight.w800,
-                  color: Color(0xFF0B1F4D),
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
               const Spacer(),
@@ -722,7 +695,7 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: const Color(0xFFF8FAFC),
+          color: Theme.of(context).colorScheme.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(18),
         ),
         child: Column(
@@ -730,24 +703,35 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             Text(
               title,
-              style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: Color(0xFF0B1F4D)),
+              style: TextStyle(
+                fontSize: 12.5,
+                fontWeight: FontWeight.w700,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
             ),
             const SizedBox(height: 10),
             Text(
               amount,
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: Color(0xFF0B1F4D)),
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w800,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
             ),
             const SizedBox(height: 8),
             Text(
               percent,
-              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF1677FF)),
+              style: const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF1677FF),
+              ),
             ),
           ],
         ),
       ),
     );
   }
-
 
   Widget _buildDrawer() {
     return Drawer(
@@ -757,12 +741,12 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
+              Text(
                 'Sanchora',
                 style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.w800,
-                  color: Color(0xFF0B1F4D),
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
               const SizedBox(height: 16),
@@ -811,7 +795,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void handleBottomNavTap(int index) {
-
     switch (index) {
       case 0:
         break;
@@ -831,14 +814,16 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void pushScreen(Widget screen) {
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => screen),
-    );
+    Navigator.of(context).push(MaterialPageRoute(builder: (_) => screen));
   }
 }
 
 class PlaceholderScreen extends StatelessWidget {
-  const PlaceholderScreen({super.key, required this.title, required this.message});
+  const PlaceholderScreen({
+    super.key,
+    required this.title,
+    required this.message,
+  });
 
   final String title;
   final String message;
@@ -857,7 +842,10 @@ class PlaceholderScreen extends StatelessWidget {
                 child: const SizedBox(
                   width: 40,
                   height: 40,
-                  child: Icon(Icons.arrow_back_rounded, color: Color(0xFF0B1F4D)),
+                  child: Icon(
+                    Icons.arrow_back_rounded,
+                    color: Color(0xFF0B1F4D),
+                  ),
                 ),
               ),
             ),

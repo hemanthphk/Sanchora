@@ -80,11 +80,11 @@ class SubscriptionCard extends StatelessWidget {
                 Row(
                   children: [
                     if (subscription.hasReminder) ...[
-                      Icon(Icons.notifications_active_outlined, size: 16, color: AppColors.accent),
+                      Icon(Icons.notifications_active_outlined, size: 16, color: theme.colorScheme.primary),
                       const SizedBox(width: 6),
-                      Text('Reminder On', style: AppTextStyles.caption.copyWith(color: AppColors.accent)),
+                      Text('Reminder On', style: AppTextStyles.caption.copyWith(color: theme.colorScheme.primary)),
                     ] else ...[
-                      Icon(Icons.notifications_off_outlined, size: 16, color: AppColors.textSecondary),
+                      Icon(Icons.notifications_off_outlined, size: 16, color: theme.colorScheme.onSurfaceVariant),
                       const SizedBox(width: 6),
                       Text('No Reminder', style: AppTextStyles.caption),
                     ]
@@ -92,11 +92,11 @@ class SubscriptionCard extends StatelessWidget {
                 ),
                 Row(
                   children: [
-                    _buildActionButton(Icons.remove_red_eye_outlined, 'View', onViewDetails),
+                    _buildActionButton(theme, Icons.remove_red_eye_outlined, 'View', onViewDetails),
                     const SizedBox(width: 8),
-                    _buildActionButton(Icons.edit_outlined, 'Edit', onEdit),
+                    _buildActionButton(theme, Icons.edit_outlined, 'Edit', onEdit),
                     const SizedBox(width: 8),
-                    _buildActionButton(Icons.delete_outline, 'Delete', () {
+                    _buildActionButton(theme, Icons.delete_outline, 'Delete', () {
                       _showDeleteDialog(context);
                     }, isDestructive: true),
                   ],
@@ -128,7 +128,7 @@ class SubscriptionCard extends StatelessWidget {
       child: Center(
         child: Text(
           subscription.name.isNotEmpty ? subscription.name[0].toUpperCase() : '?',
-          style: AppTextStyles.sectionTitle.copyWith(color: AppColors.primary),
+          style: AppTextStyles.sectionTitle.copyWith(color: theme.colorScheme.primary),
         ),
       ),
     );
@@ -201,7 +201,7 @@ class SubscriptionCard extends StatelessWidget {
     );
   }
 
-  Widget _buildActionButton(IconData icon, String tooltip, VoidCallback? onTap, {bool isDestructive = false}) {
+  Widget _buildActionButton(ThemeData theme, IconData icon, String tooltip, VoidCallback? onTap, {bool isDestructive = false}) {
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -212,7 +212,7 @@ class SubscriptionCard extends StatelessWidget {
           child: Icon(
             icon,
             size: 20,
-            color: isDestructive ? AppColors.error : AppColors.textSecondary,
+            color: isDestructive ? theme.colorScheme.error : theme.colorScheme.onSurfaceVariant,
           ),
         ),
       ),
@@ -235,7 +235,7 @@ class SubscriptionCard extends StatelessWidget {
               Navigator.pop(context);
               if (onDelete != null) onDelete!();
             },
-            child: Text('Delete', style: AppTextStyles.body.copyWith(color: AppColors.error)),
+            child: Text('Delete', style: AppTextStyles.body.copyWith(color: Theme.of(context).colorScheme.error)),
           ),
         ],
       ),

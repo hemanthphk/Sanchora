@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sanchora/features/auth/screens/login_screen.dart';
 import 'package:sanchora/features/home/screens/home_screen.dart';
-import 'package:sanchora/core/theme/app_colors.dart';
+import 'package:sanchora/core/theme/theme_controller.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -12,28 +12,12 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  bool _isDarkMode = false;
 
   @override
   Widget build(BuildContext context) {
-    final theme = _isDarkMode
-        ? ThemeData.dark(useMaterial3: true).copyWith(
-            colorScheme: ColorScheme.fromSeed(
-              seedColor: const Color(0xFF1677FF),
-              brightness: Brightness.dark,
-            ),
-          )
-        : ThemeData.light(useMaterial3: true).copyWith(
-            colorScheme: ColorScheme.fromSeed(
-              seedColor: const Color(0xFF1677FF),
-              brightness: Brightness.light,
-            ),
-            scaffoldBackgroundColor: AppColors.background,
-          );
+    final theme = Theme.of(context);
 
-    return Theme(
-      data: theme,
-      child: Scaffold(
+    return Scaffold(
         key: _scaffoldKey,
         backgroundColor: theme.scaffoldBackgroundColor,
         drawer: _buildDrawer(theme),
@@ -175,7 +159,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
             },
           ),
         ),
-      ),
     );
   }
 
@@ -488,7 +471,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Widget _buildDarkModeTile(ThemeData theme) {
     return InkWell(
-      onTap: () => setState(() => _isDarkMode = !_isDarkMode),
+      onTap: () => themeController.toggleTheme(),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
         child: Row(
@@ -502,7 +485,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
               alignment: Alignment.center,
               child: Icon(
-                _isDarkMode ? Icons.dark_mode_rounded : Icons.light_mode_rounded,
+                themeController.isDarkMode ? Icons.dark_mode_rounded : Icons.light_mode_rounded,
                 size: 20,
                 color: const Color(0xFF1677FF),
               ),
@@ -529,8 +512,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
             ),
             Switch(
-              value: _isDarkMode,
-              onChanged: (value) => setState(() => _isDarkMode = value),
+              value: themeController.isDarkMode,
+              onChanged: (value) => themeController.toggleTheme(),
               activeThumbColor: const Color(0xFF1677FF),
             ),
           ],
