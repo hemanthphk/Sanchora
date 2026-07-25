@@ -39,7 +39,13 @@ class _MainNavigationState extends State<MainNavigation> {
           if (tab == BottomNavTab.add) {
             Navigator.of(context).push(
               MaterialPageRoute(builder: (_) => const AddSubscriptionPage()),
-            );
+            ).then((result) {
+              if (result == true && mounted) {
+                setState(() {
+                  _currentIndex = 1;
+                });
+              }
+            });
             return;
           }
           setState(() {

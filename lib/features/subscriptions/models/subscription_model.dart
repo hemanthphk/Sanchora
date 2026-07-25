@@ -20,6 +20,7 @@ class SubscriptionModel {
   final SubscriptionStatus status;
   final String iconUrl;
   final bool hasReminder;
+  final String? notes;
 
   const SubscriptionModel({
     required this.id,
@@ -32,6 +33,7 @@ class SubscriptionModel {
     required this.status,
     required this.iconUrl,
     this.hasReminder = false,
+    this.notes,
   });
 
   double get currentPrice => billingCycle == BillingCycle.monthly ? monthlyPrice : yearlyPrice;

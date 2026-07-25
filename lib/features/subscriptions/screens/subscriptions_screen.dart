@@ -5,7 +5,7 @@ import 'package:sanchora/core/widgets/app_header.dart';
 import 'package:sanchora/core/widgets/sanchora_text_field.dart';
 
 import '../models/subscription_model.dart';
-import '../services/dummy_subscriptions.dart';
+import '../services/subscription_service.dart';
 import '../widgets/subscription_card.dart';
 import '../widgets/subscription_empty_state.dart';
 import '../widgets/subscription_filter_chips.dart';
@@ -31,23 +31,31 @@ class _SubscriptionsScreenState extends State<SubscriptionsScreen> {
   @override
   void initState() {
     super.initState();
-    _filteredSubscriptions = List.from(dummySubscriptions);
+    SubscriptionService.instance.addListener(_onSubscriptionsChanged);
+    _filteredSubscriptions = List.from(SubscriptionService.instance.subscriptions);
     _applyFiltersAndSort();
     _searchController.addListener(_onSearchChanged);
   }
 
   @override
   void dispose() {
+    SubscriptionService.instance.removeListener(_onSubscriptionsChanged);
     _searchController.dispose();
     super.dispose();
+  }
+
+  void _onSubscriptionsChanged() {
+    if (mounted) {
+      _applyFiltersAndSort();
+    }
   }
 
   void _onSearchChanged() {
     _applyFiltersAndSort();
   }
 
-  void _applyFiltersAndSort() {
-    List<SubscriptionModel> result = List.from(dummySubscriptions);
+  void _applyFiltersAndSort({bool notify = true}) {
+    List<SubscriptionModel> result = List.from(SubscriptionService.instance.subscriptions);
 
     // Filter by Search Query
     final query = _searchController.text.toLowerCase();
@@ -82,9 +90,13 @@ class _SubscriptionsScreenState extends State<SubscriptionsScreen> {
         break;
     }
 
-    setState(() {
+    if (notify) {
+      setState(() {
+        _filteredSubscriptions = result;
+      });
+    } else {
       _filteredSubscriptions = result;
-    });
+    }
   }
 
   void _onFilterSelected(String filter) {
@@ -111,7 +123,7 @@ class _SubscriptionsScreenState extends State<SubscriptionsScreen> {
     // Calculate summary statistics
     double monthlySpending = 0;
     double yearlySpending = 0;
-    for (var sub in dummySubscriptions) {
+    for (var sub in SubscriptionService.instance.subscriptions) {
       monthlySpending += sub.monthlyPrice;
       yearlySpending += sub.yearlyPrice;
     }
@@ -169,7 +181,7 @@ class _SubscriptionsScreenState extends State<SubscriptionsScreen> {
                       child: Padding(
                         padding: const EdgeInsets.only(bottom: 24),
                         child: SubscriptionSummary(
-                          totalSubscriptions: dummySubscriptions.length,
+                          totalSubscriptions: SubscriptionService.instance.subscriptions.length,
                           monthlySpending: monthlySpending,
                           yearlySpending: yearlySpending,
                         ),
@@ -177,7 +189,7 @@ class _SubscriptionsScreenState extends State<SubscriptionsScreen> {
                     ),
                   ],
 
-                  if (dummySubscriptions.isEmpty)
+                  if (SubscriptionService.instance.subscriptions.isEmpty)
                     const SliverFillRemaining(
                       hasScrollBody: false,
                       child: SubscriptionEmptyState(isSearch: false),
@@ -203,10 +215,7 @@ class _SubscriptionsScreenState extends State<SubscriptionsScreen> {
                                 // Placeholder for edit
                               },
                               onDelete: () {
-                                setState(() {
-                                  dummySubscriptions.remove(subscription);
-                                  _applyFiltersAndSort();
-                                });
+                                SubscriptionService.instance.removeSubscription(subscription);
                               },
                             );
                           },

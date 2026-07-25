@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sanchora/core/utils/currency_formatter.dart';
+import 'package:sanchora/features/subscriptions/models/subscription_model.dart';
+import 'package:sanchora/features/subscriptions/services/subscription_service.dart';
 
 class AddSubscriptionPage extends StatefulWidget {
   const AddSubscriptionPage({super.key});
@@ -66,6 +68,64 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
       setState(() {
         _isFormValid = valid;
       });
+    }
+  }
+
+  void _saveSubscription() {
+    if (!_formKey.currentState!.validate()) return;
+
+    final name = _nameController.text.trim();
+    final isDuplicate = SubscriptionService.instance.isDuplicateName(name);
+
+    if (isDuplicate) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Subscription already exists."),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    final price = double.tryParse(_priceController.text.trim()) ?? 0.0;
+    final monthlyPrice = _selectedCycle == "Monthly" ? price : (price / 12);
+    final yearlyPrice = _selectedCycle == "Yearly" ? price : (price * 12);
+
+    final now = DateTime.now();
+    SubscriptionStatus status;
+    if (_renewalDate.isBefore(DateTime(now.year, now.month, now.day))) {
+      status = SubscriptionStatus.expired;
+    } else if (_renewalDate.difference(now).inDays <= 7) {
+      status = SubscriptionStatus.upcoming;
+    } else {
+      status = SubscriptionStatus.active;
+    }
+
+    final newSub = SubscriptionModel(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      name: name,
+      category: _selectedCategory,
+      monthlyPrice: monthlyPrice,
+      yearlyPrice: yearlyPrice,
+      billingCycle: _selectedCycle == "Monthly" ? BillingCycle.monthly : BillingCycle.yearly,
+      nextRenewalDate: _renewalDate,
+      status: status,
+      iconUrl: 'assets/images/default_logo.png',
+      hasReminder: _reminderEnabled,
+      notes: _notesController.text.trim().isNotEmpty ? _notesController.text.trim() : null,
+    );
+
+    SubscriptionService.instance.addSubscription(newSub);
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text("Subscription added successfully."),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+
+    if (Navigator.canPop(context)) {
+      Navigator.pop(context, true);
     }
   }
 
@@ -390,16 +450,7 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
                       Expanded(
                         flex: 2,
                         child: ElevatedButton(
-                          onPressed: _isFormValid
-                              ? () {
-                                  if (_formKey.currentState!.validate()) {
-                                    // Phase 1: Do not implement saving, dummy data updates, or navigation back yet.
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(content: Text("Form is valid! (Saving disabled in Phase 1)")),
-                                    );
-                                  }
-                                }
-                              : null,
+                          onPressed: _isFormValid ? _saveSubscription : null,
                           style: ElevatedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             backgroundColor: theme.colorScheme.primary,
