@@ -33,7 +33,9 @@ class SubscriptionEmptyState extends StatelessWidget {
           const SizedBox(height: 24),
           Text(
             isSearch ? 'No results found' : 'No subscriptions yet',
-            style: AppTextStyles.sectionTitle,
+            style: AppTextStyles.sectionTitle.copyWith(
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 8),
@@ -41,7 +43,9 @@ class SubscriptionEmptyState extends StatelessWidget {
             isSearch
                 ? 'Try adjusting your search or filters.'
                 : 'Add your first subscription to start tracking your spending.',
-            style: AppTextStyles.bodySecondary,
+            style: AppTextStyles.bodySecondary.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
             textAlign: TextAlign.center,
           ),
         ],

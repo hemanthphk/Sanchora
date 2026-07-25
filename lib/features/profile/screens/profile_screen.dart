@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:sanchora/features/auth/screens/login_screen.dart';
 import 'package:sanchora/features/home/screens/home_screen.dart';
 import 'package:sanchora/core/theme/theme_controller.dart';
+import 'package:sanchora/core/utils/currency_formatter.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -315,8 +316,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget _buildStatisticsSection(ThemeData theme) {
     final stats = [
       _StatItem(icon: Icons.subscriptions_rounded, title: 'Total Subscriptions', value: '18', subtitle: 'Active plans'),
-      _StatItem(icon: Icons.account_balance_wallet_outlined, title: 'Total Spent', value: '₹2.4k', subtitle: 'This month'),
-      _StatItem(icon: Icons.savings_outlined, title: 'Total Saved', value: '₹480', subtitle: 'Annual value'),
+      _StatItem(icon: Icons.account_balance_wallet_outlined, title: 'Total Spent', value: CurrencyFormatter.format(2400, compact: true), subtitle: 'This month'),
+      _StatItem(icon: Icons.savings_outlined, title: 'Total Saved', value: CurrencyFormatter.format(480), subtitle: 'Annual value'),
       _StatItem(icon: Icons.calendar_today_rounded, title: 'Member Since', value: '2023', subtitle: 'Joined'),
     ];
 

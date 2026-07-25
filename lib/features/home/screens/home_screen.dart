@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sanchora/features/profile/screens/profile_screen.dart';
 import 'package:sanchora/core/widgets/app_header.dart';
+import 'package:sanchora/core/utils/currency_formatter.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -224,8 +225,8 @@ class _HomeScreenState extends State<HomeScreen> {
             ],
           ),
           const SizedBox(height: 6),
-          const Text(
-            '₹2,430',
+          Text(
+            CurrencyFormatter.format(2430),
             style: TextStyle(
               fontSize: 32,
               fontWeight: FontWeight.w800,
@@ -344,7 +345,7 @@ class _HomeScreenState extends State<HomeScreen> {
           _buildPaymentTile(
             name: 'Netflix',
             date: 'May 25, 2025',
-            amount: '₹649',
+            amount: CurrencyFormatter.format(649),
             daysLeft: '2 days left',
             icon: Icons.play_circle_fill_rounded,
             color: const Color(0xFFFF3B30),
@@ -353,7 +354,7 @@ class _HomeScreenState extends State<HomeScreen> {
           _buildPaymentTile(
             name: 'Spotify Premium',
             date: 'May 27, 2025',
-            amount: '₹119',
+            amount: CurrencyFormatter.format(119),
             daysLeft: '4 days left',
             icon: Icons.music_note_rounded,
             color: const Color(0xFF1DB954),
@@ -362,7 +363,7 @@ class _HomeScreenState extends State<HomeScreen> {
           _buildPaymentTile(
             name: 'Amazon Prime',
             date: 'May 30, 2025',
-            amount: '₹179',
+            amount: CurrencyFormatter.format(179),
             daysLeft: '7 days left',
             icon: Icons.shopping_bag_rounded,
             color: const Color(0xFFFF9900),
@@ -506,7 +507,7 @@ class _HomeScreenState extends State<HomeScreen> {
           Row(
             children: [
               Text(
-                '₹2,430',
+                CurrencyFormatter.format(2430),
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.w800,
@@ -576,7 +577,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         borderRadius: BorderRadius.circular(999),
                       ),
                       child: Text(
-                        '₹2,430',
+                        CurrencyFormatter.format(2430),
                         style: TextStyle(
                           fontSize: 10,
                           color: Theme.of(context).colorScheme.onInverseSurface,
@@ -655,7 +656,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     width: cardWidth.clamp(90.0, double.infinity),
                     child: _buildCategoryCard(
                       title: 'Entertainment',
-                      amount: '₹1,250',
+                      amount: CurrencyFormatter.format(1250),
                       percent: '51%',
                     ),
                   ),
@@ -663,7 +664,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     width: cardWidth.clamp(90.0, double.infinity),
                     child: _buildCategoryCard(
                       title: 'Shopping',
-                      amount: '₹720',
+                      amount: CurrencyFormatter.format(720),
                       percent: '29%',
                     ),
                   ),
@@ -671,7 +672,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     width: cardWidth.clamp(90.0, double.infinity),
                     child: _buildCategoryCard(
                       title: 'Education',
-                      amount: '₹280',
+                      amount: CurrencyFormatter.format(280),
                       percent: '11%',
                     ),
                   ),

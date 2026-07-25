@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sanchora/core/theme/app_colors.dart';
 import 'package:sanchora/core/theme/app_text_styles.dart';
+import 'package:sanchora/core/utils/currency_formatter.dart';
 
 class SubscriptionSummary extends StatelessWidget {
   const SubscriptionSummary({
@@ -32,7 +33,9 @@ class SubscriptionSummary extends StatelessWidget {
               children: [
                 Text(
                   'Total Subscriptions',
-                  style: AppTextStyles.bodySecondary,
+                  style: AppTextStyles.bodySecondary.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
                 ),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
@@ -56,7 +59,7 @@ class SubscriptionSummary extends StatelessWidget {
             Row(
               children: [
                 Expanded(
-                  child: _buildSpendingColumn('Monthly', monthlySpending),
+                  child: _buildSpendingColumn(context, 'Monthly', monthlySpending),
                 ),
                 Container(
                   width: 1,
@@ -64,7 +67,7 @@ class SubscriptionSummary extends StatelessWidget {
                   color: AppColors.divider,
                 ),
                 Expanded(
-                  child: _buildSpendingColumn('Yearly', yearlySpending),
+                  child: _buildSpendingColumn(context, 'Yearly', yearlySpending),
                 ),
               ],
             ),
@@ -74,17 +77,21 @@ class SubscriptionSummary extends StatelessWidget {
     );
   }
 
-  Widget _buildSpendingColumn(String label, double amount) {
+  Widget _buildSpendingColumn(BuildContext context, String label, double amount) {
     return Column(
       children: [
         Text(
           label,
-          style: AppTextStyles.bodySecondary,
+          style: AppTextStyles.bodySecondary.copyWith(
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
         ),
         const SizedBox(height: 4),
         Text(
-          '\$${amount.toStringAsFixed(2)}',
-          style: AppTextStyles.sectionTitle.copyWith(color: AppColors.primary),
+          CurrencyFormatter.format(amount, decimalDigits: 2),
+          style: AppTextStyles.sectionTitle.copyWith(
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
         ),
       ],
     );

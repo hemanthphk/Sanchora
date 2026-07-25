@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sanchora/features/auth/screens/login_screen.dart';
+import 'package:sanchora/core/utils/currency_formatter.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -396,7 +397,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                           ),
                                         ),
                                         Text(
-                                          '₹119 / month',
+                                          '${CurrencyFormatter.format(119)} / month',
                                           style: TextStyle(
                                             fontSize: 12,
                                             color: Theme.of(
@@ -648,7 +649,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                   ),
                                   SizedBox(height: 6),
                                   Text(
-                                    '₹3,247',
+                                    CurrencyFormatter.format(3247),
                                     style: TextStyle(
                                       fontSize: 24,
                                       fontWeight: FontWeight.w800,
@@ -695,17 +696,17 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                           children: [
                                             _buildAnalyticsRow(
                                               'Netflix',
-                                              '₹649',
+                                              CurrencyFormatter.format(649),
                                             ),
                                             SizedBox(height: 8),
                                             _buildAnalyticsRow(
                                               'Spotify',
-                                              '₹119',
+                                              CurrencyFormatter.format(119),
                                             ),
                                             SizedBox(height: 8),
                                             _buildAnalyticsRow(
                                               'Amazon Prime',
-                                              '₹299',
+                                              CurrencyFormatter.format(299),
                                             ),
                                           ],
                                         ),
@@ -948,25 +949,25 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                 _buildSubscriptionCard(
                                   iconColor: Color(0xFFFF3B30),
                                   title: 'Netflix',
-                                  amount: '\$15.99',
+                                  amount: CurrencyFormatter.format(15.99),
                                 ),
                                 SizedBox(height: 10),
                                 _buildSubscriptionCard(
                                   iconColor: Color(0xFF1DB954),
                                   title: 'Spotify',
-                                  amount: '\$9.99',
+                                  amount: CurrencyFormatter.format(9.99),
                                 ),
                                 SizedBox(height: 10),
                                 _buildSubscriptionCard(
                                   iconColor: Color(0xFFFF9900),
                                   title: 'Amazon Prime',
-                                  amount: '\$8.99',
+                                  amount: CurrencyFormatter.format(8.99),
                                 ),
                                 SizedBox(height: 10),
                                 _buildSubscriptionCard(
                                   iconColor: Color(0xFFFF0000),
                                   title: 'YouTube Premium',
-                                  amount: '\$13.99',
+                                  amount: CurrencyFormatter.format(13.99),
                                 ),
                               ],
                             ),

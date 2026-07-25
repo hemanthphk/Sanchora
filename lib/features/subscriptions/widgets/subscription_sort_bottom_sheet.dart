@@ -44,7 +44,7 @@ class SubscriptionSortBottomSheet extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('Sort By', style: AppTextStyles.sectionTitle),
+                Text('Sort By', style: AppTextStyles.sectionTitle.copyWith(color: Theme.of(context).colorScheme.onSurface)),
                 IconButton(
                   icon: const Icon(Icons.close),
                   onPressed: () => Navigator.pop(context),
@@ -61,7 +61,7 @@ class SubscriptionSortBottomSheet extends StatelessWidget {
                 option.label,
                 style: AppTextStyles.body.copyWith(
                   fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                  color: isSelected ? AppColors.primary : AppColors.textPrimary,
+                  color: isSelected ? AppColors.primary : Theme.of(context).colorScheme.onSurface,
                 ),
               ),
               trailing: isSelected

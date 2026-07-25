@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:sanchora/core/theme/app_colors.dart';
 import 'package:sanchora/core/theme/app_text_styles.dart';
 import 'package:sanchora/core/widgets/sanchora_card.dart';
+import 'package:sanchora/core/utils/currency_formatter.dart';
 import '../models/subscription_model.dart';
 
 class SubscriptionCard extends StatelessWidget {
@@ -40,14 +41,14 @@ class SubscriptionCard extends StatelessWidget {
                     children: [
                       Text(
                         subscription.name,
-                        style: AppTextStyles.sectionTitle,
+                        style: AppTextStyles.sectionTitle.copyWith(color: theme.colorScheme.onSurface),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 4),
                       Text(
                         subscription.category,
-                        style: AppTextStyles.caption,
+                        style: AppTextStyles.caption.copyWith(color: theme.colorScheme.onSurfaceVariant),
                       ),
                     ],
                   ),
@@ -62,14 +63,18 @@ class SubscriptionCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 _buildInfoItem(
+                  context,
                   'Price',
-                  '\$${subscription.currentPrice.toStringAsFixed(2)}',
+                  CurrencyFormatter.format(subscription.currentPrice, decimalDigits: 2),
                   '/${subscription.billingCycle == BillingCycle.monthly ? 'mo' : 'yr'}',
+                  isPrimaryValue: true,
                 ),
                 _buildInfoItem(
+                  context,
                   'Next Renewal',
                   DateFormat('MMM dd, yyyy').format(subscription.nextRenewalDate),
                   '',
+                  isPrimaryValue: false,
                 ),
               ],
             ),
@@ -86,7 +91,7 @@ class SubscriptionCard extends StatelessWidget {
                     ] else ...[
                       Icon(Icons.notifications_off_outlined, size: 16, color: theme.colorScheme.onSurfaceVariant),
                       const SizedBox(width: 6),
-                      Text('No Reminder', style: AppTextStyles.caption),
+                      Text('No Reminder', style: AppTextStyles.caption.copyWith(color: theme.colorScheme.onSurfaceVariant)),
                     ]
                   ],
                 ),
@@ -173,13 +178,14 @@ class SubscriptionCard extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoItem(String label, String value, String suffix) {
+  Widget _buildInfoItem(BuildContext context, String label, String value, String suffix, {required bool isPrimaryValue}) {
+    final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
-          style: AppTextStyles.caption,
+          style: AppTextStyles.caption.copyWith(color: theme.colorScheme.onSurfaceVariant),
         ),
         const SizedBox(height: 4),
         Row(
@@ -188,12 +194,14 @@ class SubscriptionCard extends StatelessWidget {
           children: [
             Text(
               value,
-              style: AppTextStyles.cardTitle,
+              style: AppTextStyles.cardTitle.copyWith(
+                color: isPrimaryValue ? theme.colorScheme.onSurface : theme.colorScheme.onSurfaceVariant,
+              ),
             ),
             if (suffix.isNotEmpty)
               Text(
                 suffix,
-                style: AppTextStyles.bodySecondary,
+                style: AppTextStyles.bodySecondary.copyWith(color: theme.colorScheme.onSurfaceVariant),
               ),
           ],
         ),
@@ -223,12 +231,12 @@ class SubscriptionCard extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Subscription'),
-        content: Text('Are you sure you want to delete ${subscription.name}?'),
+        title: Text('Delete Subscription', style: AppTextStyles.sectionTitle.copyWith(color: Theme.of(context).colorScheme.onSurface)),
+        content: Text('Are you sure you want to delete ${subscription.name}?', style: AppTextStyles.body.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text('Cancel', style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)),
           ),
           TextButton(
             onPressed: () {
