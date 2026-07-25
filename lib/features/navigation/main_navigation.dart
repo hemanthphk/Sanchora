@@ -4,6 +4,7 @@ import 'package:sanchora/core/widgets/sanchora_bottom_nav.dart';
 import '../home/screens/home_screen.dart';
 import '../profile/screens/profile_screen.dart';
 import '../subscriptions/screens/subscriptions_screen.dart';
+import '../add_subscription/presentation/pages/add_subscription_page.dart';
 
 class MainNavigation extends StatefulWidget {
   const MainNavigation({super.key});
@@ -18,9 +19,7 @@ class _MainNavigationState extends State<MainNavigation> {
   final List<Widget> _screens = const [
     HomeScreen(),
     SubscriptionsScreen(),
-    Scaffold(
-      body: Center(child: Text('Add Subscription')),
-    ),
+    AddSubscriptionPage(),
     Scaffold(
       body: Center(child: Text('Analytics')),
     ),
@@ -37,6 +36,12 @@ class _MainNavigationState extends State<MainNavigation> {
       bottomNavigationBar: SanchoraBottomNav(
         selectedTab: BottomNavTab.values[_currentIndex],
         onTabSelected: (tab) {
+          if (tab == BottomNavTab.add) {
+            Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const AddSubscriptionPage()),
+            );
+            return;
+          }
           setState(() {
             _currentIndex = tab.index;
           });

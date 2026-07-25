@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sanchora/core/utils/currency_formatter.dart';
 
 class AddSubscriptionPage extends StatefulWidget {
   const AddSubscriptionPage({super.key});
@@ -13,40 +14,63 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
   final TextEditingController _priceController = TextEditingController();
   final TextEditingController _notesController = TextEditingController();
 
-  String _selectedCategory = "Entertainment";
-  final List<Map<String, String>> _categories = [
-    {"title": "Entertainment", "emoji": "🍿"},
-    {"title": "Music", "emoji": "🎵"},
-    {"title": "Productivity", "emoji": "💼"},
-    {"title": "Cloud", "emoji": "☁️"},
-    {"title": "Gaming", "emoji": "🎮"},
+  String _selectedCategory = "Streaming";
+  final List<String> _categories = [
+    "Streaming",
+    "Music",
+    "Shopping",
+    "Productivity",
+    "AI",
+    "Gaming",
+    "Finance",
+    "Education",
+    "Health",
+    "Other",
   ];
 
   String _selectedCycle = "Monthly";
-  final List<String> _billingCycles = ["Weekly", "Monthly", "Yearly"];
+  final List<String> _billingCycles = ["Monthly", "Yearly"];
 
   DateTime _startDate = DateTime.now();
   late DateTime _renewalDate;
   bool _reminderEnabled = true;
+  bool _isFormValid = false;
 
   @override
   void initState() {
     super.initState();
     _renewalDate = _calculateRenewalDate(_startDate, _selectedCycle);
+    _nameController.addListener(_validateForm);
+    _priceController.addListener(() {
+      setState(() {});
+      _validateForm();
+    });
+    _validateForm();
   }
 
   @override
   void dispose() {
+    _nameController.removeListener(_validateForm);
     _nameController.dispose();
     _priceController.dispose();
     _notesController.dispose();
     super.dispose();
   }
 
+  void _validateForm() {
+    final nameValid = _nameController.text.trim().isNotEmpty;
+    final priceText = _priceController.text.trim();
+    final priceValid = priceText.isNotEmpty && (double.tryParse(priceText) ?? 0) > 0;
+    final valid = nameValid && priceValid && _selectedCategory.isNotEmpty;
+    if (valid != _isFormValid) {
+      setState(() {
+        _isFormValid = valid;
+      });
+    }
+  }
+
   DateTime _calculateRenewalDate(DateTime start, String cycle) {
-    if (cycle == "Weekly") {
-      return start.add(const Duration(days: 7));
-    } else if (cycle == "Monthly") {
+    if (cycle == "Monthly") {
       return DateTime(start.year, start.month + 1, start.day);
     } else if (cycle == "Yearly") {
       return DateTime(start.year + 1, start.month, start.day);
@@ -59,6 +83,7 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
       _selectedCycle = cycle;
       _renewalDate = _calculateRenewalDate(_startDate, cycle);
     });
+    _validateForm();
   }
 
   Future<void> _selectDate(BuildContext context, bool isStart) async {
@@ -85,6 +110,7 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
           _renewalDate = picked;
         }
       });
+      _validateForm();
     }
   }
 
@@ -157,15 +183,18 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
                   TextFormField(
                     controller: _priceController,
                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       hintText: "0.00",
-                      prefixIcon: Icon(Icons.currency_rupee_rounded, size: 20),
+                      prefixText: "${CurrencyFormatter.format(0).substring(0, 1)} ",
+                      helperText: _priceController.text.trim().isNotEmpty && double.tryParse(_priceController.text.trim()) != null
+                          ? "Formatted: ${CurrencyFormatter.format(double.tryParse(_priceController.text.trim()) ?? 0)} / ${_selectedCycle == 'Monthly' ? 'mo' : 'yr'}"
+                          : null,
                     ),
                     validator: (value) {
                       if (value == null || value.trim().isEmpty) {
                         return "Please enter price";
                       }
-                      if (double.tryParse(value) == null) {
+                      if ((double.tryParse(value.trim()) ?? 0) <= 0) {
                         return "Invalid amount";
                       }
                       return null;
@@ -174,41 +203,41 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
                   const SizedBox(height: 24),
 
                   _buildSectionTitle("Category"),
-                  Wrap(
-                    spacing: 10,
-                    runSpacing: 10,
-                    children: _categories.map((category) {
-                      final selected = _selectedCategory == category["title"];
-                      return InkWell(
-                        onTap: () => setState(() => _selectedCategory = category["title"]!),
+                  DropdownButtonFormField<String>(
+                    initialValue: _selectedCategory,
+                    decoration: InputDecoration(
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                      border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(16),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                          decoration: BoxDecoration(
-                            color: selected ? theme.colorScheme.primary : theme.cardTheme.color,
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(
-                              color: selected ? theme.colorScheme.primary : theme.colorScheme.outline,
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(category["emoji"]!, style: const TextStyle(fontSize: 16)),
-                              const SizedBox(width: 8),
-                              Text(
-                                category["title"]!,
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 14,
-                                  color: selected ? theme.colorScheme.onPrimary : theme.colorScheme.onSurface,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
+                        borderSide: BorderSide(color: theme.colorScheme.outline),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        borderSide: BorderSide(color: theme.colorScheme.outline),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        borderSide: BorderSide(color: theme.colorScheme.primary, width: 2),
+                      ),
+                    ),
+                    dropdownColor: theme.cardTheme.color ?? theme.colorScheme.surface,
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                      color: theme.colorScheme.onSurface,
+                    ),
+                    items: _categories.map((category) {
+                      return DropdownMenuItem<String>(
+                        value: category,
+                        child: Text(category),
                       );
                     }).toList(),
+                    onChanged: (val) {
+                      if (val != null) {
+                        setState(() => _selectedCategory = val);
+                        _validateForm();
+                      }
+                    },
                   ),
                   const SizedBox(height: 24),
 
@@ -361,18 +390,22 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
                       Expanded(
                         flex: 2,
                         child: ElevatedButton(
-                          onPressed: () {
-                            if (_formKey.currentState!.validate()) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text("Subscription saved successfully!")),
-                              );
-                              Navigator.pop(context);
-                            }
-                          },
+                          onPressed: _isFormValid
+                              ? () {
+                                  if (_formKey.currentState!.validate()) {
+                                    // Phase 1: Do not implement saving, dummy data updates, or navigation back yet.
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(content: Text("Form is valid! (Saving disabled in Phase 1)")),
+                                    );
+                                  }
+                                }
+                              : null,
                           style: ElevatedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             backgroundColor: theme.colorScheme.primary,
                             foregroundColor: theme.colorScheme.onPrimary,
+                            disabledBackgroundColor: theme.colorScheme.onSurface.withValues(alpha: 0.12),
+                            disabledForegroundColor: theme.colorScheme.onSurface.withValues(alpha: 0.38),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                             elevation: 0,
                           ),
