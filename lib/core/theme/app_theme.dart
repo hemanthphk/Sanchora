@@ -19,6 +19,7 @@ class AppTheme {
       onSecondary: Colors.white,
       surface: AppColors.surface,
       onSurface: AppColors.textPrimary,
+      onSurfaceVariant: AppColors.textSecondary,
       outline: AppColors.divider,
       tertiary: AppColors.accent,
     ),
@@ -83,6 +84,8 @@ class AppTheme {
     colorScheme: ColorScheme.fromSeed(
       seedColor: const Color(0xFF1677FF),
       brightness: Brightness.dark,
+    ).copyWith(
+      onSurfaceVariant: const Color(0xFF94A3B8),
     ),
   );
 }

@@ -68,7 +68,7 @@ class SubscriptionCard extends StatelessWidget {
                 _buildInfoItem(
                   context,
                   'Price',
-                  CurrencyFormatter.format(subscription.currentPrice, decimalDigits: 2),
+                  CurrencyFormatter.format(subscription.currentPrice),
                   '/${subscription.billingCycle == BillingCycle.monthly ? 'mo' : 'yr'}',
                   isPrimaryValue: true,
                 ),

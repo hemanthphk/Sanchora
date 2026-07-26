@@ -88,7 +88,7 @@ class SubscriptionSummary extends StatelessWidget {
         ),
         const SizedBox(height: 4),
         Text(
-          CurrencyFormatter.format(amount, decimalDigits: 2),
+          CurrencyFormatter.format(amount),
           style: AppTextStyles.sectionTitle.copyWith(
             color: Theme.of(context).colorScheme.onSurface,
           ),

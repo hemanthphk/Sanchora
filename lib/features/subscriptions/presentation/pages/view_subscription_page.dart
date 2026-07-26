@@ -56,18 +56,30 @@ class _ViewSubscriptionPageState extends State<ViewSubscriptionPage> {
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          padding: const EdgeInsets.symmetric(vertical: 12),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              _buildTopCard(theme),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: _buildTopCard(theme),
+              ),
+              const SizedBox(height: 12),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: _buildInformationCard(context, theme),
+              ),
+              const SizedBox(height: 12),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: _buildSummaryCard(theme),
+              ),
               const SizedBox(height: 20),
-              _buildInformationCard(theme),
-              const SizedBox(height: 20),
-              _buildSummaryCard(theme),
-              const SizedBox(height: 32),
-              _buildButtons(context, theme),
-              const SizedBox(height: 20),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: _buildButtons(context, theme),
+              ),
+              const SizedBox(height: 12),
             ],
           ),
         ),
@@ -77,45 +89,47 @@ class _ViewSubscriptionPageState extends State<ViewSubscriptionPage> {
 
   Widget _buildTopCard(ThemeData theme) {
     return SanchoraCard(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       child: Column(
         children: [
           SubscriptionIcon(
             iconIdentifier: subscription.iconUrl,
             fallbackName: subscription.name,
-            size: 72,
-            borderRadius: 18,
+            size: 56,
+            borderRadius: 14,
             backgroundColor: theme.colorScheme.surface,
             textColor: theme.colorScheme.primary,
             border: Border.all(color: theme.dividerColor),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.05),
-                blurRadius: 12,
-                offset: const Offset(0, 6),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 10),
           Text(
             subscription.name,
             style: TextStyle(
-              fontSize: 22,
+              fontSize: 20,
               fontWeight: FontWeight.w700,
               color: theme.colorScheme.onSurface,
             ),
             textAlign: TextAlign.center,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 2),
           Text(
             subscription.category,
             style: TextStyle(
-              fontSize: 15,
+              fontSize: 14,
               color: theme.colorScheme.onSurfaceVariant,
             ),
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
           _buildStatusChip(theme, subscription.status),
         ],
       ),
@@ -162,89 +176,70 @@ class _ViewSubscriptionPageState extends State<ViewSubscriptionPage> {
     );
   }
 
-  Widget _buildInformationCard(ThemeData theme) {
+  Widget _buildInformationCard(BuildContext context, ThemeData theme) {
     final priceSuffix = subscription.billingCycle == BillingCycle.monthly ? '/ month' : '/ year';
     final priceFormatted = '${CurrencyFormatter.format(subscription.currentPrice)} $priceSuffix';
     final cycleFormatted = subscription.billingCycle == BillingCycle.monthly ? 'Monthly' : 'Yearly';
     final startDateFormatted = DateFormat('dd MMM yyyy').format(_calculateStartDate(subscription.nextRenewalDate, subscription.billingCycle));
     final renewalDateFormatted = DateFormat('dd MMM yyyy').format(subscription.nextRenewalDate);
     final reminderFormatted = subscription.hasReminder ? 'Enabled' : 'Disabled';
+    final reminderColor = subscription.hasReminder ? AppColors.success : Theme.of(context).colorScheme.onSurfaceVariant;
     final notesFormatted = subscription.notes != null && subscription.notes!.trim().isNotEmpty
         ? subscription.notes!.trim()
-        : 'No notes';
+        : 'No notes added';
 
     return SanchoraCard(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildInfoRow(theme, 'Price', priceFormatted),
+          _buildInfoRow(context, theme, 'Price', priceFormatted),
           _buildDivider(theme),
-          _buildInfoRow(theme, 'Billing Cycle', cycleFormatted),
+          _buildInfoRow(context, theme, 'Billing Cycle', cycleFormatted),
           _buildDivider(theme),
-          _buildInfoRow(theme, 'Start Date', startDateFormatted),
+          _buildInfoRow(context, theme, 'Start Date', startDateFormatted),
           _buildDivider(theme),
-          _buildInfoRow(theme, 'Renewal Date', renewalDateFormatted),
+          _buildInfoRow(context, theme, 'Renewal Date', renewalDateFormatted),
           _buildDivider(theme),
-          _buildInfoRow(theme, 'Reminder', reminderFormatted),
+          _buildInfoRow(context, theme, 'Reminder', reminderFormatted, valueColor: reminderColor),
           _buildDivider(theme),
-          _buildInfoRow(theme, 'Notes', notesFormatted, isNotes: true),
+          _buildInfoRow(context, theme, 'Notes', notesFormatted),
         ],
       ),
     );
   }
 
-  Widget _buildInfoRow(ThemeData theme, String label, String value, {bool isNotes = false}) {
+  Widget _buildInfoRow(BuildContext context, ThemeData theme, String label, String value, {Color? valueColor}) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10),
-      child: isNotes
-          ? Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  value,
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w500,
-                    color: theme.colorScheme.onSurface,
-                    height: 1.4,
-                  ),
-                ),
-              ],
-            )
-          : Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Flexible(
-                  child: Text(
-                    value,
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                      color: theme.colorScheme.onSurface,
-                    ),
-                    textAlign: TextAlign.right,
-                  ),
-                ),
-              ],
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w500,
+              color: theme.colorScheme.onSurfaceVariant,
             ),
+          ),
+          const SizedBox(width: 12),
+          Flexible(
+            child: Text(
+              value,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ).copyWith(
+                color: valueColor ?? Theme.of(context).colorScheme.onSurface,
+              ),
+              textAlign: TextAlign.right,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -265,10 +260,27 @@ class _ViewSubscriptionPageState extends State<ViewSubscriptionPage> {
     );
     final daysDifference = renewalDay.difference(today).inDays;
 
+    String valueText;
+    Color valueColor;
+
+    if (daysDifference > 1) {
+      valueText = 'Renews in $daysDifference Days';
+      valueColor = theme.colorScheme.primary;
+    } else if (daysDifference == 1) {
+      valueText = 'Renews Tomorrow';
+      valueColor = theme.colorScheme.primary;
+    } else if (daysDifference == 0) {
+      valueText = 'Renews Today';
+      valueColor = AppColors.warning;
+    } else {
+      valueText = 'Expired';
+      valueColor = AppColors.error;
+    }
+
     return SanchoraCard(
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
             'Next Renewal',
@@ -278,89 +290,66 @@ class _ViewSubscriptionPageState extends State<ViewSubscriptionPage> {
               color: theme.colorScheme.onSurfaceVariant,
             ),
           ),
-          const SizedBox(height: 10),
-          if (daysDifference > 0) ...[
-            Text(
-              'Next renewal in',
+          const SizedBox(width: 8),
+          Flexible(
+            child: Text(
+              valueText,
               style: TextStyle(
-                fontSize: 14,
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              '$daysDifference ${daysDifference == 1 ? 'Day' : 'Days'}',
-              style: TextStyle(
-                fontSize: 24,
+                fontSize: 15,
                 fontWeight: FontWeight.w700,
-                color: theme.colorScheme.primary,
+                color: valueColor,
               ),
+              textAlign: TextAlign.right,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
-          ] else if (daysDifference == 0) ...[
-            Text(
-              'Renew today',
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.w700,
-                color: AppColors.warning,
-              ),
-            ),
-          ] else ...[
-            Text(
-              'Expired',
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.w700,
-                color: AppColors.error,
-              ),
-            ),
-          ],
+          ),
         ],
       ),
     );
   }
 
   Widget _buildButtons(BuildContext context, ThemeData theme) {
-    return Column(
+    return Row(
       children: [
-        SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            onPressed: () => _navigateToEdit(context),
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              backgroundColor: theme.colorScheme.primary,
-              foregroundColor: theme.colorScheme.onPrimary,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              elevation: 0,
-            ),
-            child: const Text(
-              'Edit Subscription',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
-            ),
-          ),
-        ),
-        const SizedBox(height: 12),
-        SizedBox(
-          width: double.infinity,
+        Expanded(
           child: OutlinedButton(
             onPressed: () => Navigator.pop(context),
             style: OutlinedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 16),
+              padding: const EdgeInsets.symmetric(vertical: 14),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(14),
               ),
               side: BorderSide(color: theme.colorScheme.outline),
             ),
             child: Text(
               'Back',
               style: TextStyle(
-                fontSize: 16,
+                fontSize: 15,
                 fontWeight: FontWeight.w600,
                 color: theme.colorScheme.onSurface,
               ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: ElevatedButton(
+            onPressed: () => _navigateToEdit(context),
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              backgroundColor: theme.colorScheme.primary,
+              foregroundColor: theme.colorScheme.onPrimary,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
+              elevation: 0,
+            ),
+            child: const Text(
+              'Edit Subscription',
+              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ),

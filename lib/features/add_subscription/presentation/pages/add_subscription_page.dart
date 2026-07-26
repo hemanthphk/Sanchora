@@ -367,7 +367,7 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
 
   Widget _buildSectionTitle(String title) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.only(bottom: 8),
       child: Text(
         title,
         style: const TextStyle(
@@ -439,7 +439,7 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
                     },
                   ),
                   _buildSuggestionsList(theme),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 16),
                   
                   _buildSectionTitle("Price"),
                   TextFormField(
@@ -462,83 +462,113 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
                       return null;
                     },
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 16),
 
-                  _buildSectionTitle("Category"),
-                  DropdownButtonFormField<String>(
-                    initialValue: _selectedCategory,
-                    decoration: InputDecoration(
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: BorderSide(color: theme.colorScheme.outline),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: BorderSide(color: theme.colorScheme.outline),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: BorderSide(color: theme.colorScheme.primary, width: 2),
-                      ),
-                    ),
-                    dropdownColor: theme.cardTheme.color ?? theme.colorScheme.surface,
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
-                      color: theme.colorScheme.onSurface,
-                    ),
-                    items: _categories.map((category) {
-                      return DropdownMenuItem<String>(
-                        value: category,
-                        child: Text(category),
-                      );
-                    }).toList(),
-                    onChanged: (val) {
-                      if (val != null) {
-                        setState(() => _selectedCategory = val);
-                        _validateForm();
-                      }
-                    },
-                  ),
-                  const SizedBox(height: 24),
-
-                  _buildSectionTitle("Billing Cycle"),
                   Row(
-                    children: _billingCycles.map((cycle) {
-                      final selected = _selectedCycle == cycle;
-                      return Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 4),
-                          child: InkWell(
-                            onTap: () => _updateRenewalDate(cycle),
-                            borderRadius: BorderRadius.circular(16),
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(vertical: 12),
-                              alignment: Alignment.center,
-                              decoration: BoxDecoration(
-                                color: selected ? theme.colorScheme.primary.withValues(alpha: 0.1) : theme.cardTheme.color,
-                                borderRadius: BorderRadius.circular(16),
-                                border: Border.all(
-                                  color: selected ? theme.colorScheme.primary : theme.colorScheme.outline,
-                                  width: selected ? 1.5 : 1.0,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        flex: 3,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildSectionTitle("Category"),
+                            DropdownButtonFormField<String>(
+                              isExpanded: true,
+                              initialValue: _selectedCategory,
+                              decoration: InputDecoration(
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                  borderSide: BorderSide(color: theme.colorScheme.outline),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                  borderSide: BorderSide(color: theme.colorScheme.outline),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                  borderSide: BorderSide(color: theme.colorScheme.primary, width: 2),
                                 ),
                               ),
-                              child: Text(
-                                cycle,
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 14,
-                                  color: selected ? theme.colorScheme.primary : theme.colorScheme.onSurface,
-                                ),
+                              dropdownColor: theme.cardTheme.color ?? theme.colorScheme.surface,
+                              style: TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 14,
+                                color: theme.colorScheme.onSurface,
                               ),
+                              items: _categories.map((category) {
+                                return DropdownMenuItem<String>(
+                                  value: category,
+                                  child: Text(category),
+                                );
+                              }).toList(),
+                              onChanged: (val) {
+                                if (val != null) {
+                                  setState(() => _selectedCategory = val);
+                                  _validateForm();
+                                }
+                              },
                             ),
-                          ),
+                          ],
                         ),
-                      );
-                    }).toList(),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        flex: 2,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildSectionTitle("Billing Cycle"),
+                            Row(
+                              children: _billingCycles.map((cycle) {
+                                final selected = _selectedCycle == cycle;
+                                return Expanded(
+                                  child: Padding(
+                                    padding: EdgeInsets.only(
+                                      right: cycle == _billingCycles.first ? 4.0 : 0.0,
+                                      left: cycle == _billingCycles.last ? 4.0 : 0.0,
+                                    ),
+                                    child: InkWell(
+                                      onTap: () => _updateRenewalDate(cycle),
+                                      borderRadius: BorderRadius.circular(16),
+                                      child: Container(
+                                        height: 50,
+                                        alignment: Alignment.center,
+                                        decoration: BoxDecoration(
+                                          color: selected ? theme.colorScheme.primary.withValues(alpha: 0.1) : theme.cardTheme.color,
+                                          borderRadius: BorderRadius.circular(16),
+                                          border: Border.all(
+                                            color: selected ? theme.colorScheme.primary : theme.colorScheme.outline,
+                                            width: selected ? 1.5 : 1.0,
+                                          ),
+                                        ),
+                                        child: FittedBox(
+                                          fit: BoxFit.scaleDown,
+                                          child: Padding(
+                                            padding: const EdgeInsets.symmetric(horizontal: 4),
+                                            child: Text(
+                                              cycle,
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.w600,
+                                                fontSize: 13,
+                                                color: selected ? theme.colorScheme.primary : theme.colorScheme.onSurface,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              }).toList(),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 16),
 
                   Row(
                     children: [
@@ -561,10 +591,10 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 16),
 
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                     decoration: BoxDecoration(
                       color: theme.cardTheme.color,
                       borderRadius: BorderRadius.circular(16),
@@ -615,18 +645,19 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
                       ],
                     ),
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 16),
 
                   _buildSectionTitle("Notes (Optional)"),
                   TextFormField(
                     controller: _notesController,
-                    maxLines: 3,
+                    minLines: 1,
+                    maxLines: 4,
                     textCapitalization: TextCapitalization.sentences,
                     decoration: const InputDecoration(
                       hintText: "Add any notes or details here...",
                     ),
                   ),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 20),
 
                   Row(
                     children: [
@@ -634,7 +665,7 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
                         child: OutlinedButton(
                           onPressed: () => Navigator.pop(context),
                           style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            padding: const EdgeInsets.symmetric(vertical: 14),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                             side: BorderSide(color: theme.colorScheme.outline),
                           ),
@@ -654,7 +685,7 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
                         child: ElevatedButton(
                           onPressed: _isFormValid ? _saveSubscription : null,
                           style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            padding: const EdgeInsets.symmetric(vertical: 14),
                             backgroundColor: theme.colorScheme.primary,
                             foregroundColor: theme.colorScheme.onPrimary,
                             disabledBackgroundColor: theme.colorScheme.onSurface.withValues(alpha: 0.12),
@@ -670,7 +701,7 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 40),
+                  const SizedBox(height: 24),
                 ],
               ),
             ),
@@ -694,7 +725,7 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
           onTap: onTap,
           borderRadius: BorderRadius.circular(16),
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             decoration: BoxDecoration(
               color: theme.cardTheme.color,
               borderRadius: BorderRadius.circular(16),
