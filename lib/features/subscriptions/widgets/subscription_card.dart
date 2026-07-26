@@ -5,6 +5,8 @@ import 'package:sanchora/core/theme/app_text_styles.dart';
 import 'package:sanchora/core/widgets/sanchora_card.dart';
 import 'package:sanchora/core/utils/currency_formatter.dart';
 import '../models/subscription_model.dart';
+import 'subscription_icon.dart';
+import '../presentation/pages/view_subscription_page.dart';
 
 class SubscriptionCard extends StatelessWidget {
   const SubscriptionCard({
@@ -97,7 +99,7 @@ class SubscriptionCard extends StatelessWidget {
                 ),
                 Row(
                   children: [
-                    _buildActionButton(theme, Icons.remove_red_eye_outlined, 'View', onViewDetails),
+                    _buildActionButton(theme, Icons.remove_red_eye_outlined, 'View', onViewDetails ?? () => _navigateToViewDetails(context)),
                     const SizedBox(width: 8),
                     _buildActionButton(theme, Icons.edit_outlined, 'Edit', onEdit),
                     const SizedBox(width: 8),
@@ -115,27 +117,22 @@ class SubscriptionCard extends StatelessWidget {
   }
 
   Widget _buildAppIcon(ThemeData theme) {
-    return Container(
-      width: 52,
-      height: 52,
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: theme.dividerColor),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Center(
-        child: Text(
-          subscription.name.isNotEmpty ? subscription.name[0].toUpperCase() : '?',
-          style: AppTextStyles.sectionTitle.copyWith(color: theme.colorScheme.primary),
+    return SubscriptionIcon(
+      iconIdentifier: subscription.iconUrl,
+      fallbackName: subscription.name,
+      size: 52,
+      borderRadius: 14,
+      backgroundColor: theme.colorScheme.surface,
+      textColor: theme.colorScheme.primary,
+      textStyle: AppTextStyles.sectionTitle.copyWith(color: theme.colorScheme.primary),
+      border: Border.all(color: theme.dividerColor),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withValues(alpha: 0.05),
+          blurRadius: 10,
+          offset: const Offset(0, 4),
         ),
-      ),
+      ],
     );
   }
 
@@ -206,6 +203,15 @@ class SubscriptionCard extends StatelessWidget {
           ],
         ),
       ],
+    );
+  }
+
+  void _navigateToViewDetails(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ViewSubscriptionPage(subscription: subscription),
+      ),
     );
   }
 

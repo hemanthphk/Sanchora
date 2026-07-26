@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:sanchora/core/utils/currency_formatter.dart';
 import 'package:sanchora/features/subscriptions/models/subscription_model.dart';
+import 'package:sanchora/features/subscriptions/models/subscription_preset_model.dart';
+import 'package:sanchora/features/subscriptions/services/subscription_preset_service.dart';
 import 'package:sanchora/features/subscriptions/services/subscription_service.dart';
+import 'package:sanchora/features/subscriptions/services/subscription_icon_registry.dart';
+import 'package:sanchora/features/subscriptions/widgets/subscription_icon.dart';
 
 class AddSubscriptionPage extends StatefulWidget {
   const AddSubscriptionPage({super.key});
@@ -37,12 +41,17 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
   late DateTime _renewalDate;
   bool _reminderEnabled = true;
   bool _isFormValid = false;
+  
+  final SubscriptionPresetService _presetService = const SubscriptionPresetService();
+  List<SubscriptionPresetModel> _suggestions = [];
+  bool _showSuggestions = false;
+  bool _isSelectingPreset = false;
 
   @override
   void initState() {
     super.initState();
     _renewalDate = _calculateRenewalDate(_startDate, _selectedCycle);
-    _nameController.addListener(_validateForm);
+    _nameController.addListener(_onNameChanged);
     _priceController.addListener(() {
       setState(() {});
       _validateForm();
@@ -52,11 +61,138 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
 
   @override
   void dispose() {
-    _nameController.removeListener(_validateForm);
+    _nameController.removeListener(_onNameChanged);
     _nameController.dispose();
     _priceController.dispose();
     _notesController.dispose();
     super.dispose();
+  }
+
+  void _onNameChanged() {
+    if (_isSelectingPreset) return;
+    final query = _nameController.text.trim();
+    if (query.isNotEmpty) {
+      final matches = _presetService.searchPresets(query);
+      final exactMatch = _presetService.findPresetByName(query);
+      if (exactMatch != null) {
+        if (_showSuggestions) {
+          setState(() {
+            _showSuggestions = false;
+            _suggestions = [];
+          });
+        }
+      } else {
+        setState(() {
+          _suggestions = matches;
+          _showSuggestions = matches.isNotEmpty;
+        });
+      }
+    } else {
+      if (_showSuggestions) {
+        setState(() {
+          _showSuggestions = false;
+          _suggestions = [];
+        });
+      }
+    }
+    _validateForm();
+  }
+
+  void _onPresetSelected(SubscriptionPresetModel preset) {
+    _isSelectingPreset = true;
+    FocusScope.of(context).unfocus();
+    _nameController.text = preset.name;
+    setState(() {
+      _selectedCategory = preset.defaultCategory;
+      _selectedCycle = preset.defaultBillingCycle;
+      _showSuggestions = false;
+      _suggestions = [];
+    });
+    _isSelectingPreset = false;
+    _validateForm();
+  }
+
+  Widget _buildSuggestionsList(ThemeData theme) {
+    if (!_showSuggestions || _suggestions.isEmpty) return const SizedBox.shrink();
+    return Container(
+      margin: const EdgeInsets.only(top: 8),
+      constraints: const BoxConstraints(maxHeight: 220),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.3)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.08),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: ListView.separated(
+          shrinkWrap: true,
+          itemCount: _suggestions.length,
+          separatorBuilder: (context, index) => Divider(height: 1, color: theme.colorScheme.outline.withValues(alpha: 0.1)),
+          itemBuilder: (context, index) {
+            final preset = _suggestions[index];
+            return InkWell(
+              onTap: () => _onPresetSelected(preset),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                child: Row(
+                  children: [
+                    SubscriptionIcon(
+                      iconIdentifier: preset.iconKey ?? preset.name,
+                      fallbackName: preset.name,
+                      size: 36,
+                      borderRadius: 10,
+                      backgroundColor: (preset.brandColor ?? theme.colorScheme.primary).withValues(alpha: 0.15),
+                      textColor: preset.brandColor ?? theme.colorScheme.primary,
+                      textStyle: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        color: preset.brandColor ?? theme.colorScheme.primary,
+                        fontSize: 16,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            preset.name,
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                              color: theme.colorScheme.onSurface,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            "${preset.defaultCategory} • ${preset.defaultBillingCycle}",
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Icon(
+                      Icons.arrow_forward_ios_rounded,
+                      size: 14,
+                      color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
   }
 
   void _validateForm() {
@@ -101,6 +237,9 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
       status = SubscriptionStatus.active;
     }
 
+    final presetMatch = _presetService.findPresetByName(name);
+    final iconUrl = SubscriptionIconRegistry.getIconUrl(presetMatch?.iconKey ?? name);
+
     final newSub = SubscriptionModel(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       name: name,
@@ -110,7 +249,7 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
       billingCycle: _selectedCycle == "Monthly" ? BillingCycle.monthly : BillingCycle.yearly,
       nextRenewalDate: _renewalDate,
       status: status,
-      iconUrl: 'assets/images/default_logo.png',
+      iconUrl: iconUrl,
       hasReminder: _reminderEnabled,
       notes: _notesController.text.trim().isNotEmpty ? _notesController.text.trim() : null,
     );
@@ -215,7 +354,10 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
       ),
       body: SafeArea(
         child: GestureDetector(
-          onTap: () => FocusScope.of(context).unfocus(),
+          onTap: () {
+            FocusScope.of(context).unfocus();
+            if (_showSuggestions) setState(() => _showSuggestions = false);
+          },
           child: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
             child: Form(
@@ -227,8 +369,20 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
                   TextFormField(
                     controller: _nameController,
                     textCapitalization: TextCapitalization.words,
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       hintText: "e.g., Netflix",
+                      suffixIcon: _nameController.text.isNotEmpty
+                          ? IconButton(
+                              icon: const Icon(Icons.clear, size: 18),
+                              onPressed: () {
+                                _nameController.clear();
+                                setState(() {
+                                  _showSuggestions = false;
+                                  _suggestions = [];
+                                });
+                              },
+                            )
+                          : null,
                     ),
                     validator: (value) {
                       if (value == null || value.trim().isEmpty) {
@@ -237,6 +391,7 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
                       return null;
                     },
                   ),
+                  _buildSuggestionsList(theme),
                   const SizedBox(height: 24),
                   
                   _buildSectionTitle("Price"),

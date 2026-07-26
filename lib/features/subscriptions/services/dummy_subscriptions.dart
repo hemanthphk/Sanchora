@@ -1,4 +1,5 @@
 import '../models/subscription_model.dart';
+import 'subscription_icon_registry.dart';
 
 final List<SubscriptionModel> dummySubscriptions = [
   SubscriptionModel(
@@ -10,7 +11,7 @@ final List<SubscriptionModel> dummySubscriptions = [
     billingCycle: BillingCycle.monthly,
     nextRenewalDate: DateTime.now().add(const Duration(days: 12)),
     status: SubscriptionStatus.active,
-    iconUrl: 'assets/images/netflix_logo.png',
+    iconUrl: SubscriptionIconRegistry.getIconUrl('netflix'),
     hasReminder: true,
   ),
   SubscriptionModel(
@@ -22,7 +23,7 @@ final List<SubscriptionModel> dummySubscriptions = [
     billingCycle: BillingCycle.monthly,
     nextRenewalDate: DateTime.now().add(const Duration(days: 3)),
     status: SubscriptionStatus.upcoming,
-    iconUrl: 'assets/images/spotify_logo.png',
+    iconUrl: SubscriptionIconRegistry.getIconUrl('spotify'),
   ),
   SubscriptionModel(
     id: '3',
@@ -33,7 +34,7 @@ final List<SubscriptionModel> dummySubscriptions = [
     billingCycle: BillingCycle.monthly,
     nextRenewalDate: DateTime.now().add(const Duration(days: 20)),
     status: SubscriptionStatus.active,
-    iconUrl: 'assets/images/youtube_logo.png',
+    iconUrl: SubscriptionIconRegistry.getIconUrl('youtube_premium'),
   ),
   SubscriptionModel(
     id: '4',
@@ -44,7 +45,7 @@ final List<SubscriptionModel> dummySubscriptions = [
     billingCycle: BillingCycle.yearly,
     nextRenewalDate: DateTime.now().add(const Duration(days: 150)),
     status: SubscriptionStatus.active,
-    iconUrl: 'assets/images/amazon_logo.png',
+    iconUrl: SubscriptionIconRegistry.getIconUrl('amazon_prime'),
   ),
   SubscriptionModel(
     id: '5',
@@ -55,7 +56,7 @@ final List<SubscriptionModel> dummySubscriptions = [
     billingCycle: BillingCycle.yearly,
     nextRenewalDate: DateTime.now().subtract(const Duration(days: 5)),
     status: SubscriptionStatus.expired,
-    iconUrl: 'assets/images/google_logo.png',
+    iconUrl: SubscriptionIconRegistry.getIconUrl('google_one'),
   ),
   SubscriptionModel(
     id: '6',
@@ -66,7 +67,7 @@ final List<SubscriptionModel> dummySubscriptions = [
     billingCycle: BillingCycle.monthly,
     nextRenewalDate: DateTime.now().add(const Duration(days: 8)),
     status: SubscriptionStatus.active,
-    iconUrl: 'assets/images/chatgpt_logo.png',
+    iconUrl: SubscriptionIconRegistry.getIconUrl('chatgpt_plus'),
     hasReminder: true,
   ),
   SubscriptionModel(
@@ -78,7 +79,7 @@ final List<SubscriptionModel> dummySubscriptions = [
     billingCycle: BillingCycle.yearly,
     nextRenewalDate: DateTime.now().add(const Duration(days: 45)),
     status: SubscriptionStatus.active,
-    iconUrl: 'assets/images/microsoft_logo.png',
+    iconUrl: SubscriptionIconRegistry.getIconUrl('microsoft_365'),
   ),
   SubscriptionModel(
     id: '8',
@@ -89,6 +90,6 @@ final List<SubscriptionModel> dummySubscriptions = [
     billingCycle: BillingCycle.monthly,
     nextRenewalDate: DateTime.now().add(const Duration(days: 2)),
     status: SubscriptionStatus.upcoming,
-    iconUrl: 'assets/images/adobe_logo.png',
+    iconUrl: SubscriptionIconRegistry.getIconUrl('adobe_creative_cloud'),
   ),
 ];

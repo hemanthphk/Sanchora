@@ -208,9 +208,6 @@ class _SubscriptionsScreenState extends State<SubscriptionsScreen> {
                             final subscription = _filteredSubscriptions[index];
                             return SubscriptionCard(
                               subscription: subscription,
-                              onViewDetails: () {
-                                // Placeholder for view details
-                              },
                               onEdit: () {
                                 // Placeholder for edit
                               },
