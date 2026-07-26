@@ -3,18 +3,35 @@ import 'package:intl/intl.dart';
 import 'package:sanchora/core/theme/app_colors.dart';
 import 'package:sanchora/core/utils/currency_formatter.dart';
 import 'package:sanchora/core/widgets/sanchora_card.dart';
+import 'package:sanchora/features/add_subscription/presentation/pages/add_subscription_page.dart';
+import 'package:sanchora/features/subscriptions/services/subscription_service.dart';
 import '../../models/subscription_model.dart';
 import '../../widgets/subscription_icon.dart';
 
 /// Full-screen navigation page for displaying complete subscription details.
 /// Designed to be future-ready for real logos, cloud sync, OCR, and AI Insights.
-class ViewSubscriptionPage extends StatelessWidget {
+class ViewSubscriptionPage extends StatefulWidget {
   const ViewSubscriptionPage({
     super.key,
     required this.subscription,
   });
 
   final SubscriptionModel subscription;
+
+  @override
+  State<ViewSubscriptionPage> createState() => _ViewSubscriptionPageState();
+}
+
+class _ViewSubscriptionPageState extends State<ViewSubscriptionPage> {
+  late SubscriptionModel _subscription;
+
+  SubscriptionModel get subscription => _subscription;
+
+  @override
+  void initState() {
+    super.initState();
+    _subscription = widget.subscription;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -309,7 +326,7 @@ class ViewSubscriptionPage extends StatelessWidget {
         SizedBox(
           width: double.infinity,
           child: ElevatedButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => _navigateToEdit(context),
             style: ElevatedButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 16),
               backgroundColor: theme.colorScheme.primary,
@@ -356,6 +373,28 @@ class ViewSubscriptionPage extends StatelessWidget {
       return DateTime(renewalDate.year, renewalDate.month - 1, renewalDate.day);
     } else {
       return DateTime(renewalDate.year - 1, renewalDate.month, renewalDate.day);
+    }
+  }
+
+  Future<void> _navigateToEdit(BuildContext context) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AddSubscriptionPage(subscriptionToEdit: _subscription),
+      ),
+    );
+    if (result != null && result is SubscriptionModel && mounted) {
+      setState(() {
+        _subscription = result;
+      });
+    } else if (result == true && mounted) {
+      final updated = SubscriptionService.instance.subscriptions.firstWhere(
+        (s) => s.id == _subscription.id,
+        orElse: () => _subscription,
+      );
+      setState(() {
+        _subscription = updated;
+      });
     }
   }
 }

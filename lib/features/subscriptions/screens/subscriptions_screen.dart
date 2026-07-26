@@ -208,9 +208,6 @@ class _SubscriptionsScreenState extends State<SubscriptionsScreen> {
                             final subscription = _filteredSubscriptions[index];
                             return SubscriptionCard(
                               subscription: subscription,
-                              onEdit: () {
-                                // Placeholder for edit
-                              },
                               onDelete: () {
                                 SubscriptionService.instance.removeSubscription(subscription);
                               },

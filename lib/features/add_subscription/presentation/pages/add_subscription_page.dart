@@ -8,13 +8,19 @@ import 'package:sanchora/features/subscriptions/services/subscription_icon_regis
 import 'package:sanchora/features/subscriptions/widgets/subscription_icon.dart';
 
 class AddSubscriptionPage extends StatefulWidget {
-  const AddSubscriptionPage({super.key});
+  const AddSubscriptionPage({
+    super.key,
+    this.subscriptionToEdit,
+  });
+
+  final SubscriptionModel? subscriptionToEdit;
 
   @override
   State<AddSubscriptionPage> createState() => _AddSubscriptionPageState();
 }
 
 class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
+  bool get _isEditMode => widget.subscriptionToEdit != null;
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _priceController = TextEditingController();
@@ -50,7 +56,32 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
   @override
   void initState() {
     super.initState();
-    _renewalDate = _calculateRenewalDate(_startDate, _selectedCycle);
+    if (_isEditMode) {
+      final sub = widget.subscriptionToEdit!;
+      _nameController.text = sub.name;
+      if (_categories.contains(sub.category)) {
+        _selectedCategory = sub.category;
+      } else {
+        _categories.add(sub.category);
+        _selectedCategory = sub.category;
+      }
+      _selectedCycle = sub.billingCycle == BillingCycle.monthly ? "Monthly" : "Yearly";
+      _priceController.text = sub.currentPrice == sub.currentPrice.roundToDouble()
+          ? sub.currentPrice.toInt().toString()
+          : sub.currentPrice.toString();
+      _renewalDate = sub.nextRenewalDate;
+      if (_selectedCycle == "Monthly") {
+        _startDate = DateTime(_renewalDate.year, _renewalDate.month - 1, _renewalDate.day);
+      } else {
+        _startDate = DateTime(_renewalDate.year - 1, _renewalDate.month, _renewalDate.day);
+      }
+      _reminderEnabled = sub.hasReminder;
+      if (sub.notes != null) {
+        _notesController.text = sub.notes!;
+      }
+    } else {
+      _renewalDate = _calculateRenewalDate(_startDate, _selectedCycle);
+    }
     _nameController.addListener(_onNameChanged);
     _priceController.addListener(() {
       setState(() {});
@@ -211,7 +242,10 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
     if (!_formKey.currentState!.validate()) return;
 
     final name = _nameController.text.trim();
-    final isDuplicate = SubscriptionService.instance.isDuplicateName(name);
+    final isDuplicate = SubscriptionService.instance.isDuplicateName(
+      name,
+      excludeId: widget.subscriptionToEdit?.id,
+    );
 
     if (isDuplicate) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -240,8 +274,10 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
     final presetMatch = _presetService.findPresetByName(name);
     final iconUrl = SubscriptionIconRegistry.getIconUrl(presetMatch?.iconKey ?? name);
 
-    final newSub = SubscriptionModel(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
+    final id = _isEditMode ? widget.subscriptionToEdit!.id : DateTime.now().millisecondsSinceEpoch.toString();
+
+    final subModel = SubscriptionModel(
+      id: id,
       name: name,
       category: _selectedCategory,
       monthlyPrice: monthlyPrice,
@@ -254,17 +290,28 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
       notes: _notesController.text.trim().isNotEmpty ? _notesController.text.trim() : null,
     );
 
-    SubscriptionService.instance.addSubscription(newSub);
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text("Subscription added successfully."),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
-
-    if (Navigator.canPop(context)) {
-      Navigator.pop(context, true);
+    if (_isEditMode) {
+      SubscriptionService.instance.updateSubscription(subModel);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Subscription updated successfully."),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      if (Navigator.canPop(context)) {
+        Navigator.pop(context, subModel);
+      }
+    } else {
+      SubscriptionService.instance.addSubscription(subModel);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Subscription added successfully."),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      if (Navigator.canPop(context)) {
+        Navigator.pop(context, true);
+      }
     }
   }
 
@@ -344,7 +391,7 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
         centerTitle: true,
         iconTheme: IconThemeData(color: theme.colorScheme.onSurface),
         title: Text(
-          'New Subscription',
+          _isEditMode ? 'Edit Subscription' : 'Add Subscription',
           style: TextStyle(
             color: theme.colorScheme.onSurface,
             fontWeight: FontWeight.w700,
@@ -615,9 +662,9 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                             elevation: 0,
                           ),
-                          child: const Text(
-                            "Save Subscription",
-                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                          child: Text(
+                            _isEditMode ? "Update Subscription" : "Save Subscription",
+                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
                           ),
                         ),
                       ),

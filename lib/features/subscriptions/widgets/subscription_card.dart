@@ -7,6 +7,7 @@ import 'package:sanchora/core/utils/currency_formatter.dart';
 import '../models/subscription_model.dart';
 import 'subscription_icon.dart';
 import '../presentation/pages/view_subscription_page.dart';
+import 'package:sanchora/features/add_subscription/presentation/pages/add_subscription_page.dart';
 
 class SubscriptionCard extends StatelessWidget {
   const SubscriptionCard({
@@ -101,7 +102,7 @@ class SubscriptionCard extends StatelessWidget {
                   children: [
                     _buildActionButton(theme, Icons.remove_red_eye_outlined, 'View', onViewDetails ?? () => _navigateToViewDetails(context)),
                     const SizedBox(width: 8),
-                    _buildActionButton(theme, Icons.edit_outlined, 'Edit', onEdit),
+                    _buildActionButton(theme, Icons.edit_outlined, 'Edit', onEdit ?? () => _navigateToEdit(context)),
                     const SizedBox(width: 8),
                     _buildActionButton(theme, Icons.delete_outline, 'Delete', () {
                       _showDeleteDialog(context);
@@ -211,6 +212,15 @@ class SubscriptionCard extends StatelessWidget {
       context,
       MaterialPageRoute(
         builder: (context) => ViewSubscriptionPage(subscription: subscription),
+      ),
+    );
+  }
+
+  void _navigateToEdit(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AddSubscriptionPage(subscriptionToEdit: subscription),
       ),
     );
   }
