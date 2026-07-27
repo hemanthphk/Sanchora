@@ -28,7 +28,7 @@ class CurrencyFormatter {
       }
     }
     final bool isWhole = amount % 1 == 0;
-    final int digits = isWhole ? 0 : (decimalDigits ?? 2);
+    final int digits = decimalDigits ?? (isWhole ? 0 : 2);
     final NumberFormat formatter = NumberFormat.currency(
       locale: locale,
       symbol: symbol,

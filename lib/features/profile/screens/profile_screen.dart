@@ -3,6 +3,12 @@ import 'package:sanchora/features/auth/screens/login_screen.dart';
 import 'package:sanchora/features/home/screens/home_screen.dart';
 import 'package:sanchora/core/theme/theme_controller.dart';
 import 'package:sanchora/core/utils/currency_formatter.dart';
+import '../widgets/profile_app_bar.dart';
+import '../widgets/profile_header_card.dart';
+import '../widgets/analytics_summary_card.dart';
+import '../widgets/settings_section.dart';
+import '../widgets/settings_tile.dart';
+import '../widgets/logout_button.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -11,511 +17,259 @@ class ProfileScreen extends StatefulWidget {
   State<ProfileScreen> createState() => _ProfileScreenState();
 }
 
-class _ProfileScreenState extends State<ProfileScreen> {
+class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProviderStateMixin {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  late final AnimationController _animationController;
+  late final Animation<double> _headerFade;
+  late final Animation<Offset> _headerSlide;
+  late final Animation<double> _analyticsFade;
+  late final Animation<Offset> _analyticsSlide;
+  late final Animation<double> _settingsFade;
+  late final Animation<Offset> _settingsSlide;
+  late final Animation<double> _logoutFade;
+  late final Animation<Offset> _logoutSlide;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 750),
+    )..forward();
+
+    _headerFade = CurvedAnimation(
+      parent: _animationController,
+      curve: const Interval(0.0, 0.45, curve: Curves.easeOut),
+    );
+    _headerSlide = Tween<Offset>(
+      begin: const Offset(0, 0.08),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(
+      parent: _animationController,
+      curve: const Interval(0.0, 0.45, curve: Curves.easeOutCubic),
+    ));
+
+    _analyticsFade = CurvedAnimation(
+      parent: _animationController,
+      curve: const Interval(0.15, 0.60, curve: Curves.easeOut),
+    );
+    _analyticsSlide = Tween<Offset>(
+      begin: const Offset(0, 0.08),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(
+      parent: _animationController,
+      curve: const Interval(0.15, 0.60, curve: Curves.easeOutCubic),
+    ));
+
+    _settingsFade = CurvedAnimation(
+      parent: _animationController,
+      curve: const Interval(0.30, 0.75, curve: Curves.easeOut),
+    );
+    _settingsSlide = Tween<Offset>(
+      begin: const Offset(0, 0.08),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(
+      parent: _animationController,
+      curve: const Interval(0.30, 0.75, curve: Curves.easeOutCubic),
+    ));
+
+    _logoutFade = CurvedAnimation(
+      parent: _animationController,
+      curve: const Interval(0.45, 0.90, curve: Curves.easeOut),
+    );
+    _logoutSlide = Tween<Offset>(
+      begin: const Offset(0, 0.08),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(
+      parent: _animationController,
+      curve: const Interval(0.45, 0.90, curve: Curves.easeOutCubic),
+    ));
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
     return Scaffold(
-        key: _scaffoldKey,
-        backgroundColor: theme.scaffoldBackgroundColor,
-        drawer: _buildDrawer(theme),
-        body: SafeArea(
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              return SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(minHeight: constraints.maxHeight),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const SizedBox(height: 4),
-                      _buildHeader(theme),
-                      const SizedBox(height: 20),
-                      _buildProfileCard(theme),
-                      const SizedBox(height: 20),
-                      _buildStatisticsSection(theme),
-                      const SizedBox(height: 24),
-                      _buildSection(
-                        title: 'Account',
-                        children: [
-                          _buildProfileTile(
-                            context,
-                            icon: Icons.person_outline_rounded,
-                            title: 'Personal Information',
-                            subtitle: 'Update your personal details',
-                            onTap: () => _openScreen(context, const PersonalInfoScreen()),
-                            theme: theme,
-                          ),
-                          _buildProfileTile(
-                            context,
-                            icon: Icons.workspace_premium_outlined,
-                            title: 'Subscription to Premium',
-                            subtitle: 'Manage your premium benefits',
-                            onTap: () => _openScreen(context, const PremiumScreen()),
-                            theme: theme,
-                          ),
-                          _buildProfileTile(
-                            context,
-                            icon: Icons.credit_card_outlined,
-                            title: 'Billing & Payments',
-                            subtitle: 'Payment history and invoices',
-                            onTap: () => _openScreen(context, const BillingScreen()),
-                            theme: theme,
-                          ),
-                          _buildProfileTile(
-                            context,
-                            icon: Icons.notifications_none_rounded,
-                            title: 'Notification Settings',
-                            subtitle: 'Control your alerts',
-                            onTap: () => _openScreen(context, const NotificationScreen()),
-                            theme: theme,
-                          ),
-                        ],
-                        theme: theme,
-                      ),
-                      const SizedBox(height: 16),
-                      _buildSection(
-                        title: 'Preferences',
-                        children: [
-                          _buildProfileTile(
-                            context,
-                            icon: Icons.currency_rupee_rounded,
-                            title: 'Currency',
-                            subtitle: 'INR • Indian Rupee',
-                            onTap: () => _openScreen(context, const CurrencyScreen()),
-                            theme: theme,
-                          ),
-                          _buildDarkModeTile(theme),
-                          _buildProfileTile(
-                            context,
-                            icon: Icons.lock_outline_rounded,
-                            title: 'Data & Privacy',
-                            subtitle: 'Secure your account data',
-                            onTap: () => _openScreen(context, const PrivacyScreen()),
-                            theme: theme,
-                          ),
-                        ],
-                        theme: theme,
-                      ),
-                      const SizedBox(height: 16),
-                      _buildSection(
-                        title: 'Support',
-                        children: [
-                          _buildProfileTile(
-                            context,
-                            icon: Icons.help_outline_rounded,
-                            title: 'Help & FAQs',
-                            subtitle: 'Find answers quickly',
-                            onTap: () => _openScreen(context, const FaqScreen()),
-                            theme: theme,
-                          ),
-                          _buildProfileTile(
-                            context,
-                            icon: Icons.support_agent_outlined,
-                            title: 'Contact Support',
-                            subtitle: 'Reach out for help',
-                            onTap: () => _openScreen(context, const ContactScreen()),
-                            theme: theme,
-                          ),
-                          _buildProfileTile(
-                            context,
-                            icon: Icons.info_outline_rounded,
-                            title: 'About Sanchora',
-                            subtitle: 'Learn more about the app',
-                            onTap: () => _openScreen(context, const AboutScreen()),
-                            theme: theme,
-                          ),
-                        ],
-                        theme: theme,
-                      ),
-                      const SizedBox(height: 24),
-                      SizedBox(
-                        width: double.infinity,
-                        height: 56,
-                        child: OutlinedButton.icon(
-                          onPressed: _showLogoutDialog,
-                          icon: const Icon(Icons.logout_rounded),
-                          label: const Text(
-                            'Logout',
-                            style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
-                          ),
-                          style: OutlinedButton.styleFrom(
-                            side: const BorderSide(color: Color(0xFFEF4444), width: 1.2),
-                            foregroundColor: const Color(0xFFEF4444),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(18),
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                    ],
-                  ),
-                ),
-              );
-            },
-          ),
-        ),
-    );
-  }
-
-  Widget _buildHeader(ThemeData theme) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Profile',
-          style: theme.textTheme.headlineMedium?.copyWith(
-            fontSize: 28,
-            fontWeight: FontWeight.w800,
-            color: theme.colorScheme.onSurface,
-          ) ?? TextStyle(
-            fontSize: 28,
-            fontWeight: FontWeight.w800,
-            color: theme.colorScheme.onSurface,
-          ),
-        ),
-        const SizedBox(height: 6),
-        Text(
-          'Manage your account and preferences.',
-          style: theme.textTheme.bodyMedium?.copyWith(
-            fontSize: 14.5,
-            color: theme.colorScheme.onSurfaceVariant,
-            height: 1.45,
-          ) ?? TextStyle(
-            fontSize: 14.5,
-            color: theme.colorScheme.onSurfaceVariant,
-            height: 1.45,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildProfileCard(ThemeData theme) {
-    return InkWell(
-      onTap: () => _openScreen(context, const ProfileDetailsScreen()),
-      borderRadius: BorderRadius.circular(24),
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(18),
-        decoration: BoxDecoration(
-          color: theme.cardColor,
-          borderRadius: BorderRadius.circular(24),
-          boxShadow: const [
-            BoxShadow(
-              color: Color(0x140B1F4D),
-              blurRadius: 16,
-              offset: Offset(0, 10),
-            ),
-          ],
-        ),
-        child: Row(
+      key: _scaffoldKey,
+      backgroundColor: theme.scaffoldBackgroundColor,
+      appBar: ProfileAppBar(
+        onNotificationTap: () => _openScreen(context, const NotificationScreen()),
+      ),
+      drawer: _buildDrawer(theme),
+      body: SingleChildScrollView(
+        physics: const BouncingScrollPhysics(),
+        padding: const EdgeInsets.fromLTRB(20, 8, 20, 36),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Stack(
-              clipBehavior: Clip.none,
-              children: [
-                Container(
-                  width: 72,
-                  height: 72,
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFF1677FF), Color(0xFF3B82F6)],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.circular(24),
-                  ),
-                  alignment: Alignment.center,
-                  child: const Text(
-                    'HP',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 24,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
+            const SizedBox(height: 4),
+            // Animated Profile Header Card
+            SlideTransition(
+              position: _headerSlide,
+              child: FadeTransition(
+                opacity: _headerFade,
+                child: ProfileHeaderCard(
+                  name: 'Hemanth Paruchuri',
+                  email: 'hemanth@example.com',
+                  avatarInitials: 'HP',
+                  isPremium: true,
+                  onTap: () => _openScreen(context, const ProfileDetailsScreen()),
+                  onEditAvatarTap: () => _openScreen(context, const ProfileDetailsScreen()),
                 ),
-                Positioned(
-                  bottom: -2,
-                  right: -2,
-                  child: Container(
-                    width: 28,
-                    height: 28,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: const Color(0xFFE2E8F0), width: 1),
-                    ),
-                    child: const Icon(Icons.camera_alt_rounded, size: 14, color: Color(0xFF1677FF)),
-                  ),
-                ),
-              ],
+              ),
             ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          'Hemanth Paruchuri',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w800,
-                            color: theme.colorScheme.onSurface,
+            const SizedBox(height: 10),
+            // Animated Analytics Container
+            SlideTransition(
+              position: _analyticsSlide,
+              child: FadeTransition(
+                opacity: _analyticsFade,
+                child: AnalyticsSummaryCard(
+                  totalSubscriptions: '18',
+                  totalSpent: CurrencyFormatter.format(2400, compact: true),
+                  totalSaved: CurrencyFormatter.format(480),
+                  memberSince: 'Oct 2023',
+                ),
+              ),
+            ),
+            const SizedBox(height: 28),
+            // Animated Account Section
+            SlideTransition(
+              position: _settingsSlide,
+              child: FadeTransition(
+                opacity: _settingsFade,
+                child: SettingsSection(
+                  title: 'Account',
+                  children: [
+                    SettingsTile(
+                      icon: Icons.person_rounded,
+                      iconColor: const Color(0xFF2563EB),
+                      title: 'Personal Information',
+                      subtitle: 'Update your personal details',
+                      onTap: () => _openScreen(context, const PersonalInfoScreen()),
+                    ),
+                    SettingsTile(
+                      icon: Icons.workspace_premium_rounded,
+                      iconColor: const Color(0xFF8B5CF6),
+                      title: 'Subscription to Premium',
+                      subtitle: 'Manage your premium benefits',
+                      onTap: () => _openScreen(context, const PremiumScreen()),
+                    ),
+                    SettingsTile(
+                      icon: Icons.credit_card_rounded,
+                      iconColor: const Color(0xFF10B981),
+                      title: 'Billing & Payments',
+                      subtitle: 'Payment history and invoices',
+                      onTap: () => _openScreen(context, const BillingScreen()),
+                    ),
+                    SettingsTile(
+                      icon: Icons.notifications_rounded,
+                      iconColor: const Color(0xFFEA580C),
+                      title: 'Notification Settings',
+                      subtitle: 'Control your alerts',
+                      onTap: () => _openScreen(context, const NotificationScreen()),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            // Animated Preferences Section
+            SlideTransition(
+              position: _settingsSlide,
+              child: FadeTransition(
+                opacity: _settingsFade,
+                child: ListenableBuilder(
+                  listenable: themeController,
+                  builder: (context, _) {
+                    return SettingsSection(
+                      title: 'Preferences',
+                      children: [
+                        SettingsTile(
+                          icon: Icons.currency_rupee_rounded,
+                          iconColor: const Color(0xFF10B981),
+                          title: 'Currency',
+                          subtitle: 'INR • Indian Rupee',
+                          onTap: () => _openScreen(context, const CurrencyScreen()),
+                        ),
+                        SettingsTile(
+                          icon: themeController.isDarkMode
+                              ? Icons.dark_mode_rounded
+                              : Icons.light_mode_rounded,
+                          iconColor: const Color(0xFF2563EB),
+                          title: 'Dark Mode',
+                          subtitle: 'Switch between light and dark',
+                          onTap: () => themeController.toggleTheme(),
+                          trailing: Switch(
+                            value: themeController.isDarkMode,
+                            onChanged: (value) => themeController.toggleTheme(),
+                            activeThumbColor: const Color(0xFF0A84FF),
                           ),
                         ),
-                      ),
-                      const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: Color(0xFF64748B)),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'hemanth@example.com',
-                    style: TextStyle(fontSize: 13.5, color: theme.colorScheme.onSurfaceVariant),
-                  ),
-                  const SizedBox(height: 10),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFEAF4FF),
-                      borderRadius: BorderRadius.circular(999),
-                    ),
-                    child: const Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.workspace_premium_rounded, size: 14, color: Color(0xFF1677FF)),
-                        SizedBox(width: 6),
-                        Text(
-                          'Premium Plan',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                            color: Color(0xFF1677FF),
-                          ),
+                        SettingsTile(
+                          icon: Icons.lock_rounded,
+                          iconColor: const Color(0xFFF87171),
+                          title: 'Data & Privacy',
+                          subtitle: 'Secure your account data',
+                          onTap: () => _openScreen(context, const PrivacyScreen()),
                         ),
                       ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildStatisticsSection(ThemeData theme) {
-    final stats = [
-      _StatItem(icon: Icons.subscriptions_rounded, title: 'Total Subscriptions', value: '18', subtitle: 'Active plans'),
-      _StatItem(icon: Icons.account_balance_wallet_outlined, title: 'Total Spent', value: CurrencyFormatter.format(2400, compact: true), subtitle: 'This month'),
-      _StatItem(icon: Icons.savings_outlined, title: 'Total Saved', value: CurrencyFormatter.format(480), subtitle: 'Annual value'),
-      _StatItem(icon: Icons.calendar_today_rounded, title: 'Member Since', value: '2023', subtitle: 'Joined'),
-    ];
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final crossCount = constraints.maxWidth > 700 ? 4 : 2;
-        final itemWidth = (constraints.maxWidth - (crossCount - 1) * 12) / crossCount;
-        return Wrap(
-          spacing: 12,
-          runSpacing: 12,
-          children: stats.map((item) {
-            return SizedBox(
-              width: itemWidth,
-              child: InkWell(
-                onTap: () {},
-                borderRadius: BorderRadius.circular(18),
-                child: Container(
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: theme.cardColor,
-                    borderRadius: BorderRadius.circular(18),
-                    border: Border.all(color: theme.colorScheme.outlineVariant.withValues(alpha: 0.85)),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        width: 36,
-                        height: 36,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFEAF4FF),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        alignment: Alignment.center,
-                        child: Icon(item.icon, size: 18, color: const Color(0xFF1677FF)),
-                      ),
-                      const SizedBox(height: 10),
-                      Text(
-                        item.title,
-                        style: TextStyle(fontSize: 12.5, color: theme.colorScheme.onSurfaceVariant),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        item.value,
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w800,
-                          color: theme.colorScheme.onSurface,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        item.subtitle,
-                        style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurfaceVariant),
-                      ),
-                    ],
-                  ),
+                    );
+                  },
                 ),
               ),
-            );
-          }).toList(),
-        );
-      },
-    );
-  }
-
-  Widget _buildSection({required String title, required List<Widget> children, required ThemeData theme}) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(left: 2, bottom: 10),
-          child: Text(
-            title,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w800,
-              color: theme.colorScheme.onSurfaceVariant,
             ),
-          ),
-        ),
-        Container(
-          width: double.infinity,
-          decoration: BoxDecoration(
-            color: theme.cardColor,
-            borderRadius: BorderRadius.circular(22),
-            boxShadow: const [
-              BoxShadow(
-                color: Color(0x0F0B1F4D),
-                blurRadius: 10,
-                offset: Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Column(children: children),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildProfileTile(
-    BuildContext context, {
-    required IconData icon,
-    required String title,
-    required String subtitle,
-    required VoidCallback onTap,
-    required ThemeData theme,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-        child: Row(
-          children: [
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: const Color(0xFFEAF4FF),
-                borderRadius: BorderRadius.circular(14),
-              ),
-              alignment: Alignment.center,
-              child: Icon(icon, size: 20, color: const Color(0xFF1677FF)),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: TextStyle(
-                      fontSize: 14.5,
-                      fontWeight: FontWeight.w700,
-                      color: theme.colorScheme.onSurface,
+            const SizedBox(height: 20),
+            // Animated Support Section
+            SlideTransition(
+              position: _settingsSlide,
+              child: FadeTransition(
+                opacity: _settingsFade,
+                child: SettingsSection(
+                  title: 'Support',
+                  children: [
+                    SettingsTile(
+                      icon: Icons.help_outline_rounded,
+                      iconColor: const Color(0xFF2563EB),
+                      title: 'Help & FAQs',
+                      subtitle: 'Find answers quickly',
+                      onTap: () => _openScreen(context, const FaqScreen()),
                     ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    subtitle,
-                    style: TextStyle(fontSize: 12.5, color: theme.colorScheme.onSurfaceVariant),
-                  ),
-                ],
-              ),
-            ),
-            const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: Color(0xFF64748B)),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDarkModeTile(ThemeData theme) {
-    return InkWell(
-      onTap: () => themeController.toggleTheme(),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-        child: Row(
-          children: [
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: const Color(0xFFEAF4FF),
-                borderRadius: BorderRadius.circular(14),
-              ),
-              alignment: Alignment.center,
-              child: Icon(
-                themeController.isDarkMode ? Icons.dark_mode_rounded : Icons.light_mode_rounded,
-                size: 20,
-                color: const Color(0xFF1677FF),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Dark Mode',
-                    style: TextStyle(
-                      fontSize: 14.5,
-                      fontWeight: FontWeight.w700,
-                      color: theme.colorScheme.onSurface,
+                    SettingsTile(
+                      icon: Icons.support_agent_rounded,
+                      iconColor: const Color(0xFF10B981),
+                      title: 'Contact Support',
+                      subtitle: 'Reach out for help',
+                      onTap: () => _openScreen(context, const ContactScreen()),
                     ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    'Switch between light and dark',
-                    style: TextStyle(fontSize: 12.5, color: theme.colorScheme.onSurfaceVariant),
-                  ),
-                ],
+                    SettingsTile(
+                      icon: Icons.info_outline_rounded,
+                      iconColor: const Color(0xFF8B5CF6),
+                      title: 'About Sanchora',
+                      subtitle: 'Learn more about the app',
+                      onTap: () => _openScreen(context, const AboutScreen()),
+                    ),
+                  ],
+                ),
               ),
             ),
-            Switch(
-              value: themeController.isDarkMode,
-              onChanged: (value) => themeController.toggleTheme(),
-              activeThumbColor: const Color(0xFF1677FF),
+            const SizedBox(height: 28),
+            // Animated Logout Button
+            SlideTransition(
+              position: _logoutSlide,
+              child: FadeTransition(
+                opacity: _logoutFade,
+                child: LogoutButton(
+                  onPressed: _showLogoutDialog,
+                ),
+              ),
             ),
           ],
         ),
@@ -614,18 +368,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   void _openScreen(BuildContext context, Widget screen) {
     Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => screen),
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) => screen,
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          const begin = Offset(1.0, 0.0);
+          const end = Offset.zero;
+          const curve = Curves.easeOutCubic;
+          final tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+          return SlideTransition(
+            position: animation.drive(tween),
+            child: child,
+          );
+        },
+        transitionDuration: const Duration(milliseconds: 320),
+      ),
     );
   }
-}
-
-class _StatItem {
-  const _StatItem({required this.icon, required this.title, required this.value, required this.subtitle});
-
-  final IconData icon;
-  final String title;
-  final String value;
-  final String subtitle;
 }
 
 class PersonalInfoScreen extends StatelessWidget {

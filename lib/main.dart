@@ -24,6 +24,8 @@ class SanchoraApp extends StatelessWidget {
           theme: AppTheme.lightTheme,
           darkTheme: AppTheme.darkTheme,
           themeMode: themeController.themeMode,
+          themeAnimationDuration: const Duration(milliseconds: 200),
+          themeAnimationCurve: Curves.easeOut,
           home: const SplashScreen(),
         );
       },

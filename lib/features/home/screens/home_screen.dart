@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:sanchora/features/profile/screens/profile_screen.dart';
 import 'package:sanchora/core/widgets/app_header.dart';
 import 'package:sanchora/core/utils/currency_formatter.dart';
+import 'package:sanchora/features/home/widgets/spending_overview_card.dart';
+import 'package:sanchora/features/home/widgets/top_categories_card.dart';
+import 'package:sanchora/features/home/widgets/hero_summary_card.dart';
+import 'package:sanchora/features/home/screens/upcoming_payments_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -38,21 +42,31 @@ class _HomeScreenState extends State<HomeScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const SizedBox(height: 4),
-                    Text(
-                      'Hi, Hemanth 👋',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.w800,
-                        color: Theme.of(context).colorScheme.onSurface,
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        '👋 Hi, Hemanth',
+                        maxLines: 1,
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.w800,
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
                       ),
                     ),
-                    const SizedBox(height: 6),
-                    Text(
-                      "Here's what's happening with your subscriptions.",
-                      style: TextStyle(
-                        fontSize: 14.5,
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        height: 1.45,
+                    const SizedBox(height: 8),
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        "Here's your subscriptions overview.",
+                        maxLines: 1,
+                        style: TextStyle(
+                          fontSize: 14.5,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          height: 1.45,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -160,142 +174,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildSummaryCard() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(28),
-        gradient: const LinearGradient(
-          colors: [Color(0xFF1677FF), Color(0xFF3B82F6)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x1A1677FF),
-            blurRadius: 24,
-            offset: Offset(0, 10),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const Text(
-                'Total Spent This Month',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white70,
-                ),
-              ),
-              const Spacer(),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 6,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.16),
-                  borderRadius: BorderRadius.circular(999),
-                ),
-                child: const Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.arrow_downward_rounded,
-                      size: 14,
-                      color: Colors.white,
-                    ),
-                    SizedBox(width: 4),
-                    Text(
-                      '12% ↓',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 6),
-          Text(
-            CurrencyFormatter.format(2430),
-            style: TextStyle(
-              fontSize: 32,
-              fontWeight: FontWeight.w800,
-              color: Colors.white,
-            ),
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: _buildSummaryMetric(
-                  Icons.subscriptions_rounded,
-                  'Active Subscriptions',
-                  '8',
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: _buildSummaryMetric(
-                  Icons.calendar_today_rounded,
-                  'Upcoming Payments',
-                  '3',
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSummaryMetric(IconData icon, String label, String value) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.16),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 34,
-            height: 34,
-            decoration: BoxDecoration(
-              color: Theme.of(
-                context,
-              ).colorScheme.onPrimary.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(icon, size: 18, color: Colors.white),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            label,
-            style: const TextStyle(fontSize: 11.5, color: Colors.white70),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            value,
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w800,
-              color: Colors.white,
-            ),
-          ),
-        ],
-      ),
-    );
+    return const HeroSummaryCard();
   }
 
   Widget _buildUpcomingPaymentsCard() {
@@ -328,7 +207,7 @@ class _HomeScreenState extends State<HomeScreen> {
               const Spacer(),
               InkWell(
                 onTap: () =>
-                    pushScreen(const UpcomingPaymentsPlaceholderScreen()),
+                    pushScreen(const UpcomingPaymentsScreen()),
                 borderRadius: BorderRadius.circular(8),
                 child: const Text(
                   'View All →',
@@ -466,272 +345,11 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildSpendingOverviewCard() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(18, 16, 18, 16),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: Theme.of(context).shadowColor.withValues(alpha: 0.08),
-            blurRadius: 14,
-            offset: const Offset(0, 6),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              Text(
-                'Spending Overview',
-                style: TextStyle(
-                  fontSize: 17,
-                  fontWeight: FontWeight.w800,
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
-              ),
-              const Spacer(),
-              Text(
-                'This Month',
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Text(
-                CurrencyFormatter.format(2430),
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w800,
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
-              ),
-              const Spacer(),
-              Text(
-                'Total Spent',
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 18),
-          SizedBox(
-            height: 140,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                _buildBar('Jan', 0.42, false),
-                _buildBar('Feb', 0.54, false),
-                _buildBar('Mar', 0.64, false),
-                _buildBar('Apr', 0.72, false),
-                _buildBar('May', 0.92, true),
-                _buildBar('Jun', 0.68, false),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildBar(String label, double heightFactor, bool highlight) {
-    return Expanded(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 4),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            Stack(
-              alignment: Alignment.topCenter,
-              children: [
-                Container(
-                  height: 92 * heightFactor,
-                  decoration: BoxDecoration(
-                    color: highlight
-                        ? const Color(0xFF1677FF)
-                        : Theme.of(context).colorScheme.surfaceContainerHighest,
-                    borderRadius: BorderRadius.circular(999),
-                  ),
-                ),
-                if (highlight)
-                  Positioned(
-                    top: -8,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 5,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.inverseSurface,
-                        borderRadius: BorderRadius.circular(999),
-                      ),
-                      child: Text(
-                        CurrencyFormatter.format(2430),
-                        style: TextStyle(
-                          fontSize: 10,
-                          color: Theme.of(context).colorScheme.onInverseSurface,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 12,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+    return const SpendingOverviewCard();
   }
 
   Widget _buildTopCategoriesCard() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(18, 16, 18, 16),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: Theme.of(context).shadowColor.withValues(alpha: 0.08),
-            blurRadius: 14,
-            offset: const Offset(0, 6),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              Text(
-                'Top Categories',
-                style: TextStyle(
-                  fontSize: 17,
-                  fontWeight: FontWeight.w800,
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
-              ),
-              const Spacer(),
-              InkWell(
-                onTap: () => pushScreen(const CategoriesPlaceholderScreen()),
-                borderRadius: BorderRadius.circular(8),
-                child: const Text(
-                  'View All →',
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w700,
-                    color: Color(0xFF1677FF),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          LayoutBuilder(
-            builder: (context, constraints) {
-              final cardWidth = (constraints.maxWidth - 20) / 3;
-              return Wrap(
-                spacing: 10,
-                runSpacing: 10,
-                children: [
-                  SizedBox(
-                    width: cardWidth.clamp(90.0, double.infinity),
-                    child: _buildCategoryCard(
-                      title: 'Entertainment',
-                      amount: CurrencyFormatter.format(1250),
-                      percent: '51%',
-                    ),
-                  ),
-                  SizedBox(
-                    width: cardWidth.clamp(90.0, double.infinity),
-                    child: _buildCategoryCard(
-                      title: 'Shopping',
-                      amount: CurrencyFormatter.format(720),
-                      percent: '29%',
-                    ),
-                  ),
-                  SizedBox(
-                    width: cardWidth.clamp(90.0, double.infinity),
-                    child: _buildCategoryCard(
-                      title: 'Education',
-                      amount: CurrencyFormatter.format(280),
-                      percent: '11%',
-                    ),
-                  ),
-                ],
-              );
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCategoryCard({
-    required String title,
-    required String amount,
-    required String percent,
-  }) {
-    return InkWell(
-      onTap: () => pushScreen(const CategoryDetailsPlaceholderScreen()),
-      borderRadius: BorderRadius.circular(18),
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surfaceContainerHighest,
-          borderRadius: BorderRadius.circular(18),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              title,
-              style: TextStyle(
-                fontSize: 12.5,
-                fontWeight: FontWeight.w700,
-                color: Theme.of(context).colorScheme.onSurface,
-              ),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              amount,
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w800,
-                color: Theme.of(context).colorScheme.onSurface,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              percent,
-              style: const TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFF1677FF),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+    return const TopCategoriesCard();
   }
 
   Widget _buildDrawer() {
@@ -840,12 +458,12 @@ class PlaceholderScreen extends StatelessWidget {
               leading: InkWell(
                 onTap: () => Navigator.of(context).pop(),
                 borderRadius: BorderRadius.circular(14),
-                child: const SizedBox(
+                child: SizedBox(
                   width: 40,
                   height: 40,
                   child: Icon(
                     Icons.arrow_back_rounded,
-                    color: Color(0xFF0B1F4D),
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
               ),
@@ -856,7 +474,17 @@ class PlaceholderScreen extends StatelessWidget {
                   padding: const EdgeInsets.all(20),
                   child: Column(
                     children: [
-                      // Placeholder content
+                      const SizedBox(height: 24),
+                      Text(
+                        message,
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w500,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          height: 1.45,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
                     ],
                   ),
                 ),
@@ -922,10 +550,7 @@ class UpcomingPaymentsPlaceholderScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const PlaceholderScreen(
-      title: 'Upcoming Payments',
-      message: 'Upcoming Payments Screen',
-    );
+    return const UpcomingPaymentsScreen();
   }
 }
 
@@ -948,7 +573,7 @@ class CategoriesPlaceholderScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return const PlaceholderScreen(
       title: 'Categories',
-      message: 'Categories Screen',
+      message: 'Detailed category analytics will be available soon.',
     );
   }
 }

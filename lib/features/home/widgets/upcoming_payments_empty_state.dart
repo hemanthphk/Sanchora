@@ -2,13 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:sanchora/core/theme/app_colors.dart';
 import 'package:sanchora/core/theme/app_text_styles.dart';
 
-class SubscriptionEmptyState extends StatelessWidget {
-  const SubscriptionEmptyState({
-    super.key,
-    this.isSearch = false,
-  });
-
-  final bool isSearch;
+class UpcomingPaymentsEmptyState extends StatelessWidget {
+  const UpcomingPaymentsEmptyState({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -24,15 +19,15 @@ class SubscriptionEmptyState extends StatelessWidget {
               color: AppColors.primary.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
-            child: Icon(
-              isSearch ? Icons.search_off_rounded : Icons.subscriptions_outlined,
+            child: const Icon(
+              Icons.event_available_rounded,
               size: 40,
               color: AppColors.primary,
             ),
           ),
           const SizedBox(height: 24),
           Text(
-            isSearch ? 'No matching subscriptions' : 'No subscriptions yet',
+            'No upcoming renewals',
             style: AppTextStyles.sectionTitle.copyWith(
               color: Theme.of(context).colorScheme.onSurface,
             ),
@@ -40,11 +35,10 @@ class SubscriptionEmptyState extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            isSearch
-                ? 'Try adjusting your search or filters.'
-                : 'Add your first subscription to start tracking.',
+            "You're all caught up.\nEnjoy your services!",
             style: AppTextStyles.bodySecondary.copyWith(
               color: Theme.of(context).colorScheme.onSurfaceVariant,
+              height: 1.4,
             ),
             textAlign: TextAlign.center,
           ),

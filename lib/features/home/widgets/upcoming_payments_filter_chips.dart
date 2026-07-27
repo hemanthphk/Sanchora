@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:sanchora/core/theme/app_text_styles.dart';
 
-class SubscriptionFilterChips extends StatelessWidget {
-  const SubscriptionFilterChips({
+class UpcomingPaymentsFilterChips extends StatelessWidget {
+  const UpcomingPaymentsFilterChips({
     super.key,
     required this.filters,
     required this.selectedFilter,
@@ -26,11 +26,7 @@ class SubscriptionFilterChips extends StatelessWidget {
           return Padding(
             padding: const EdgeInsets.only(right: 10),
             child: FilterChip(
-              label: Text(
-                filter,
-                maxLines: 1,
-                softWrap: false,
-              ),
+              label: Text(filter),
               selected: isSelected,
               onSelected: (_) => onFilterSelected(filter),
               backgroundColor: theme.colorScheme.surface,
@@ -38,7 +34,6 @@ class SubscriptionFilterChips extends StatelessWidget {
               labelStyle: AppTextStyles.body.copyWith(
                 color: isSelected ? theme.colorScheme.onPrimary : theme.colorScheme.onSurfaceVariant,
                 fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                height: 1.2,
               ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(999),
@@ -48,9 +43,7 @@ class SubscriptionFilterChips extends StatelessWidget {
                 ),
               ),
               showCheckmark: false,
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              visualDensity: VisualDensity.compact,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             ),
           );
         }).toList(),

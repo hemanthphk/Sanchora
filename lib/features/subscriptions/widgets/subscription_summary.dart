@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:sanchora/core/theme/app_colors.dart';
-import 'package:sanchora/core/theme/app_text_styles.dart';
 import 'package:sanchora/core/utils/currency_formatter.dart';
 
 class SubscriptionSummary extends StatelessWidget {
@@ -17,57 +15,74 @@ class SubscriptionSummary extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Container(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
         decoration: BoxDecoration(
-          color: AppColors.primary.withValues(alpha: 0.05),
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: AppColors.primary.withValues(alpha: 0.1)),
+          color: theme.colorScheme.surface,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: theme.colorScheme.outlineVariant.withValues(alpha: 0.6),
+            width: 1,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: theme.shadowColor.withValues(alpha: 0.04),
+              blurRadius: 10,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Text(
                   'Total Subscriptions',
-                  style: AppTextStyles.bodySecondary.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  style: TextStyle(
+                    fontSize: 14.5,
+                    fontWeight: FontWeight.w700,
+                    color: theme.colorScheme.onSurface,
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
                   decoration: BoxDecoration(
-                    color: AppColors.primary,
-                    borderRadius: BorderRadius.circular(20),
+                    color: theme.colorScheme.primary.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(999),
                   ),
                   child: Text(
-                    totalSubscriptions.toString(),
-                    style: AppTextStyles.body.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w700,
+                    '$totalSubscriptions',
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w800,
+                      color: theme.colorScheme.primary,
                     ),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 16),
-            const Divider(color: AppColors.divider),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
+            Divider(color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5), height: 1),
+            const SizedBox(height: 12),
             Row(
               children: [
                 Expanded(
-                  child: _buildSpendingColumn(context, 'Monthly', monthlySpending),
+                  child: _buildSpendingColumn(theme, 'Monthly Spend', monthlySpending),
                 ),
                 Container(
                   width: 1,
-                  height: 40,
-                  color: AppColors.divider,
+                  height: 36,
+                  color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5),
                 ),
                 Expanded(
-                  child: _buildSpendingColumn(context, 'Yearly', yearlySpending),
+                  child: _buildSpendingColumn(theme, 'Yearly Spend', yearlySpending),
                 ),
               ],
             ),
@@ -77,20 +92,24 @@ class SubscriptionSummary extends StatelessWidget {
     );
   }
 
-  Widget _buildSpendingColumn(BuildContext context, String label, double amount) {
+  Widget _buildSpendingColumn(ThemeData theme, String label, double amount) {
     return Column(
       children: [
         Text(
           label,
-          style: AppTextStyles.bodySecondary.copyWith(
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            color: theme.colorScheme.onSurfaceVariant,
           ),
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: 3),
         Text(
           CurrencyFormatter.format(amount),
-          style: AppTextStyles.sectionTitle.copyWith(
-            color: Theme.of(context).colorScheme.onSurface,
+          style: TextStyle(
+            fontSize: 17,
+            fontWeight: FontWeight.w800,
+            color: theme.colorScheme.onSurface,
           ),
         ),
       ],

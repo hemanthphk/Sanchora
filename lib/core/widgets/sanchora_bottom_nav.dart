@@ -75,7 +75,7 @@ class SanchoraBottomNav extends StatelessWidget {
             ),
           ),
           Positioned(
-            top: -22,
+            top: -16,
             child: _buildCenterButton(context),
           ),
         ],
@@ -135,23 +135,23 @@ class SanchoraBottomNav extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            width: 60,
-            height: 60,
+            width: 52,
+            height: 52,
             decoration: BoxDecoration(
               color: _selectedColor,
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(18),
               boxShadow: const [
                 BoxShadow(
-                  color: Color(0x331677FF),
-                  blurRadius: 16,
-                  offset: Offset(0, 8),
+                  color: Color(0x241677FF),
+                  blurRadius: 12,
+                  offset: Offset(0, 6),
                 ),
               ],
             ),
             child: const Icon(
               Icons.add_rounded,
               color: Colors.white,
-              size: 30,
+              size: 26,
             ),
           ),
           const SizedBox(height: 4),
