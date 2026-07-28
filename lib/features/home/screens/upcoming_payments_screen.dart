@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:sanchora/features/subscriptions/models/subscription_model.dart';
 import 'package:sanchora/features/subscriptions/services/subscription_service.dart';
+import 'package:sanchora/core/utils/currency_formatter.dart';
 import '../widgets/upcoming_payment_card.dart';
 import '../widgets/upcoming_payments_empty_state.dart';
-import '../widgets/upcoming_payments_filter_chips.dart';
-import '../widgets/upcoming_payments_sort_bottom_sheet.dart';
-import '../widgets/upcoming_payments_summary_card.dart';
 
 class TimelineSection {
   final String title;
@@ -14,9 +11,6 @@ class TimelineSection {
   const TimelineSection(this.title, this.subscriptions);
 }
 
-/// Premium timeline experience for Upcoming Payments.
-/// Designed with Apple Wallet, Stripe Dashboard, Linear, and Notion Timeline aesthetics.
-/// Future-ready for calendar sync, notifications, AI reminders, and snooze controls without redesign.
 class UpcomingPaymentsScreen extends StatefulWidget {
   const UpcomingPaymentsScreen({super.key});
 
@@ -25,17 +19,15 @@ class UpcomingPaymentsScreen extends StatefulWidget {
 }
 
 class _UpcomingPaymentsScreenState extends State<UpcomingPaymentsScreen> {
-  String _selectedFilter = 'All';
-  UpcomingSortOption _currentSort = UpcomingSortOption.nearestFirst;
-  List<SubscriptionModel> _filteredSubscriptions = [];
-
-  final List<String> _filters = ['All', 'Today', 'This Week', 'This Month'];
+  List<TimelineSection> _sections = [];
+  int _renewalsThisWeek = 0;
+  double _amountDueThisWeek = 0;
 
   @override
   void initState() {
     super.initState();
     SubscriptionService.instance.addListener(_onSubscriptionsChanged);
-    _applyFiltersAndSort(notify: false);
+    _buildTimelineData();
   }
 
   @override
@@ -46,92 +38,17 @@ class _UpcomingPaymentsScreenState extends State<UpcomingPaymentsScreen> {
 
   void _onSubscriptionsChanged() {
     if (mounted) {
-      _applyFiltersAndSort();
+      _buildTimelineData();
     }
   }
 
-  void _applyFiltersAndSort({bool notify = true}) {
+  void _buildTimelineData() {
     final allSubs = SubscriptionService.instance.subscriptions;
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
-
-    // Include subscriptions that are not expired or have future/today renewal dates
-    List<SubscriptionModel> result = allSubs.where((sub) {
-      if (sub.status == SubscriptionStatus.expired) return false;
-      final target = DateTime(
-        sub.nextRenewalDate.year,
-        sub.nextRenewalDate.month,
-        sub.nextRenewalDate.day,
-      );
-      return target.difference(today).inDays >= 0;
-    }).toList();
-
-    // Apply Filter Chips
-    if (_selectedFilter != 'All') {
-      result = result.where((sub) {
-        final target = DateTime(
-          sub.nextRenewalDate.year,
-          sub.nextRenewalDate.month,
-          sub.nextRenewalDate.day,
-        );
-        final diff = target.difference(today).inDays;
-
-        if (_selectedFilter == 'Today') {
-          return diff == 0;
-        } else if (_selectedFilter == 'This Week') {
-          return diff >= 0 && diff <= 7;
-        } else if (_selectedFilter == 'This Month') {
-          return diff >= 0 && diff <= 30;
-        }
-        return true;
-      }).toList();
-    }
-
-    // Apply Sorting
-    switch (_currentSort) {
-      case UpcomingSortOption.nearestFirst:
-        result.sort((a, b) => a.nextRenewalDate.compareTo(b.nextRenewalDate));
-        break;
-      case UpcomingSortOption.highestAmount:
-        result.sort((a, b) => b.currentPrice.compareTo(a.currentPrice));
-        break;
-      case UpcomingSortOption.lowestAmount:
-        result.sort((a, b) => a.currentPrice.compareTo(b.currentPrice));
-        break;
-      case UpcomingSortOption.alphabetical:
-        result.sort((a, b) => a.name.compareTo(b.name));
-        break;
-    }
-
-    if (notify) {
-      setState(() {
-        _filteredSubscriptions = result;
-      });
-    } else {
-      _filteredSubscriptions = result;
-    }
-  }
-
-  void _onFilterSelected(String filter) {
-    setState(() {
-      _selectedFilter = filter;
-    });
-    _applyFiltersAndSort();
-  }
-
-  Future<void> _showSortOptions() async {
-    final newSort = await UpcomingPaymentsSortBottomSheet.show(context, _currentSort);
-    if (newSort != null && newSort != _currentSort) {
-      setState(() {
-        _currentSort = newSort;
-      });
-      _applyFiltersAndSort();
-    }
-  }
-
-  List<TimelineSection> _buildTimelineSections(List<SubscriptionModel> subs) {
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
+    
+    int renewalsWeek = 0;
+    double amountWeek = 0;
 
     final Map<int, List<SubscriptionModel>> buckets = {
       0: [], // Overdue
@@ -139,13 +56,19 @@ class _UpcomingPaymentsScreenState extends State<UpcomingPaymentsScreen> {
       2: [], // Tomorrow
       3: [], // This Week (2-7 days)
       4: [], // Next Week (8-14 days)
-      5: [], // This Month (15-30 days)
-      6: [], // Later (>30 days)
     };
 
-    for (final sub in subs) {
+    for (final sub in allSubs) {
+      if (sub.status == SubscriptionStatus.expired) continue;
+      
       final target = DateTime(sub.nextRenewalDate.year, sub.nextRenewalDate.month, sub.nextRenewalDate.day);
       final diff = target.difference(today).inDays;
+      
+      if (diff >= 0 && diff <= 7) {
+        renewalsWeek++;
+        amountWeek += sub.currentPrice;
+      }
+      
       if (diff < 0) {
         buckets[0]!.add(sub);
       } else if (diff == 0) {
@@ -156,64 +79,35 @@ class _UpcomingPaymentsScreenState extends State<UpcomingPaymentsScreen> {
         buckets[3]!.add(sub);
       } else if (diff <= 14) {
         buckets[4]!.add(sub);
-      } else if (diff <= 30) {
-        buckets[5]!.add(sub);
-      } else {
-        buckets[6]!.add(sub);
       }
+      // Renewals beyond 14 days are ignored to keep the screen concise and action-oriented.
+    }
+    
+    // Sort buckets
+    for (final list in buckets.values) {
+      list.sort((a, b) => a.nextRenewalDate.compareTo(b.nextRenewalDate));
     }
 
     final List<TimelineSection> sections = [];
-
-    if (buckets[0]!.isNotEmpty) {
-      sections.add(TimelineSection('OVERDUE', buckets[0]!));
-    }
-    if (buckets[1]!.isNotEmpty) {
-      final dateStr = DateFormat('dd MMM').format(buckets[1]!.first.nextRenewalDate);
-      sections.add(TimelineSection('TODAY • $dateStr', buckets[1]!));
-    }
-    if (buckets[2]!.isNotEmpty) {
-      final dateStr = DateFormat('dd MMM').format(buckets[2]!.first.nextRenewalDate);
-      sections.add(TimelineSection('TOMORROW • $dateStr', buckets[2]!));
-    }
+    if (buckets[0]!.isNotEmpty) sections.add(TimelineSection('Overdue', buckets[0]!));
+    if (buckets[1]!.isNotEmpty) sections.add(TimelineSection('Today', buckets[1]!));
+    if (buckets[2]!.isNotEmpty) sections.add(TimelineSection('Tomorrow', buckets[2]!));
     if (buckets[3]!.isNotEmpty) {
-      sections.add(TimelineSection('THIS WEEK', buckets[3]!));
+      // Find what day it is for the first item
+      sections.add(TimelineSection('This Week', buckets[3]!));
     }
-    if (buckets[4]!.isNotEmpty) {
-      sections.add(TimelineSection('NEXT WEEK', buckets[4]!));
-    }
-    if (buckets[5]!.isNotEmpty) {
-      sections.add(TimelineSection('THIS MONTH', buckets[5]!));
-    }
-    if (buckets[6]!.isNotEmpty) {
-      sections.add(TimelineSection('LATER', buckets[6]!));
-    }
+    if (buckets[4]!.isNotEmpty) sections.add(TimelineSection('Next Week', buckets[4]!));
 
-    return sections;
+    setState(() {
+      _sections = sections;
+      _renewalsThisWeek = renewalsWeek;
+      _amountDueThisWeek = amountWeek;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final allSubs = SubscriptionService.instance.subscriptions;
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-
-    int todayCount = 0;
-    int thisWeekCount = 0;
-    int thisMonthCount = 0;
-
-    for (final sub in allSubs) {
-      if (sub.status == SubscriptionStatus.expired) continue;
-      final target = DateTime(sub.nextRenewalDate.year, sub.nextRenewalDate.month, sub.nextRenewalDate.day);
-      final diff = target.difference(today).inDays;
-      if (diff < 0) continue;
-      if (diff == 0) todayCount++;
-      if (diff <= 7) thisWeekCount++;
-      if (diff <= 30) thisMonthCount++;
-    }
-
-    final sections = _buildTimelineSections(_filteredSubscriptions);
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -221,81 +115,21 @@ class _UpcomingPaymentsScreenState extends State<UpcomingPaymentsScreen> {
         child: Column(
           children: [
             _buildHeader(theme),
-            const SizedBox(height: 6),
-            UpcomingPaymentsSummaryCard(
-              todayCount: todayCount,
-              thisWeekCount: thisWeekCount,
-              thisMonthCount: thisMonthCount,
-            ),
-            const SizedBox(height: 14),
-            UpcomingPaymentsFilterChips(
-              filters: _filters,
-              selectedFilter: _selectedFilter,
-              onFilterSelected: _onFilterSelected,
-            ),
-            const SizedBox(height: 8),
+            _buildHero(theme),
             Expanded(
-              child: _filteredSubscriptions.isEmpty
+              child: _sections.isEmpty
                   ? const UpcomingPaymentsEmptyState()
                   : ListView.builder(
-                      padding: const EdgeInsets.fromLTRB(20, 4, 20, 32),
+                      padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
                       physics: const BouncingScrollPhysics(),
-                      itemCount: sections.length,
-                      itemBuilder: (context, sectionIndex) {
-                        final section = sections[sectionIndex];
-                        return TweenAnimationBuilder<double>(
-                          tween: Tween<double>(begin: 0.0, end: 1.0),
-                          duration: const Duration(milliseconds: 350),
-                          curve: Curves.easeOut,
-                          builder: (context, value, child) {
-                            return Opacity(
-                              opacity: value.clamp(0.0, 1.0),
-                              child: Transform.translate(
-                                offset: Offset(0, 12 * (1 - value)),
-                                child: child,
-                              ),
-                            );
-                          },
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              _buildSectionHeader(theme, section.title),
-                              ...section.subscriptions.map((sub) => UpcomingPaymentCard(subscription: sub)),
-                            ],
-                          ),
-                        );
+                      itemCount: _sections.length,
+                      itemBuilder: (context, index) {
+                        return _buildTimelineSection(theme, _sections[index], index == _sections.length - 1);
                       },
                     ),
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildSectionHeader(ThemeData theme, String title) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 14, bottom: 12),
-      child: Row(
-        children: [
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: 12.5,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 0.5,
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Divider(
-              height: 1,
-              thickness: 1,
-              color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5),
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -311,39 +145,152 @@ class _UpcomingPaymentsScreenState extends State<UpcomingPaymentsScreen> {
             color: theme.colorScheme.onSurface,
           ),
           const SizedBox(width: 4),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Upcoming Payments',
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: -0.5,
-                    color: theme.colorScheme.onSurface,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  'Manage your upcoming renewals.',
-                  style: TextStyle(
-                    fontSize: 13.5,
-                    fontWeight: FontWeight.w500,
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ],
+          Text(
+            'Timeline',
+            style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.5,
+              color: theme.colorScheme.onSurface,
             ),
-          ),
-          IconButton(
-            icon: const Icon(Icons.sort_rounded, size: 24),
-            onPressed: _showSortOptions,
-            color: theme.colorScheme.onSurface,
-            tooltip: 'Sort By',
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildHero(ThemeData theme) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 12, 20, 8),
+      child: Container(
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.primary,
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: [
+            BoxShadow(
+              color: theme.colorScheme.primary.withValues(alpha: 0.3),
+              blurRadius: 16,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Upcoming Renewals',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: theme.colorScheme.onPrimary.withValues(alpha: 0.8),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    '$_renewalsThisWeek renewals',
+                    style: TextStyle(
+                      fontSize: 26,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -0.5,
+                      color: theme.colorScheme.onPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '${CurrencyFormatter.format(_amountDueThisWeek)} due this week',
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w500,
+                      color: theme.colorScheme.onPrimary.withValues(alpha: 0.9),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.onPrimary.withValues(alpha: 0.15),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(Icons.calendar_month_rounded, color: theme.colorScheme.onPrimary, size: 28),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTimelineSection(ThemeData theme, TimelineSection section, bool isLast) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Container(
+              width: 12,
+              height: 12,
+              decoration: BoxDecoration(
+                color: theme.colorScheme.primary,
+                shape: BoxShape.circle,
+                border: Border.all(color: theme.scaffoldBackgroundColor, width: 2),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Text(
+              section.title,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: theme.colorScheme.onSurface,
+              ),
+            ),
+          ],
+        ),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(width: 5), // to align border with circle center (circle is 12 width)
+            Expanded(
+              child: Container(
+                margin: const EdgeInsets.only(top: 4, bottom: 4),
+                decoration: BoxDecoration(
+                  border: isLast ? null : Border(
+                    left: BorderSide(
+                      color: theme.colorScheme.outlineVariant.withValues(alpha: 0.3),
+                      width: 2,
+                    ),
+                  ),
+                ),
+                padding: const EdgeInsets.only(left: 22, top: 12, bottom: 24),
+                child: Column(
+                  children: section.subscriptions.map((sub) {
+                    // Generate AI tip if applicable
+                    String? aiTip;
+                    if (sub.monthlyPrice > 500 && sub.billingCycle == BillingCycle.monthly) {
+                      aiTip = 'High cost. Switch to annual?';
+                    } else if (sub.name.toLowerCase().contains('trial')) {
+                      aiTip = 'Trial ending soon!';
+                    }
+                    
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: UpcomingPaymentCard(
+                        subscription: sub,
+                        aiTip: aiTip,
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }

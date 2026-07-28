@@ -1,17 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:intl/intl.dart';
 import 'package:sanchora/core/theme/app_colors.dart';
 import 'package:sanchora/core/theme/app_text_styles.dart';
-import 'package:sanchora/core/widgets/sanchora_card.dart';
 import 'package:sanchora/core/utils/currency_formatter.dart';
 import '../models/subscription_model.dart';
 import 'subscription_icon.dart';
 import '../presentation/pages/view_subscription_page.dart';
 import 'package:sanchora/features/add_subscription/presentation/pages/add_subscription_page.dart';
 
-/// Command Center management dashboard card for Subscriptions.
-/// Designed according to Apple + Stripe + Linear design language.
-/// Features always-visible action pills [View], [Edit], [Delete] and compact ~92px layout.
 class SubscriptionCard extends StatelessWidget {
   const SubscriptionCard({
     super.key,
@@ -19,12 +16,14 @@ class SubscriptionCard extends StatelessWidget {
     this.onViewDetails,
     this.onEdit,
     this.onDelete,
+    this.aiTip,
   });
 
   final SubscriptionModel subscription;
   final VoidCallback? onViewDetails;
   final VoidCallback? onEdit;
   final VoidCallback? onDelete;
+  final String? aiTip;
 
   @override
   Widget build(BuildContext context) {
@@ -32,115 +31,172 @@ class SubscriptionCard extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onViewDetails ?? () => _navigateToViewDetails(context),
-          borderRadius: BorderRadius.circular(18),
-          child: SanchoraCard(
-            padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+      child: Slidable(
+        key: ValueKey(subscription.id),
+        startActionPane: ActionPane(
+          extentRatio: 0.22,
+          motion: const BehindMotion(),
+          children: [
+            CustomSlidableAction(
+              onPressed: (_) => onEdit != null ? onEdit!() : _navigateToEdit(context),
+              padding: const EdgeInsets.only(right: 12),
+              backgroundColor: Colors.transparent,
+              child: Container(
+                width: double.infinity,
+                height: double.infinity,
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.primary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(18),
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    _buildAppIcon(theme),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                    Icon(Icons.edit_rounded, color: theme.colorScheme.primary, size: 22),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Edit',
+                      style: TextStyle(color: theme.colorScheme.primary, fontSize: 12, fontWeight: FontWeight.w600),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+        endActionPane: ActionPane(
+          extentRatio: 0.22,
+          motion: const BehindMotion(),
+          children: [
+            CustomSlidableAction(
+              onPressed: (_) => _showDeleteDialog(context),
+              padding: const EdgeInsets.only(left: 12),
+              backgroundColor: Colors.transparent,
+              child: Container(
+                width: double.infinity,
+                height: double.infinity,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFE57373).withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(18),
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.delete_outline_rounded, color: Color(0xFFE57373), size: 22),
+                    const SizedBox(height: 4),
+                    const Text(
+                      'Delete',
+                      style: TextStyle(color: Color(0xFFE57373), fontSize: 12, fontWeight: FontWeight.w600),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: onViewDetails ?? () => _navigateToViewDetails(context),
+            borderRadius: BorderRadius.circular(20),
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surface,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: theme.colorScheme.outlineVariant.withValues(alpha: 0.4),
+                  width: 1,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.03),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      _buildAppIcon(theme),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              subscription.name,
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                                color: theme.colorScheme.onSurface,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              subscription.category,
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w500,
+                                color: _getCategoryColor(theme, subscription.category),
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           Text(
-                            subscription.name,
+                            '${CurrencyFormatter.format(subscription.currentPrice)}/${subscription.billingCycle == BillingCycle.monthly ? 'mo' : 'yr'}',
                             style: TextStyle(
-                              fontSize: 15.5,
-                              fontWeight: FontWeight.w700,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w800,
                               color: theme.colorScheme.onSurface,
                             ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
                           ),
-                          const SizedBox(height: 2),
-                          Text(
-                            subscription.category,
-                            style: TextStyle(
-                              fontSize: 12.5,
-                              fontWeight: FontWeight.w500,
-                              color: theme.colorScheme.onSurfaceVariant,
+                          const SizedBox(height: 4),
+                          _buildRenewalCountdown(theme),
+                        ],
+                      ),
+                    ],
+                  ),
+                  if (aiTip != null) ...[
+                    const SizedBox(height: 12),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: AppColors.success.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.auto_awesome_rounded, size: 14, color: AppColors.success),
+                          const SizedBox(width: 6),
+                          Expanded(
+                            child: Text(
+                              aiTip!,
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.success,
+                              ),
                             ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
                           ),
                         ],
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        _buildStatusBadge(theme),
-                        const SizedBox(height: 4),
-                        Text(
-                          '${CurrencyFormatter.format(subscription.currentPrice)}/${subscription.billingCycle == BillingCycle.monthly ? 'mo' : 'yr'}',
-                          style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w700,
-                            color: theme.colorScheme.onSurface,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          'Renews ${DateFormat('dd MMM').format(subscription.nextRenewalDate)}',
-                          style: TextStyle(
-                            fontSize: 11.5,
-                            fontWeight: FontWeight.w500,
-                            color: theme.colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                      ],
-                    ),
                   ],
-                ),
-                const SizedBox(height: 10),
-                Divider(
-                  height: 1,
-                  thickness: 1,
-                  color: theme.colorScheme.outlineVariant.withValues(alpha: 0.4),
-                ),
-                const SizedBox(height: 10),
-                Row(
-                  children: [
-                    Expanded(
-                      child: _buildActionPill(
-                        theme,
-                        Icons.remove_red_eye_outlined,
-                        'View',
-                        onViewDetails ?? () => _navigateToViewDetails(context),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: _buildActionPill(
-                        theme,
-                        Icons.edit_outlined,
-                        'Edit',
-                        onEdit ?? () => _navigateToEdit(context),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: _buildActionPill(
-                        theme,
-                        Icons.delete_outline,
-                        'Delete',
-                        () => _showDeleteDialog(context),
-                        isDestructive: true,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
@@ -152,107 +208,70 @@ class SubscriptionCard extends StatelessWidget {
     return SubscriptionIcon(
       iconIdentifier: subscription.iconUrl,
       fallbackName: subscription.name,
-      size: 40,
-      borderRadius: 10,
+      size: 44,
+      borderRadius: 12,
       backgroundColor: theme.colorScheme.surface,
       textColor: theme.colorScheme.primary,
       textStyle: AppTextStyles.sectionTitle.copyWith(
-        fontSize: 17,
+        fontSize: 18,
         color: theme.colorScheme.primary,
       ),
       border: Border.all(color: theme.dividerColor),
-      boxShadow: [
-        BoxShadow(
-          color: Colors.black.withValues(alpha: 0.04),
-          blurRadius: 8,
-          offset: const Offset(0, 2),
-        ),
-      ],
     );
   }
 
-  Widget _buildStatusBadge(ThemeData theme) {
-    Color bgColor;
-    Color textColor;
-    String text;
+  Widget _buildRenewalCountdown(ThemeData theme) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final target = DateTime(subscription.nextRenewalDate.year, subscription.nextRenewalDate.month, subscription.nextRenewalDate.day);
+    final diff = target.difference(today).inDays;
 
-    switch (subscription.status) {
-      case SubscriptionStatus.active:
-        bgColor = AppColors.success.withValues(alpha: 0.12);
-        textColor = AppColors.success;
-        text = 'Active';
-        break;
-      case SubscriptionStatus.upcoming:
-        bgColor = AppColors.warning.withValues(alpha: 0.12);
-        textColor = AppColors.warning;
-        text = 'Upcoming';
-        break;
-      case SubscriptionStatus.expired:
-        bgColor = AppColors.error.withValues(alpha: 0.12);
-        textColor = AppColors.error;
-        text = 'Expired';
-        break;
+    String text;
+    Color color;
+
+    if (subscription.status == SubscriptionStatus.expired) {
+      text = 'Expired';
+      color = AppColors.error;
+    } else if (diff < 0) {
+      text = 'Overdue';
+      color = AppColors.error;
+    } else if (diff == 0) {
+      text = 'Renews today';
+      color = AppColors.warning;
+    } else if (diff == 1) {
+      text = 'Renews tomorrow';
+      color = AppColors.warning;
+    } else if (diff <= 7) {
+      text = 'Renews in $diff days';
+      color = theme.colorScheme.onSurfaceVariant;
+    } else {
+      text = 'Renews ${DateFormat('dd MMM').format(subscription.nextRenewalDate)}';
+      color = theme.colorScheme.onSurfaceVariant;
     }
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-      decoration: BoxDecoration(
-        color: bgColor,
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Text(
-        text,
-        style: TextStyle(
-          fontSize: 11,
-          fontWeight: FontWeight.w700,
-          color: textColor,
-        ),
+    return Text(
+      text,
+      style: TextStyle(
+        fontSize: 12,
+        fontWeight: FontWeight.w600,
+        color: color,
       ),
     );
   }
 
-  Widget _buildActionPill(
-    ThemeData theme,
-    IconData icon,
-    String label,
-    VoidCallback? onTap, {
-    bool isDestructive = false,
-  }) {
-    final color = isDestructive ? theme.colorScheme.error : theme.colorScheme.primary;
-    final bgColor = isDestructive
-        ? theme.colorScheme.error.withValues(alpha: 0.08)
-        : theme.colorScheme.primary.withValues(alpha: 0.08);
-
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(8),
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 6),
-          decoration: BoxDecoration(
-            color: bgColor,
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: color.withValues(alpha: 0.2), width: 1),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icon, size: 14, color: color),
-              const SizedBox(width: 4),
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: color,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
+  Color _getCategoryColor(ThemeData theme, String category) {
+    switch (category.toLowerCase()) {
+      case 'entertainment':
+        return Colors.purple;
+      case 'productivity':
+        return Colors.blue;
+      case 'utility':
+        return Colors.orange;
+      case 'education':
+        return Colors.teal;
+      default:
+        return theme.colorScheme.primary;
+    }
   }
 
   void _navigateToViewDetails(BuildContext context) {

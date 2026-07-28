@@ -75,8 +75,10 @@ class SanchoraBottomNav extends StatelessWidget {
             ),
           ),
           Positioned(
-            top: -16,
-            child: _buildCenterButton(context),
+            top: -8,
+            child: _CenterAddButton(
+              onTap: () => onTabSelected(BottomNavTab.add),
+            ),
           ),
         ],
       ),
@@ -125,45 +127,78 @@ class SanchoraBottomNav extends StatelessWidget {
     return const SizedBox(width: 80);
   }
 
-  Widget _buildCenterButton(BuildContext context) {
-    final bool isSelected = selectedTab == BottomNavTab.add;
-    final Color labelColor = isSelected ? _selectedColor : Theme.of(context).colorScheme.onSurfaceVariant;
+}
 
-    return GestureDetector(
-      onTap: () => onTabSelected(BottomNavTab.add),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 52,
-            height: 52,
-            decoration: BoxDecoration(
-              color: _selectedColor,
-              borderRadius: BorderRadius.circular(18),
-              boxShadow: const [
-                BoxShadow(
-                  color: Color(0x241677FF),
-                  blurRadius: 12,
-                  offset: Offset(0, 6),
-                ),
-              ],
+class _CenterAddButton extends StatefulWidget {
+  final VoidCallback onTap;
+
+  const _CenterAddButton({required this.onTap});
+
+  @override
+  State<_CenterAddButton> createState() => _CenterAddButtonState();
+}
+
+class _CenterAddButtonState extends State<_CenterAddButton> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 150));
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.92).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ScaleTransition(
+      scale: _scaleAnimation,
+      child: Container(
+        width: 52,
+        height: 52,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          gradient: const LinearGradient(
+            colors: [Color(0xFF0A84FF), Color(0xFF2563EB)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF0A84FF).withValues(alpha: 0.25),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
             ),
+          ],
+        ),
+        child: Material(
+          color: Colors.transparent,
+          shape: const CircleBorder(),
+          child: InkWell(
+            onTapDown: (_) => _controller.forward(),
+            onTapCancel: () => _controller.reverse(),
+            onHighlightChanged: (isHighlighted) {
+              if (!isHighlighted) _controller.reverse();
+            },
+            onTap: widget.onTap,
+            customBorder: const CircleBorder(),
+            splashColor: Colors.white.withValues(alpha: 0.25),
+            highlightColor: Colors.transparent,
             child: const Icon(
               Icons.add_rounded,
               color: Colors.white,
               size: 26,
             ),
           ),
-          const SizedBox(height: 4),
-          Text(
-            'Add',
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-              color: labelColor,
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
