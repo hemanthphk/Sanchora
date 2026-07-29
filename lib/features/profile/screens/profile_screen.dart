@@ -9,6 +9,8 @@ import '../widgets/analytics_summary_card.dart';
 import '../widgets/settings_section.dart';
 import '../widgets/settings_tile.dart';
 import '../widgets/logout_button.dart';
+import '../../add_subscription/presentation/pages/add_subscription_page.dart';
+import '../../analytics/screens/analytics_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -327,7 +329,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
         _openScreen(context, const SubscriptionsPlaceholderScreen());
         break;
       case 2:
-        _openScreen(context, const AddSubscriptionScreen());
+        _openScreen(context, const AddSubscriptionPage());
         break;
       case 3:
         _openScreen(context, const AnalyticsScreen());
@@ -514,30 +516,6 @@ class SubscriptionsPlaceholderScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Subscriptions')),
       body: const Center(child: Text('Subscriptions Screen')),
-    );
-  }
-}
-
-class AddSubscriptionScreen extends StatelessWidget {
-  const AddSubscriptionScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Add Subscription')),
-      body: const Center(child: Text('Add Subscription Screen')),
-    );
-  }
-}
-
-class AnalyticsScreen extends StatelessWidget {
-  const AnalyticsScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Analytics')),
-      body: const Center(child: Text('Analytics Screen')),
     );
   }
 }

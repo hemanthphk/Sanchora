@@ -16,6 +16,7 @@ class SubscriptionModel {
   final double monthlyPrice;
   final double yearlyPrice;
   final BillingCycle billingCycle;
+  final DateTime startDate;
   final DateTime nextRenewalDate;
   final SubscriptionStatus status;
   final String iconUrl;
@@ -29,6 +30,7 @@ class SubscriptionModel {
     required this.monthlyPrice,
     required this.yearlyPrice,
     required this.billingCycle,
+    required this.startDate,
     required this.nextRenewalDate,
     required this.status,
     required this.iconUrl,

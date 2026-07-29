@@ -6,6 +6,7 @@ import '../widgets/subscription_empty_state.dart';
 import '../widgets/subscription_intent_chips.dart';
 import '../widgets/ai_hero_card.dart';
 import '../widgets/subscription_bottom_sheet_filter.dart';
+import '../models/subscription_filter_state.dart';
 
 class SubscriptionsScreen extends StatefulWidget {
   const SubscriptionsScreen({super.key});
@@ -18,6 +19,7 @@ class _SubscriptionsScreenState extends State<SubscriptionsScreen> {
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocusNode = FocusNode();
   String _selectedIntent = '⭐ All';
+  SubscriptionFilterState _filterState = const SubscriptionFilterState();
 
   List<SubscriptionModel> _filteredSubscriptions = [];
 
@@ -74,6 +76,14 @@ class _SubscriptionsScreenState extends State<SubscriptionsScreen> {
       }).toList();
     }
 
+    // Filter by Bottom Sheet Filters
+    if (_filterState.category != null) {
+      result = result.where((sub) => sub.category == _filterState.category).toList();
+    }
+    if (_filterState.billingCycle != null) {
+      result = result.where((sub) => sub.billingCycle == _filterState.billingCycle).toList();
+    }
+
     // Filter by Intent
     switch (_selectedIntent) {
       case '⏰ Due Soon':
@@ -126,15 +136,39 @@ class _SubscriptionsScreenState extends State<SubscriptionsScreen> {
     _applyFiltersAndSort();
   }
 
+  void _onResetFilters() {
+    setState(() {
+      _filterState = const SubscriptionFilterState();
+    });
+    _applyFiltersAndSort();
+  }
+
   Future<void> _showFilterOptions() async {
-    await SubscriptionBottomSheetFilter.show(context);
-    // You could update state based on bottom sheet result here.
+    final availableCategories = SubscriptionService.instance.subscriptions
+        .map((e) => e.category)
+        .toSet()
+        .toList();
+    
+    final result = await SubscriptionBottomSheetFilter.show(
+      context,
+      initialState: _filterState,
+      availableCategories: availableCategories,
+    );
+
+    if (result != null) {
+      setState(() {
+        _filterState = result;
+      });
+      _applyFiltersAndSort();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isSearchingOrFiltering = _searchController.text.isNotEmpty || _selectedIntent != '⭐ All';
+    final isSearchingOrFiltering = _searchController.text.isNotEmpty || 
+        _selectedIntent != '⭐ All' || 
+        _filterState.isActive;
     final isSearchActive = _searchFocusNode.hasFocus || _searchController.text.isNotEmpty;
 
     return GestureDetector(
@@ -229,9 +263,12 @@ class _SubscriptionsScreenState extends State<SubscriptionsScreen> {
                 child: SubscriptionEmptyState(isSearch: false),
               )
             else if (_filteredSubscriptions.isEmpty)
-              const SliverFillRemaining(
+              SliverFillRemaining(
                 hasScrollBody: false,
-                child: SubscriptionEmptyState(isSearch: true),
+                child: SubscriptionEmptyState(
+                  isSearch: true,
+                  onResetFilters: _filterState.isActive ? _onResetFilters : null,
+                ),
               )
             else
               SliverPadding(
@@ -312,18 +349,36 @@ class _SubscriptionsScreenState extends State<SubscriptionsScreen> {
               ],
             ),
           ),
-          Container(
-            decoration: BoxDecoration(
-              color: theme.colorScheme.surface,
-              shape: BoxShape.circle,
-              border: Border.all(color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5)),
-            ),
-            child: IconButton(
-              icon: const Icon(Icons.tune_rounded, size: 22),
-              onPressed: _showFilterOptions,
-              color: theme.colorScheme.onSurface,
-              tooltip: 'Filters',
-            ),
+          Stack(
+            children: [
+              Container(
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.surface,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5)),
+                ),
+                child: IconButton(
+                  icon: const Icon(Icons.tune_rounded, size: 22),
+                  onPressed: _showFilterOptions,
+                  color: theme.colorScheme.onSurface,
+                  tooltip: 'Filters',
+                ),
+              ),
+              if (_filterState.isActive)
+                Positioned(
+                  top: 8,
+                  right: 8,
+                  child: Container(
+                    width: 10,
+                    height: 10,
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.primary,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: theme.scaffoldBackgroundColor, width: 2),
+                    ),
+                  ),
+                ),
+            ],
           ),
         ],
       ),

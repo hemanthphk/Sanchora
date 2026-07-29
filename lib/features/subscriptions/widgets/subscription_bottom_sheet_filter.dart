@@ -1,16 +1,75 @@
 import 'package:flutter/material.dart';
 import 'package:sanchora/core/theme/app_text_styles.dart';
+import 'package:sanchora/features/subscriptions/models/subscription_model.dart';
+import 'package:sanchora/features/subscriptions/models/subscription_filter_state.dart';
 
-class SubscriptionBottomSheetFilter extends StatelessWidget {
-  const SubscriptionBottomSheetFilter({super.key});
+class SubscriptionBottomSheetFilter extends StatefulWidget {
+  final SubscriptionFilterState initialState;
+  final List<String> availableCategories;
 
-  static Future<void> show(BuildContext context) async {
-    return showModalBottomSheet(
+  const SubscriptionBottomSheetFilter({
+    super.key,
+    required this.initialState,
+    required this.availableCategories,
+  });
+
+  static Future<SubscriptionFilterState?> show(
+    BuildContext context, {
+    required SubscriptionFilterState initialState,
+    required List<String> availableCategories,
+  }) async {
+    return showModalBottomSheet<SubscriptionFilterState>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => const SubscriptionBottomSheetFilter(),
+      builder: (context) => SubscriptionBottomSheetFilter(
+        initialState: initialState,
+        availableCategories: availableCategories,
+      ),
     );
+  }
+
+  @override
+  State<SubscriptionBottomSheetFilter> createState() => _SubscriptionBottomSheetFilterState();
+}
+
+class _SubscriptionBottomSheetFilterState extends State<SubscriptionBottomSheetFilter> {
+  late SubscriptionFilterState _currentState;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentState = widget.initialState;
+  }
+
+  void _onCategorySelected(String category) {
+    setState(() {
+      if (_currentState.category == category) {
+        _currentState = _currentState.copyWith(clearCategory: true);
+      } else {
+        _currentState = _currentState.copyWith(category: category);
+      }
+    });
+  }
+
+  void _onBillingCycleSelected(BillingCycle cycle) {
+    setState(() {
+      if (_currentState.billingCycle == cycle) {
+        _currentState = _currentState.copyWith(clearBillingCycle: true);
+      } else {
+        _currentState = _currentState.copyWith(billingCycle: cycle);
+      }
+    });
+  }
+
+  void _onReset() {
+    setState(() {
+      _currentState = const SubscriptionFilterState();
+    });
+  }
+
+  void _onApply() {
+    Navigator.pop(context, _currentState);
   }
 
   @override
@@ -38,20 +97,33 @@ class SubscriptionBottomSheetFilter extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 24),
-          Text(
-            'Filters',
-            style: AppTextStyles.sectionTitle.copyWith(color: theme.colorScheme.onSurface),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Filters',
+                style: AppTextStyles.sectionTitle.copyWith(color: theme.colorScheme.onSurface),
+              ),
+              if (_currentState.isActive)
+                TextButton(
+                  onPressed: _onReset,
+                  style: TextButton.styleFrom(
+                    foregroundColor: theme.colorScheme.primary,
+                  ),
+                  child: const Text('Reset'),
+                ),
+            ],
           ),
           const SizedBox(height: 24),
-          _buildFilterSection(theme, 'Category', ['Entertainment', 'Productivity', 'Utility', 'Education']),
+          _buildCategorySection(theme),
           const SizedBox(height: 20),
-          _buildFilterSection(theme, 'Billing Cycle', ['Monthly', 'Yearly']),
+          _buildBillingCycleSection(theme),
           const SizedBox(height: 32),
           SizedBox(
             width: double.infinity,
             height: 54,
             child: ElevatedButton(
-              onPressed: () => Navigator.pop(context),
+              onPressed: _onApply,
               style: ElevatedButton.styleFrom(
                 backgroundColor: theme.colorScheme.primary,
                 foregroundColor: theme.colorScheme.onPrimary,
@@ -69,12 +141,15 @@ class SubscriptionBottomSheetFilter extends StatelessWidget {
     );
   }
 
-  Widget _buildFilterSection(ThemeData theme, String title, List<String> options) {
+  Widget _buildCategorySection(ThemeData theme) {
+    if (widget.availableCategories.isEmpty) {
+      return const SizedBox.shrink();
+    }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          title,
+          'Category',
           style: TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.w600,
@@ -85,22 +160,82 @@ class SubscriptionBottomSheetFilter extends StatelessWidget {
         Wrap(
           spacing: 8,
           runSpacing: 8,
-          children: options.map((option) {
-            return Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              decoration: BoxDecoration(
-                color: theme.colorScheme.surface,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: theme.colorScheme.outlineVariant.withValues(alpha: 0.3),
+          children: widget.availableCategories.map((category) {
+            final isSelected = _currentState.category == category;
+            return GestureDetector(
+              onTap: () => _onCategorySelected(category),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                decoration: BoxDecoration(
+                  color: isSelected ? theme.colorScheme.primary : theme.colorScheme.surface,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: isSelected 
+                        ? theme.colorScheme.primary 
+                        : theme.colorScheme.outlineVariant.withValues(alpha: 0.3),
+                  ),
+                ),
+                child: Text(
+                  category,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                    color: isSelected ? theme.colorScheme.onPrimary : theme.colorScheme.onSurfaceVariant,
+                  ),
                 ),
               ),
-              child: Text(
-                option,
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w500,
-                  color: theme.colorScheme.onSurfaceVariant,
+            );
+          }).toList(),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildBillingCycleSection(ThemeData theme) {
+    final Map<BillingCycle, String> cycles = {
+      BillingCycle.monthly: 'Monthly',
+      BillingCycle.yearly: 'Yearly',
+    };
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Billing Cycle',
+          style: TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.w600,
+            color: theme.colorScheme.onSurface,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: cycles.entries.map((entry) {
+            final cycle = entry.key;
+            final label = entry.value;
+            final isSelected = _currentState.billingCycle == cycle;
+            return GestureDetector(
+              onTap: () => _onBillingCycleSelected(cycle),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                decoration: BoxDecoration(
+                  color: isSelected ? theme.colorScheme.primary : theme.colorScheme.surface,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: isSelected 
+                        ? theme.colorScheme.primary 
+                        : theme.colorScheme.outlineVariant.withValues(alpha: 0.3),
+                  ),
+                ),
+                child: Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                    color: isSelected ? theme.colorScheme.onPrimary : theme.colorScheme.onSurfaceVariant,
+                  ),
                 ),
               ),
             );

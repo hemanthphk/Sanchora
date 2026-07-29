@@ -78,7 +78,7 @@ class HeroSummaryCard extends StatelessWidget {
                         ),
                         TweenAnimationBuilder<double>(
                           tween: Tween<double>(begin: 0.0, end: 2430.0),
-                          duration: const Duration(milliseconds: 750),
+                          duration: const Duration(milliseconds: 1400),
                           curve: Curves.easeOutCubic,
                           builder: (context, val, child) {
                             return FittedBox(

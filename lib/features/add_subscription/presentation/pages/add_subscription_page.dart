@@ -283,6 +283,7 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
       monthlyPrice: monthlyPrice,
       yearlyPrice: yearlyPrice,
       billingCycle: _selectedCycle == "Monthly" ? BillingCycle.monthly : BillingCycle.yearly,
+      startDate: _startDate,
       nextRenewalDate: _renewalDate,
       status: status,
       iconUrl: iconUrl,

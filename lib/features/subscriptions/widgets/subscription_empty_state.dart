@@ -6,9 +6,11 @@ class SubscriptionEmptyState extends StatelessWidget {
   const SubscriptionEmptyState({
     super.key,
     this.isSearch = false,
+    this.onResetFilters,
   });
 
   final bool isSearch;
+  final VoidCallback? onResetFilters;
 
   @override
   Widget build(BuildContext context) {
@@ -48,6 +50,18 @@ class SubscriptionEmptyState extends StatelessWidget {
             ),
             textAlign: TextAlign.center,
           ),
+          if (onResetFilters != null) ...[
+            const SizedBox(height: 24),
+            TextButton.icon(
+              onPressed: onResetFilters,
+              icon: const Icon(Icons.refresh_rounded, size: 18),
+              label: const Text('Reset Filters'),
+              style: TextButton.styleFrom(
+                foregroundColor: AppColors.primary,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              ),
+            ),
+          ],
         ],
       ),
     );
