@@ -46,6 +46,7 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
   DateTime _startDate = DateTime.now();
   late DateTime _renewalDate;
   bool _reminderEnabled = true;
+  bool _isTrial = false;
   bool _isFormValid = false;
   
   final SubscriptionPresetService _presetService = const SubscriptionPresetService();
@@ -76,6 +77,7 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
         _startDate = DateTime(_renewalDate.year - 1, _renewalDate.month, _renewalDate.day);
       }
       _reminderEnabled = sub.hasReminder;
+      _isTrial = sub.isTrial;
       if (sub.notes != null) {
         _notesController.text = sub.notes!;
       }
@@ -288,6 +290,7 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
       status: status,
       iconUrl: iconUrl,
       hasReminder: _reminderEnabled,
+      isTrial: _isTrial,
       notes: _notesController.text.trim().isNotEmpty ? _notesController.text.trim() : null,
     );
 
@@ -809,6 +812,7 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
                           ],
                         ),
                         const SizedBox(height: 24),
+
                         
                         // Reminder Tile
                         _buildSectionTitle("Reminder"),

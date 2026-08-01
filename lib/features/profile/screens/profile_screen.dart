@@ -11,6 +11,7 @@ import '../widgets/settings_tile.dart';
 import '../widgets/logout_button.dart';
 import '../../add_subscription/presentation/pages/add_subscription_page.dart';
 import '../../analytics/screens/analytics_screen.dart';
+import '../../notifications/screens/notification_settings_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -101,9 +102,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
     return Scaffold(
       key: _scaffoldKey,
       backgroundColor: theme.scaffoldBackgroundColor,
-      appBar: ProfileAppBar(
-        onNotificationTap: () => _openScreen(context, const NotificationScreen()),
-      ),
+      appBar: const ProfileAppBar(),
       drawer: _buildDrawer(theme),
       body: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
@@ -172,11 +171,11 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                       onTap: () => _openScreen(context, const BillingScreen()),
                     ),
                     SettingsTile(
-                      icon: Icons.notifications_rounded,
+                      icon: Icons.settings_rounded,
                       iconColor: const Color(0xFFEA580C),
                       title: 'Notification Settings',
                       subtitle: 'Control your alerts',
-                      onTap: () => _openScreen(context, const NotificationScreen()),
+                      onTap: () => _openScreen(context, const NotificationSettingsScreen()),
                     ),
                   ],
                 ),
@@ -424,17 +423,7 @@ class BillingScreen extends StatelessWidget {
   }
 }
 
-class NotificationScreen extends StatelessWidget {
-  const NotificationScreen({super.key});
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Notifications')),
-      body: const Center(child: Text('Notification Screen')),
-    );
-  }
-}
 
 class CurrencyScreen extends StatelessWidget {
   const CurrencyScreen({super.key});

@@ -1,24 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:sanchora/core/utils/currency_formatter.dart';
-import 'package:sanchora/features/home/screens/home_screen.dart';
-
-class CategorySummary {
-  final String name;
-  final double amount;
-  final String percentage;
-  final double share;
-  final IconData icon;
-  final Color color;
-
-  const CategorySummary({
-    required this.name,
-    required this.amount,
-    required this.percentage,
-    required this.share,
-    required this.icon,
-    required this.color,
-  });
-}
+import 'package:sanchora/features/categories/screens/top_categories_screen.dart';
+import 'package:sanchora/features/subscriptions/screens/subscriptions_screen.dart';
+import 'package:sanchora/features/home/utils/category_provider.dart';
+import 'package:sanchora/features/subscriptions/services/subscription_service.dart';
 
 class TopCategoriesCard extends StatefulWidget {
   const TopCategoriesCard({super.key});
@@ -28,40 +13,21 @@ class TopCategoriesCard extends StatefulWidget {
 }
 
 class _TopCategoriesCardState extends State<TopCategoriesCard> {
-  final List<CategorySummary> _categories = const [
-    CategorySummary(
-      name: 'Entertainment',
-      amount: 1250,
-      percentage: '51%',
-      share: 0.51,
-      icon: Icons.play_circle_fill_rounded,
-      color: Color(0xFF4F46E5), // Indigo Accent
-    ),
-    CategorySummary(
-      name: 'Shopping',
-      amount: 720,
-      percentage: '29%',
-      share: 0.29,
-      icon: Icons.shopping_bag_rounded,
-      color: Color(0xFFFF9500), // Apple Orange
-    ),
-    CategorySummary(
-      name: 'Education',
-      amount: 280,
-      percentage: '11%',
-      share: 0.11,
-      icon: Icons.school_rounded,
-      color: Color(0xFF007AFF), // Apple Blue
-    ),
-  ];
-
   int? _selectedIndex;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Container(
+    return ListenableBuilder(
+      listenable: SubscriptionService.instance,
+      builder: (context, _) {
+        final allCategories = CategoryProvider.getCategorySummaries(
+          subscriptions: SubscriptionService.instance.subscriptions,
+        );
+        final topCategories = allCategories.take(3).toList();
+
+        return Container(
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
       decoration: BoxDecoration(
@@ -93,7 +59,7 @@ class _TopCategoriesCardState extends State<TopCategoriesCard> {
                 onTap: () {
                   Navigator.of(context).push(
                     MaterialPageRoute(
-                      builder: (_) => const CategoriesPlaceholderScreen(),
+                      builder: (_) => const TopCategoriesScreen(),
                     ),
                   );
                 },
@@ -116,8 +82,8 @@ class _TopCategoriesCardState extends State<TopCategoriesCard> {
           IntrinsicHeight(
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: _categories.asMap().entries.map((e) {
-                final isLast = e.key == _categories.length - 1;
+              children: topCategories.asMap().entries.map((e) {
+                final isLast = e.key == topCategories.length - 1;
                 return Expanded(
                   child: Padding(
                     padding: EdgeInsets.only(right: isLast ? 0 : 8),
@@ -129,6 +95,8 @@ class _TopCategoriesCardState extends State<TopCategoriesCard> {
           ),
         ],
       ),
+    );
+      },
     );
   }
 
@@ -158,13 +126,14 @@ class _TopCategoriesCardState extends State<TopCategoriesCard> {
             setState(() {
               _selectedIndex = index;
             });
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Analytics coming soon'),
-                duration: Duration(seconds: 2),
-                behavior: SnackBarBehavior.floating,
-              ),
-            );
+            Future.delayed(const Duration(milliseconds: 150), () {
+              if (!context.mounted) return;
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => SubscriptionsScreen(categoryFilter: data.name),
+                ),
+              );
+            });
           },
           borderRadius: BorderRadius.circular(18),
           child: AnimatedContainer(

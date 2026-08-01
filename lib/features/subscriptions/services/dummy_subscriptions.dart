@@ -26,6 +26,7 @@ final List<SubscriptionModel> dummySubscriptions = [
     nextRenewalDate: DateTime.now().add(const Duration(days: 3)),
     status: SubscriptionStatus.upcoming,
     iconUrl: SubscriptionIconRegistry.getIconUrl('spotify'),
+    isTrial: true,
   ),
   SubscriptionModel(
     id: '3',

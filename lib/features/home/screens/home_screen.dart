@@ -6,6 +6,8 @@ import 'package:sanchora/features/home/widgets/spending_overview_card.dart';
 import 'package:sanchora/features/home/widgets/top_categories_card.dart';
 import 'package:sanchora/features/home/widgets/hero_summary_card.dart';
 import 'package:sanchora/features/home/screens/upcoming_payments_screen.dart';
+import 'package:sanchora/features/notifications/services/notification_history_service.dart';
+import 'package:sanchora/features/notifications/screens/notifications_inbox_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -131,45 +133,67 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildNotificationButton() {
-    return InkWell(
-      onTap: () => pushScreen(const NotificationPlaceholderScreen()),
-      borderRadius: BorderRadius.circular(14),
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surface,
-              borderRadius: BorderRadius.circular(14),
-              boxShadow: const [
-                BoxShadow(
-                  color: Color(0x140B1F4D),
-                  blurRadius: 10,
-                  offset: Offset(0, 3),
+    return ListenableBuilder(
+      listenable: NotificationHistoryService.instance,
+      builder: (context, _) {
+        final unreadCount = NotificationHistoryService.instance.unreadCount;
+        
+        return InkWell(
+          onTap: () => pushScreen(const NotificationsInboxScreen()),
+          borderRadius: BorderRadius.circular(14),
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surface,
+                  borderRadius: BorderRadius.circular(14),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Color(0x140B1F4D),
+                      blurRadius: 10,
+                      offset: Offset(0, 3),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-            child: Icon(
-              Icons.notifications_none_rounded,
-              color: Theme.of(context).colorScheme.onSurface,
-            ),
-          ),
-          Positioned(
-            top: 7,
-            right: 7,
-            child: Container(
-              width: 10,
-              height: 10,
-              decoration: BoxDecoration(
-                color: const Color(0xFF1677FF),
-                borderRadius: BorderRadius.circular(999),
+                child: Icon(
+                  Icons.notifications_none_rounded,
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
               ),
-            ),
+              if (unreadCount > 0)
+                Positioned(
+                  top: -2,
+                  right: -2,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFEF4444),
+                      borderRadius: BorderRadius.circular(999),
+                      border: Border.all(color: Theme.of(context).colorScheme.surface, width: 2),
+                    ),
+                    constraints: const BoxConstraints(
+                      minWidth: 18,
+                      minHeight: 18,
+                    ),
+                    child: Text(
+                      unreadCount > 9 ? '9+' : unreadCount.toString(),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        height: 1,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 

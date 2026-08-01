@@ -9,7 +9,8 @@ import '../widgets/subscription_bottom_sheet_filter.dart';
 import '../models/subscription_filter_state.dart';
 
 class SubscriptionsScreen extends StatefulWidget {
-  const SubscriptionsScreen({super.key});
+  final String? categoryFilter;
+  const SubscriptionsScreen({super.key, this.categoryFilter});
 
   @override
   State<SubscriptionsScreen> createState() => _SubscriptionsScreenState();
@@ -27,14 +28,17 @@ class _SubscriptionsScreenState extends State<SubscriptionsScreen> {
     '⭐ All',
     '⏰ Due Soon',
     '💸 High Spend',
-    '🎁 Free Trials',
-    '🤖 AI Picks',
+    // '🎁 Free Trials', // Disabled for MVP
+    // '🤖 AI Picks', // Disabled for MVP
     '📅 This Month'
   ];
 
   @override
   void initState() {
     super.initState();
+    if (widget.categoryFilter != null) {
+      _filterState = SubscriptionFilterState(category: widget.categoryFilter);
+    }
     SubscriptionService.instance.addListener(_onSubscriptionsChanged);
     _filteredSubscriptions = List.from(SubscriptionService.instance.subscriptions);
     _applyFiltersAndSort();
@@ -218,7 +222,7 @@ class _SubscriptionsScreenState extends State<SubscriptionsScreen> {
                       ),
                     );
                   },
-                  child: isSearchActive
+                  child: (isSearchActive || widget.categoryFilter != null)
                       ? const SizedBox(key: ValueKey('empty_hero'), width: double.infinity, height: 0)
                       : Padding(
                           key: const ValueKey('hero_card'),
@@ -319,17 +323,29 @@ class _SubscriptionsScreenState extends State<SubscriptionsScreen> {
   }
 
   Widget _buildHeader(ThemeData theme) {
+    final title = widget.categoryFilter ?? 'Subscriptions';
+    final subtitle = widget.categoryFilter != null
+        ? '${_filteredSubscriptions.length} Subscriptions'
+        : 'Manage your recurring payments.';
+
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 16, 16, 12),
+      padding: const EdgeInsets.fromLTRB(12, 16, 16, 12),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
+          if (Navigator.canPop(context))
+            IconButton(
+              icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
+              onPressed: () => Navigator.pop(context),
+            ),
+          if (!Navigator.canPop(context))
+            const SizedBox(width: 8),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Subscriptions',
+                  title,
                   style: TextStyle(
                     fontSize: 26,
                     fontWeight: FontWeight.w800,
@@ -339,7 +355,7 @@ class _SubscriptionsScreenState extends State<SubscriptionsScreen> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Manage your recurring payments.',
+                  subtitle,
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
@@ -349,7 +365,8 @@ class _SubscriptionsScreenState extends State<SubscriptionsScreen> {
               ],
             ),
           ),
-          Stack(
+          if (widget.categoryFilter == null)
+            Stack(
             children: [
               Container(
                 decoration: BoxDecoration(

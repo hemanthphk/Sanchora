@@ -21,6 +21,7 @@ class SubscriptionModel {
   final SubscriptionStatus status;
   final String iconUrl;
   final bool hasReminder;
+  final bool isTrial;
   final String? notes;
 
   const SubscriptionModel({
@@ -35,6 +36,7 @@ class SubscriptionModel {
     required this.status,
     required this.iconUrl,
     this.hasReminder = false,
+    this.isTrial = false,
     this.notes,
   });
 

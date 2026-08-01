@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import '../models/subscription_model.dart';
 import 'dummy_subscriptions.dart';
+import '../../notifications/services/notification_service.dart';
 
 class SubscriptionService extends ChangeNotifier {
   SubscriptionService._internal();
@@ -11,11 +12,13 @@ class SubscriptionService extends ChangeNotifier {
 
   void addSubscription(SubscriptionModel subscription) {
     dummySubscriptions.insert(0, subscription);
+    NotificationService.instance.scheduler.scheduleRemindersForSubscription(subscription);
     notifyListeners();
   }
 
   void removeSubscription(SubscriptionModel subscription) {
     dummySubscriptions.removeWhere((sub) => sub.id == subscription.id || sub == subscription);
+    NotificationService.instance.scheduler.cancelReminders(subscription.id);
     notifyListeners();
   }
 
@@ -23,6 +26,8 @@ class SubscriptionService extends ChangeNotifier {
     final index = dummySubscriptions.indexWhere((sub) => sub.id == subscription.id);
     if (index != -1) {
       dummySubscriptions[index] = subscription;
+      NotificationService.instance.scheduler.cancelReminders(subscription.id);
+      NotificationService.instance.scheduler.scheduleRemindersForSubscription(subscription);
       notifyListeners();
     }
   }
