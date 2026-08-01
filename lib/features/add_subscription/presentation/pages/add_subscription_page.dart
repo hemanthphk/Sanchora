@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:sanchora/core/utils/currency_formatter.dart';
+
 import 'package:sanchora/features/subscriptions/models/subscription_model.dart';
 import 'package:sanchora/features/subscriptions/models/subscription_preset_model.dart';
 import 'package:sanchora/features/subscriptions/services/subscription_preset_service.dart';
@@ -426,10 +426,17 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
                       },
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                        color: isSelected ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.1) : Colors.transparent,
+                        color: isSelected ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.05) : Colors.transparent,
                         child: Row(
                           children: [
-                            Text(_getCategoryEmoji(cat), style: const TextStyle(fontSize: 22)),
+                            Container(
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                color: isSelected ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.15) : Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Text(_getCategoryEmoji(cat), style: const TextStyle(fontSize: 20)),
+                            ),
                             const SizedBox(width: 16),
                             Expanded(
                               child: Text(
@@ -473,28 +480,40 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
     }
   }
 
-  InputDecoration _premiumInputDecoration(ThemeData theme, String hint) {
+  InputDecoration _premiumInputDecoration(ThemeData theme, String hint, {IconData? prefixIcon}) {
     return InputDecoration(
       hintText: hint,
-      hintStyle: TextStyle(color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5)),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      hintStyle: TextStyle(
+        color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+        fontSize: 15,
+      ),
+      prefixIcon: prefixIcon != null
+          ? Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(prefixIcon, color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5), size: 22),
+              ],
+            )
+          : null,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
       filled: true,
       fillColor: theme.colorScheme.surface,
       enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(20),
-        borderSide: BorderSide(color: theme.colorScheme.outlineVariant.withValues(alpha: 0.3)),
+        borderRadius: BorderRadius.circular(24),
+        borderSide: BorderSide(color: theme.colorScheme.outlineVariant.withValues(alpha: 0.1), width: 1),
       ),
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(20),
-        borderSide: BorderSide(color: theme.colorScheme.primary.withValues(alpha: 0.5), width: 1.5),
+        borderRadius: BorderRadius.circular(24),
+        borderSide: BorderSide(color: const Color(0xFF0A84FF).withValues(alpha: 0.4), width: 1),
       ),
       errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(20),
-        borderSide: BorderSide(color: theme.colorScheme.error.withValues(alpha: 0.5)),
+        borderRadius: BorderRadius.circular(24),
+        borderSide: BorderSide(color: theme.colorScheme.error.withValues(alpha: 0.5), width: 1),
       ),
       focusedErrorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(20),
-        borderSide: BorderSide(color: theme.colorScheme.error, width: 1.5),
+        borderRadius: BorderRadius.circular(24),
+        borderSide: BorderSide(color: theme.colorScheme.error, width: 1),
       ),
     );
   }
@@ -537,15 +556,37 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
                               color: theme.colorScheme.onSurface,
                             ),
                           ),
-                          const SizedBox(height: 2),
+                          const SizedBox(height: 4),
                           Text(
-                            'Quickly add and organise your subscription.',
+                            'Never miss a renewal again.',
                             style: TextStyle(
                               fontSize: 13,
                               color: theme.colorScheme.onSurfaceVariant,
                             ),
                           ),
                         ],
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            theme.colorScheme.primary.withValues(alpha: 0.05),
+                            theme.colorScheme.primary.withValues(alpha: 0.1),
+                          ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(
+                          color: theme.colorScheme.primary.withValues(alpha: 0.05),
+                        ),
+                      ),
+                      child: Icon(
+                        Icons.account_balance_wallet_rounded,
+                        color: theme.colorScheme.primary.withValues(alpha: 0.9),
+                        size: 22,
                       ),
                     ),
                   ],
@@ -567,7 +608,7 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
                         _buildSectionTitle("Subscription Name"),
                         Container(
                           decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(20),
+                            borderRadius: BorderRadius.circular(24),
                             boxShadow: [
                               BoxShadow(
                                 color: Colors.black.withValues(alpha: 0.02),
@@ -580,7 +621,7 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
                             controller: _nameController,
                             textCapitalization: TextCapitalization.words,
                             style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                            decoration: _premiumInputDecoration(theme, "e.g., Netflix, Spotify, ChatGPT").copyWith(
+                            decoration: _premiumInputDecoration(theme, "e.g., Netflix, Spotify, ChatGPT", prefixIcon: Icons.subscriptions_outlined).copyWith(
                               suffixIcon: _nameController.text.isNotEmpty
                                   ? IconButton(
                                       icon: const Icon(Icons.cancel_rounded, size: 20),
@@ -618,8 +659,8 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
                             controller: _priceController,
                             keyboardType: const TextInputType.numberWithOptions(decimal: true),
                             style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
-                            decoration: _premiumInputDecoration(theme, "0.00").copyWith(
-                              prefixText: "${CurrencyFormatter.format(0).substring(0, 1)} ",
+                            decoration: _premiumInputDecoration(theme, "0.00", prefixIcon: Icons.payments_outlined).copyWith(
+                              prefixText: "₹",
                               prefixStyle: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: theme.colorScheme.onSurface),
                             ),
                             validator: (value) => ((double.tryParse(value?.trim() ?? '') ?? 0) <= 0) ? "" : null,
@@ -641,15 +682,26 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
                                     onTap: _showCategoryBottomSheet,
                                     child: _buildInputCard(
                                       child: Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
                                         child: Row(
                                           children: [
-                                            Text(_getCategoryEmoji(_selectedCategory), style: const TextStyle(fontSize: 18)),
-                                            const SizedBox(width: 8),
+                                            Container(
+                                              padding: const EdgeInsets.all(8),
+                                              decoration: BoxDecoration(
+                                                color: theme.colorScheme.primary.withValues(alpha: 0.1),
+                                                borderRadius: BorderRadius.circular(12),
+                                              ),
+                                              child: Text(_getCategoryEmoji(_selectedCategory), style: const TextStyle(fontSize: 16)),
+                                            ),
+                                            const SizedBox(width: 12),
                                             Expanded(
                                               child: Text(
                                                 _selectedCategory,
-                                                style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+                                                style: TextStyle(
+                                                  fontSize: 15,
+                                                  fontWeight: FontWeight.w600,
+                                                  color: theme.colorScheme.onSurface,
+                                                ),
                                                 maxLines: 1,
                                                 overflow: TextOverflow.ellipsis,
                                               ),
@@ -671,11 +723,11 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
                                 children: [
                                   _buildSectionTitle("Billing Cycle"),
                                   Container(
-                                    height: 57,
-                                    padding: const EdgeInsets.all(4),
+                                    height: 60,
+                                    padding: const EdgeInsets.all(6),
                                     decoration: BoxDecoration(
-                                      color: theme.colorScheme.onSurface.withValues(alpha: 0.05),
-                                      borderRadius: BorderRadius.circular(20),
+                                      color: theme.colorScheme.onSurface.withValues(alpha: 0.03),
+                                      borderRadius: BorderRadius.circular(24),
                                     ),
                                     child: Stack(
                                       children: [
@@ -687,15 +739,15 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
                                             widthFactor: 0.5,
                                             child: Container(
                                               decoration: BoxDecoration(
-                                                gradient: const LinearGradient(
-                                                  colors: [Color(0xFF0A84FF), Color(0xFF2563EB)],
+                                                gradient: LinearGradient(
+                                                  colors: [const Color(0xFF0A84FF).withValues(alpha: 0.8), const Color(0xFF2563EB).withValues(alpha: 0.8)],
                                                   begin: Alignment.topLeft,
                                                   end: Alignment.bottomRight,
                                                 ),
-                                                borderRadius: BorderRadius.circular(16),
+                                                borderRadius: BorderRadius.circular(20),
                                                 boxShadow: [
                                                   BoxShadow(
-                                                    color: const Color(0xFF0A84FF).withValues(alpha: 0.3),
+                                                    color: const Color(0xFF0A84FF).withValues(alpha: 0.15),
                                                     blurRadius: 8,
                                                     offset: const Offset(0, 4),
                                                   ),
@@ -763,7 +815,7 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
                         _buildInputCard(
                           child: InkWell(
                             onTap: () => setState(() => _reminderEnabled = !_reminderEnabled),
-                            borderRadius: BorderRadius.circular(20),
+                            borderRadius: BorderRadius.circular(24),
                             child: Padding(
                               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                               child: Row(
@@ -858,13 +910,13 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
                 ),
                 child: InkWell(
                   onTap: _isFormValid ? _saveSubscription : null,
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(24),
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 200),
                     width: double.infinity,
                     padding: const EdgeInsets.symmetric(vertical: 18),
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius: BorderRadius.circular(24),
                       gradient: _isFormValid
                           ? const LinearGradient(
                               colors: [Color(0xFF0A84FF), Color(0xFF2563EB)],
@@ -908,9 +960,9 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
     return Container(
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(24),
         border: Border.all(
-          color: theme.colorScheme.outlineVariant.withValues(alpha: 0.3),
+          color: theme.colorScheme.outlineVariant.withValues(alpha: 0.1),
           width: 1,
         ),
         boxShadow: [
