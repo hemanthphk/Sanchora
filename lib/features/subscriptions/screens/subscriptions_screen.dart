@@ -4,9 +4,12 @@ import '../services/subscription_service.dart';
 import '../widgets/subscription_card.dart';
 import '../widgets/subscription_empty_state.dart';
 import '../widgets/subscription_intent_chips.dart';
+import 'package:sanchora/core/services/navigation_event_bus.dart';
+import 'package:sanchora/core/widgets/sanchora_bottom_nav.dart';
+import 'dart:async';
+import '../models/subscription_filter_state.dart';
 import '../widgets/ai_hero_card.dart';
 import '../widgets/subscription_bottom_sheet_filter.dart';
-import '../models/subscription_filter_state.dart';
 
 class SubscriptionsScreen extends StatefulWidget {
   final String? categoryFilter;
@@ -21,6 +24,8 @@ class _SubscriptionsScreenState extends State<SubscriptionsScreen> {
   final FocusNode _searchFocusNode = FocusNode();
   String _selectedIntent = '⭐ All';
   SubscriptionFilterState _filterState = const SubscriptionFilterState();
+  final ScrollController _scrollController = ScrollController();
+  StreamSubscription<BottomNavTab>? _navSub;
 
   List<SubscriptionModel> _filteredSubscriptions = [];
 
@@ -46,10 +51,22 @@ class _SubscriptionsScreenState extends State<SubscriptionsScreen> {
     _searchFocusNode.addListener(() {
       setState(() {});
     });
+    
+    _navSub = NavigationEventBus.instance.scrollToTopStream.listen((tab) {
+      if (tab == BottomNavTab.subs && _scrollController.hasClients) {
+        _scrollController.animateTo(
+          0,
+          duration: const Duration(milliseconds: 350),
+          curve: Curves.easeOutCubic,
+        );
+      }
+    });
   }
 
   @override
   void dispose() {
+    _navSub?.cancel();
+    _scrollController.dispose();
     SubscriptionService.instance.removeListener(_onSubscriptionsChanged);
     _searchController.dispose();
     _searchFocusNode.dispose();
@@ -187,12 +204,12 @@ class _SubscriptionsScreenState extends State<SubscriptionsScreen> {
         backgroundColor: theme.scaffoldBackgroundColor,
         body: SafeArea(
           child: CustomScrollView(
+            controller: _scrollController,
             physics: const BouncingScrollPhysics(),
-          slivers: [
-            SliverToBoxAdapter(
-              child: _buildHeader(theme),
-            ),
-
+            slivers: [
+              SliverToBoxAdapter(
+                child: _buildHeader(theme),
+              ),
             SliverPersistentHeader(
               pinned: true,
               delegate: _StickySearchBarDelegate(
@@ -328,21 +345,17 @@ class _SubscriptionsScreenState extends State<SubscriptionsScreen> {
         ? '${_filteredSubscriptions.length} Subscriptions'
         : 'Manage your recurring payments.';
 
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(12, 16, 16, 12),
+    return Container(
+      height: 72,
+      padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          if (Navigator.canPop(context))
-            IconButton(
-              icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
-              onPressed: () => Navigator.pop(context),
-            ),
-          if (!Navigator.canPop(context))
-            const SizedBox(width: 8),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
                   title,

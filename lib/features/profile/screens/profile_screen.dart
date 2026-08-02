@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sanchora/features/auth/screens/login_screen.dart';
 import 'package:sanchora/features/home/screens/home_screen.dart';
-import 'package:sanchora/core/theme/theme_controller.dart';
 import 'package:sanchora/core/utils/currency_formatter.dart';
 import '../widgets/profile_app_bar.dart';
 import '../widgets/profile_header_card.dart';
@@ -12,6 +11,9 @@ import '../widgets/logout_button.dart';
 import '../../add_subscription/presentation/pages/add_subscription_page.dart';
 import '../../analytics/screens/analytics_screen.dart';
 import '../../notifications/screens/notification_settings_screen.dart';
+import 'package:sanchora/core/services/navigation_event_bus.dart';
+import 'package:sanchora/core/widgets/sanchora_bottom_nav.dart';
+import 'dart:async';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -31,6 +33,8 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
   late final Animation<Offset> _settingsSlide;
   late final Animation<double> _logoutFade;
   late final Animation<Offset> _logoutSlide;
+  final ScrollController _scrollController = ScrollController();
+  StreamSubscription<BottomNavTab>? _navSub;
 
   @override
   void initState() {
@@ -87,10 +91,22 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
       parent: _animationController,
       curve: const Interval(0.45, 0.90, curve: Curves.easeOutCubic),
     ));
+
+    _navSub = NavigationEventBus.instance.scrollToTopStream.listen((tab) {
+      if (tab == BottomNavTab.profile && _scrollController.hasClients) {
+        _scrollController.animateTo(
+          0,
+          duration: const Duration(milliseconds: 350),
+          curve: Curves.easeOutCubic,
+        );
+      }
+    });
   }
 
   @override
   void dispose() {
+    _navSub?.cancel();
+    _scrollController.dispose();
     _animationController.dispose();
     super.dispose();
   }
@@ -105,6 +121,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
       appBar: const ProfileAppBar(),
       drawer: _buildDrawer(theme),
       body: SingleChildScrollView(
+        controller: _scrollController,
         physics: const BouncingScrollPhysics(),
         padding: const EdgeInsets.fromLTRB(20, 8, 20, 36),
         child: Column(
@@ -187,43 +204,24 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
               position: _settingsSlide,
               child: FadeTransition(
                 opacity: _settingsFade,
-                child: ListenableBuilder(
-                  listenable: themeController,
-                  builder: (context, _) {
-                    return SettingsSection(
-                      title: 'Preferences',
-                      children: [
-                        SettingsTile(
-                          icon: Icons.currency_rupee_rounded,
-                          iconColor: const Color(0xFF10B981),
-                          title: 'Currency',
-                          subtitle: 'INR • Indian Rupee',
-                          onTap: () => _openScreen(context, const CurrencyScreen()),
-                        ),
-                        SettingsTile(
-                          icon: themeController.isDarkMode
-                              ? Icons.dark_mode_rounded
-                              : Icons.light_mode_rounded,
-                          iconColor: const Color(0xFF2563EB),
-                          title: 'Dark Mode',
-                          subtitle: 'Switch between light and dark',
-                          onTap: () => themeController.toggleTheme(),
-                          trailing: Switch(
-                            value: themeController.isDarkMode,
-                            onChanged: (value) => themeController.toggleTheme(),
-                            activeThumbColor: const Color(0xFF0A84FF),
-                          ),
-                        ),
-                        SettingsTile(
-                          icon: Icons.lock_rounded,
-                          iconColor: const Color(0xFFF87171),
-                          title: 'Data & Privacy',
-                          subtitle: 'Secure your account data',
-                          onTap: () => _openScreen(context, const PrivacyScreen()),
-                        ),
-                      ],
-                    );
-                  },
+                child: SettingsSection(
+                  title: 'Preferences',
+                  children: [
+                    SettingsTile(
+                      icon: Icons.currency_rupee_rounded,
+                      iconColor: const Color(0xFF10B981),
+                      title: 'Currency',
+                      subtitle: 'INR • Indian Rupee',
+                      onTap: () => _openScreen(context, const CurrencyScreen()),
+                    ),
+                    SettingsTile(
+                      icon: Icons.lock_rounded,
+                      iconColor: const Color(0xFFF87171),
+                      title: 'Data & Privacy',
+                      subtitle: 'Secure your account data',
+                      onTap: () => _openScreen(context, const PrivacyScreen()),
+                    ),
+                  ],
                 ),
               ),
             ),

@@ -537,25 +537,29 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
           child: Column(
             children: [
               // Custom Premium Header
-              Padding(
-                padding: const EdgeInsets.fromLTRB(12, 16, 20, 16),
+              Container(
+                height: 72,
+                padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Row(
                   children: [
                     IconButton(
                       icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
                       onPressed: () => Navigator.pop(context),
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: 12),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
                             _isEditMode ? 'Edit Subscription' : 'Add Subscription',
                             style: TextStyle(
-                              fontSize: 24,
+                              fontSize: 26,
                               fontWeight: FontWeight.w800,
-                              letterSpacing: -0.5,
+                              letterSpacing: -0.6,
                               color: theme.colorScheme.onSurface,
                             ),
                           ),

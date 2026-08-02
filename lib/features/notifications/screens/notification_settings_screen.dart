@@ -4,6 +4,7 @@ import 'package:sanchora/features/profile/widgets/settings_tile.dart';
 import 'package:sanchora/features/notifications/services/notification_scheduler.dart';
 import 'package:sanchora/features/notifications/services/notification_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sanchora/core/widgets/app_header.dart';
 
 class NotificationSettingsScreen extends StatefulWidget {
   const NotificationSettingsScreen({super.key});
@@ -66,13 +67,25 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Notification Settings')),
-      body: SingleChildScrollView(
-        physics: const BouncingScrollPhysics(),
-        padding: const EdgeInsets.fromLTRB(20, 8, 20, 36),
+      body: SafeArea(
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            AppHeader(
+              title: 'Notification Settings',
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
+                onPressed: () => Navigator.pop(context),
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+              ),
+            ),
+            Expanded(
+              child: SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 36),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
             SettingsSection(
               title: 'General',
               children: [
@@ -256,6 +269,10 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
                   ],
                 ),
               ),
+            ),
+          ],
+        ),
+      ),
             ),
           ],
         ),

@@ -8,6 +8,9 @@ import '../widgets/analytics_momentum_chart.dart';
 import '../widgets/analytics_efficiency_score.dart';
 import '../widgets/analytics_smart_recommendations.dart';
 import '../widgets/analytics_monthly_insight.dart';
+import 'package:sanchora/core/services/navigation_event_bus.dart';
+import 'package:sanchora/core/widgets/sanchora_bottom_nav.dart';
+import 'dart:async';
 
 class AnalyticsScreen extends StatefulWidget {
   const AnalyticsScreen({super.key});
@@ -18,6 +21,8 @@ class AnalyticsScreen extends StatefulWidget {
 
 class _AnalyticsScreenState extends State<AnalyticsScreen> with SingleTickerProviderStateMixin {
   late AnimationController _animController;
+  final ScrollController _scrollController = ScrollController();
+  StreamSubscription<BottomNavTab>? _navSub;
 
   @override
   void initState() {
@@ -28,10 +33,22 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with SingleTickerProv
       duration: const Duration(milliseconds: 600),
     );
     _animController.forward();
+
+    _navSub = NavigationEventBus.instance.scrollToTopStream.listen((tab) {
+      if (tab == BottomNavTab.analytics && _scrollController.hasClients) {
+        _scrollController.animateTo(
+          0,
+          duration: const Duration(milliseconds: 350),
+          curve: Curves.easeOutCubic,
+        );
+      }
+    });
   }
 
   @override
   void dispose() {
+    _navSub?.cancel();
+    _scrollController.dispose();
     SubscriptionService.instance.removeListener(_onSubscriptionsChanged);
     _animController.dispose();
     super.dispose();
@@ -79,6 +96,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with SingleTickerProv
         child: subscriptions.isEmpty
             ? const AnalyticsEmptyState()
             : CustomScrollView(
+                controller: _scrollController,
                 physics: const BouncingScrollPhysics(),
                 slivers: [
                   SliverToBoxAdapter(
@@ -103,10 +121,12 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with SingleTickerProv
   }
 
   Widget _buildHeader(ThemeData theme) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+    return Container(
+      height: 72,
+      padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
             'Analytics',

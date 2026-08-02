@@ -8,6 +8,15 @@ import 'package:sanchora/features/home/widgets/hero_summary_card.dart';
 import 'package:sanchora/features/home/screens/upcoming_payments_screen.dart';
 import 'package:sanchora/features/notifications/services/notification_history_service.dart';
 import 'package:sanchora/features/notifications/screens/notifications_inbox_screen.dart';
+import 'package:sanchora/core/services/navigation_event_bus.dart';
+import 'package:sanchora/core/widgets/sanchora_bottom_nav.dart';
+import 'dart:async';
+import 'package:share_plus/share_plus.dart';
+import 'package:sanchora/features/settings/screens/appearance_screen.dart';
+import 'package:sanchora/features/settings/screens/subscription_calendar_placeholder_screen.dart';
+import 'package:sanchora/features/settings/screens/budget_settings_placeholder_screen.dart';
+import 'package:sanchora/features/settings/screens/help_feedback_screen.dart';
+import 'package:sanchora/features/settings/screens/about_sanchora_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -18,6 +27,29 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  final ScrollController _scrollController = ScrollController();
+  StreamSubscription<BottomNavTab>? _navSub;
+
+  @override
+  void initState() {
+    super.initState();
+    _navSub = NavigationEventBus.instance.scrollToTopStream.listen((tab) {
+      if (tab == BottomNavTab.home && _scrollController.hasClients) {
+        _scrollController.animateTo(
+          0,
+          duration: const Duration(milliseconds: 350),
+          curve: Curves.easeOutCubic,
+        );
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _navSub?.cancel();
+    _scrollController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +59,6 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       key: _scaffoldKey,
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      drawer: _buildDrawer(),
       body: SafeArea(
         child: Column(
           children: [
@@ -39,6 +70,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             Expanded(
               child: SingleChildScrollView(
+                controller: _scrollController,
                 padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -97,8 +129,9 @@ class _HomeScreenState extends State<HomeScreen> {
         Text(
           'Sanchora',
           style: TextStyle(
-            fontSize: 18,
+            fontSize: 25,
             fontWeight: FontWeight.w800,
+            letterSpacing: -0.8,
             color: Theme.of(context).colorScheme.onSurface,
           ),
         ),
@@ -108,7 +141,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildMenuButton() {
     return InkWell(
-      onTap: () => _scaffoldKey.currentState?.openDrawer(),
+      onTap: () => _showGlobalActionsMenu(context),
       borderRadius: BorderRadius.circular(14),
       child: Container(
         width: 40,
@@ -125,7 +158,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
         child: Icon(
-          Icons.menu_rounded,
+          Icons.more_horiz_rounded,
           color: Theme.of(context).colorScheme.onSurface,
         ),
       ),
@@ -376,62 +409,136 @@ class _HomeScreenState extends State<HomeScreen> {
     return const TopCategoriesCard();
   }
 
-  Widget _buildDrawer() {
-    return Drawer(
-      child: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Sanchora',
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.w800,
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
-              ),
-              const SizedBox(height: 16),
-              ListTile(
-                leading: const Icon(Icons.home_rounded),
-                title: const Text('Home'),
-                onTap: () => Navigator.of(context).pop(),
-              ),
-              ListTile(
-                leading: const Icon(Icons.subscriptions_rounded),
-                title: const Text('Subscriptions'),
-                onTap: () {
-                  Navigator.of(context).pop();
-                  pushScreen(const SubscriptionsPlaceholderScreen());
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.analytics_rounded),
-                title: const Text('Analytics'),
-                onTap: () {
-                  Navigator.of(context).pop();
-                  pushScreen(const AnalyticsPlaceholderScreen());
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.person_rounded),
-                title: const Text('Profile'),
-                onTap: () {
-                  Navigator.of(context).pop();
-                  pushScreen(const ProfileScreen());
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.settings_outlined),
-                title: const Text('Settings'),
-                onTap: () {
-                  Navigator.of(context).pop();
-                  pushScreen(const SettingsPlaceholderScreen());
-                },
-              ),
-            ],
+  void _showGlobalActionsMenu(BuildContext context) {
+    final theme = Theme.of(context);
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (context) {
+        return Container(
+          padding: const EdgeInsets.fromLTRB(24, 12, 24, 32),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surface,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
           ),
+          child: SafeArea(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 48,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: 24),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                _buildActionMenuItem(
+                  theme,
+                  title: 'Appearance',
+                  icon: Icons.palette_rounded,
+                  accentColor: const Color(0xFF3B82F6),
+                  onTap: () {
+                    Navigator.of(context).pop();
+                    pushScreen(const AppearanceScreen());
+                  },
+                ),
+                _buildActionMenuItem(
+                  theme,
+                  title: 'Share Sanchora',
+                  icon: Icons.ios_share_rounded,
+                  accentColor: const Color(0xFF10B981),
+                  onTap: () {
+                    Navigator.of(context).pop();
+                    SharePlus.instance.share(ShareParams(text: 'Take control of all your subscriptions with Sanchora.\n\nOne App. Every Subscription.'));
+                  },
+                ),
+                _buildActionMenuItem(
+                  theme,
+                  title: 'Subscription Calendar',
+                  icon: Icons.calendar_month_rounded,
+                  accentColor: const Color(0xFFF59E0B),
+                  onTap: () {
+                    Navigator.of(context).pop();
+                    pushScreen(const SubscriptionCalendarPlaceholderScreen());
+                  },
+                ),
+                _buildActionMenuItem(
+                  theme,
+                  title: 'Budget Settings',
+                  icon: Icons.account_balance_wallet_rounded,
+                  accentColor: const Color(0xFF8B5CF6),
+                  onTap: () {
+                    Navigator.of(context).pop();
+                    pushScreen(const BudgetSettingsPlaceholderScreen());
+                  },
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: Divider(height: 1, thickness: 1, color: theme.colorScheme.outlineVariant.withValues(alpha: 0.4)),
+                ),
+                _buildActionMenuItem(
+                  theme,
+                  title: 'Help & Feedback',
+                  icon: Icons.help_outline_rounded,
+                  accentColor: const Color(0xFF06B6D4),
+                  onTap: () {
+                    Navigator.of(context).pop();
+                    pushScreen(const HelpFeedbackScreen());
+                  },
+                ),
+                _buildActionMenuItem(
+                  theme,
+                  title: 'About Sanchora',
+                  icon: Icons.info_outline_rounded,
+                  accentColor: const Color(0xFF64748B),
+                  onTap: () {
+                    Navigator.of(context).pop();
+                    pushScreen(const AboutSanchoraScreen());
+                  },
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildActionMenuItem(
+    ThemeData theme, {
+    required String title,
+    required IconData icon,
+    required Color accentColor,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: accentColor.withValues(alpha: theme.brightness == Brightness.dark ? 0.2 : 0.12),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(icon, color: accentColor, size: 22),
+            ),
+            const SizedBox(width: 16),
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: theme.colorScheme.onSurface,
+              ),
+            ),
+          ],
         ),
       ),
     );

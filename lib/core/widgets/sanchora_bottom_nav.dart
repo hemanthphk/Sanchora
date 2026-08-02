@@ -28,23 +28,14 @@ class SanchoraBottomNav extends StatelessWidget {
         clipBehavior: Clip.none,
         alignment: Alignment.topCenter,
         children: [
-          Container(
-            height: 78,
-            decoration: BoxDecoration(
+          CustomPaint(
+            painter: _NavCustomPainter(
               color: Theme.of(context).colorScheme.surface,
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(24),
-                topRight: Radius.circular(24),
-              ),
-              boxShadow: const [
-                BoxShadow(
-                  color: Color(0x14000000),
-                  blurRadius: 18,
-                  offset: Offset(0, -4),
-                ),
-              ],
+              shadowColor: const Color(0x14000000), // Softer premium shadow
             ),
-            child: Row(
+            child: SizedBox(
+              height: 78,
+              child: Row(
               children: [
                 _buildItem(
                   context,
@@ -74,8 +65,9 @@ class SanchoraBottomNav extends StatelessWidget {
               ],
             ),
           ),
+          ),
           Positioned(
-            top: -8,
+            top: 2, // Lowered by 10px from -8
             child: _CenterAddButton(
               onTap: () => onTabSelected(BottomNavTab.add),
             ),
@@ -91,7 +83,7 @@ class SanchoraBottomNav extends StatelessWidget {
     required BottomNavTab tab,
   }) {
     final bool isSelected = selectedTab == tab;
-    final Color color = isSelected ? _selectedColor : Theme.of(context).colorScheme.onSurfaceVariant;
+    final Color color = isSelected ? _selectedColor : Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.75);
 
     return Expanded(
       child: InkWell(
@@ -102,17 +94,25 @@ class SanchoraBottomNav extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                icon,
-                size: 24,
-                color: color,
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                padding: EdgeInsets.symmetric(horizontal: isSelected ? 12 : 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: isSelected ? _selectedColor.withValues(alpha: 0.10) : Colors.transparent,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  icon,
+                  size: isSelected ? 26 : 24,
+                  color: color,
+                ),
               ),
-              const SizedBox(height: 4),
+              SizedBox(height: isSelected ? 2 : 4),
               Text(
                 label,
                 style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                  fontSize: 11.5,
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
                   color: color,
                 ),
               ),
@@ -145,9 +145,9 @@ class _CenterAddButtonState extends State<_CenterAddButton> with SingleTickerPro
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 150));
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.92).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 180));
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.96).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
     );
   }
 
@@ -173,8 +173,8 @@ class _CenterAddButtonState extends State<_CenterAddButton> with SingleTickerPro
           ),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF0A84FF).withValues(alpha: 0.25),
-              blurRadius: 10,
+              color: const Color(0xFF0A84FF).withValues(alpha: 0.20), // Reduced shadow intensity
+              blurRadius: 12,
               offset: const Offset(0, 4),
             ),
           ],
@@ -188,18 +188,77 @@ class _CenterAddButtonState extends State<_CenterAddButton> with SingleTickerPro
             onHighlightChanged: (isHighlighted) {
               if (!isHighlighted) _controller.reverse();
             },
-            onTap: widget.onTap,
+            onTap: () {
+              _controller.forward().then((_) {
+                _controller.reverse();
+                widget.onTap();
+              });
+            },
             customBorder: const CircleBorder(),
             splashColor: Colors.white.withValues(alpha: 0.25),
             highlightColor: Colors.transparent,
             child: const Icon(
               Icons.add_rounded,
               color: Colors.white,
-              size: 26,
+              size: 28, // Increased icon size (+2px)
             ),
           ),
         ),
       ),
     );
   }
+}
+
+class _NavCustomPainter extends CustomPainter {
+  final Color color;
+  final Color shadowColor;
+
+  _NavCustomPainter({required this.color, required this.shadowColor});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.fill;
+
+    final shadowPaint = Paint()
+      ..color = shadowColor
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 20);
+
+    final path = Path();
+    final double radius = 32.0;
+
+    // Center geometry
+    final double centerX = size.width / 2;
+    final double holeWidth = 52.0;
+    final double depth = 46.0;
+
+    path.moveTo(0, radius);
+    path.quadraticBezierTo(0, 0, radius, 0);
+
+    path.lineTo(centerX - holeWidth, 0);
+    path.cubicTo(
+      centerX - 24, 0,
+      centerX - 28, depth,
+      centerX, depth,
+    );
+    path.cubicTo(
+      centerX + 28, depth,
+      centerX + 24, 0,
+      centerX + holeWidth, 0,
+    );
+
+    path.lineTo(size.width - radius, 0);
+    path.quadraticBezierTo(size.width, 0, size.width, radius);
+    path.lineTo(size.width, size.height);
+    path.lineTo(0, size.height);
+    path.close();
+
+    // Draw shadow path shifted up for floating effect
+    canvas.drawPath(path.shift(const Offset(0, -6)), shadowPaint);
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

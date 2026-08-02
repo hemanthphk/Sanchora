@@ -3,7 +3,7 @@ import 'package:intl/intl.dart';
 import 'notification_settings_screen.dart';
 import '../services/notification_history_service.dart';
 import '../models/notification_message.dart';
-
+import 'package:sanchora/core/widgets/app_header.dart';
 class NotificationsInboxScreen extends StatelessWidget {
   const NotificationsInboxScreen({super.key});
 
@@ -13,35 +13,50 @@ class NotificationsInboxScreen extends StatelessWidget {
     final service = NotificationHistoryService.instance;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Notifications'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.done_all_rounded),
-            onPressed: () => service.markAllAsRead(),
-            tooltip: 'Mark all as read',
-          ),
-          IconButton(
-            icon: const Icon(Icons.settings_rounded),
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => const NotificationSettingsScreen(),
+      backgroundColor: theme.scaffoldBackgroundColor,
+      body: SafeArea(
+        child: Column(
+          children: [
+            AppHeader(
+              title: 'Notifications',
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
+                onPressed: () => Navigator.pop(context),
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+              ),
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.done_all_rounded),
+                  onPressed: () => service.markAllAsRead(),
+                  tooltip: 'Mark all as read',
                 ),
-              );
-            },
-            tooltip: 'Notification Settings',
-          ),
-        ],
-      ),
-      body: ListenableBuilder(
-        listenable: service,
-        builder: (context, _) {
-          if (service.notifications.isEmpty) {
-            return _buildEmptyState(context, theme);
-          }
-          return _buildNotificationList(context, theme, service);
-        },
+                IconButton(
+                  icon: const Icon(Icons.settings_rounded),
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => const NotificationSettingsScreen(),
+                      ),
+                    );
+                  },
+                  tooltip: 'Notification Settings',
+                ),
+              ],
+            ),
+            Expanded(
+              child: ListenableBuilder(
+                listenable: service,
+                builder: (context, _) {
+                  if (service.notifications.isEmpty) {
+                    return _buildEmptyState(context, theme);
+                  }
+                  return _buildNotificationList(context, theme, service);
+                },
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

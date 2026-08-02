@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sanchora/core/widgets/sanchora_bottom_nav.dart';
+import 'package:sanchora/core/services/navigation_event_bus.dart';
 
 import '../home/screens/home_screen.dart';
 import '../profile/screens/profile_screen.dart';
@@ -36,6 +37,11 @@ class _MainNavigationState extends State<MainNavigation> {
       bottomNavigationBar: SanchoraBottomNav(
         selectedTab: BottomNavTab.values[_currentIndex],
         onTabSelected: (tab) {
+          if (tab.index == _currentIndex && tab != BottomNavTab.add) {
+            NavigationEventBus.instance.fireScrollToTop(tab);
+            return;
+          }
+
           if (tab == BottomNavTab.add) {
             Navigator.of(context).push(
               MaterialPageRoute(builder: (_) => const AddSubscriptionPage()),
