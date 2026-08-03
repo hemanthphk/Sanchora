@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:sanchora/core/theme/app_colors.dart';
-import 'package:sanchora/core/utils/currency_formatter.dart';
+import 'package:sanchora/core/services/currency_service.dart';
 import 'package:sanchora/core/widgets/sanchora_card.dart';
 import 'package:sanchora/features/add_subscription/presentation/pages/add_subscription_page.dart';
 import 'package:sanchora/features/subscriptions/services/subscription_service.dart';
@@ -178,7 +178,7 @@ class _ViewSubscriptionPageState extends State<ViewSubscriptionPage> {
 
   Widget _buildInformationCard(BuildContext context, ThemeData theme) {
     final priceSuffix = subscription.billingCycle == BillingCycle.monthly ? '/ month' : '/ year';
-    final priceFormatted = '${CurrencyFormatter.format(subscription.currentPrice)} $priceSuffix';
+    final priceFormatted = '${CurrencyService.instance.format(subscription.currentPrice)} $priceSuffix';
     final cycleFormatted = subscription.billingCycle == BillingCycle.monthly ? 'Monthly' : 'Yearly';
     final startDateFormatted = DateFormat('dd MMM yyyy').format(_calculateStartDate(subscription.nextRenewalDate, subscription.billingCycle));
     final renewalDateFormatted = DateFormat('dd MMM yyyy').format(subscription.nextRenewalDate);

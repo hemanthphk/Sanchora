@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:sanchora/features/auth/screens/login_screen.dart';
 import 'package:sanchora/features/home/screens/home_screen.dart';
-import 'package:sanchora/core/utils/currency_formatter.dart';
+import 'package:sanchora/features/profile/screens/premium_screen.dart';
+import 'package:sanchora/features/profile/screens/privacy_screen.dart';
+import 'package:sanchora/core/services/currency_service.dart';
 import 'package:sanchora/core/widgets/sanchora_page_header.dart';
 import '../widgets/profile_app_bar.dart';
 import '../widgets/profile_header_card.dart';
@@ -13,6 +15,7 @@ import '../../add_subscription/presentation/pages/add_subscription_page.dart';
 import '../../analytics/screens/analytics_screen.dart';
 import '../../notifications/screens/notification_settings_screen.dart';
 import 'personal_information_screen.dart';
+import 'currency_screen.dart';
 import 'package:sanchora/core/services/navigation_event_bus.dart';
 import 'package:sanchora/core/widgets/sanchora_bottom_nav.dart';
 import 'dart:async';
@@ -153,8 +156,8 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                 opacity: _analyticsFade,
                 child: AnalyticsSummaryCard(
                   totalSubscriptions: '18',
-                  totalSpent: CurrencyFormatter.format(2400, compact: true),
-                  totalSaved: CurrencyFormatter.format(480),
+                  totalSpent: CurrencyService.instance.format(2400, compact: true),
+                  totalSaved: CurrencyService.instance.format(480),
                   memberSince: 'Oct 2023',
                 ),
               ),
@@ -166,7 +169,6 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
               child: FadeTransition(
                 opacity: _settingsFade,
                 child: SettingsSection(
-                  title: 'Account',
                   children: [
                     SettingsTile(
                       icon: Icons.person_rounded,
@@ -177,17 +179,11 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                     ),
                     SettingsTile(
                       icon: Icons.workspace_premium_rounded,
-                      iconColor: const Color(0xFF8B5CF6),
+                      iconColor: const Color(0xFF7C3AED),
+                      bgColor: const Color(0xFFF3E8FF),
                       title: 'Subscription to Premium',
                       subtitle: 'Manage your premium benefits',
                       onTap: () => _openScreen(context, const PremiumScreen()),
-                    ),
-                    SettingsTile(
-                      icon: Icons.credit_card_rounded,
-                      iconColor: const Color(0xFF10B981),
-                      title: 'Billing & Payments',
-                      subtitle: 'Payment history and invoices',
-                      onTap: () => _openScreen(context, const BillingScreen()),
                     ),
                     SettingsTile(
                       icon: Icons.settings_rounded,
@@ -196,19 +192,6 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                       subtitle: 'Control your alerts',
                       onTap: () => _openScreen(context, const NotificationSettingsScreen()),
                     ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 20),
-            // Animated Preferences Section
-            SlideTransition(
-              position: _settingsSlide,
-              child: FadeTransition(
-                opacity: _settingsFade,
-                child: SettingsSection(
-                  title: 'Preferences',
-                  children: [
                     SettingsTile(
                       icon: Icons.currency_rupee_rounded,
                       iconColor: const Color(0xFF10B981),
@@ -220,47 +203,14 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                       icon: Icons.lock_rounded,
                       iconColor: const Color(0xFFF87171),
                       title: 'Data & Privacy',
-                      subtitle: 'Secure your account data',
+                      subtitle: 'Manage your data and privacy settings',
                       onTap: () => _openScreen(context, const PrivacyScreen()),
                     ),
                   ],
                 ),
               ),
             ),
-            const SizedBox(height: 20),
-            // Animated Support Section
-            SlideTransition(
-              position: _settingsSlide,
-              child: FadeTransition(
-                opacity: _settingsFade,
-                child: SettingsSection(
-                  title: 'Support',
-                  children: [
-                    SettingsTile(
-                      icon: Icons.help_outline_rounded,
-                      iconColor: const Color(0xFF2563EB),
-                      title: 'Help & FAQs',
-                      subtitle: 'Find answers quickly',
-                      onTap: () => _openScreen(context, const FaqScreen()),
-                    ),
-                    SettingsTile(
-                      icon: Icons.support_agent_rounded,
-                      iconColor: const Color(0xFF10B981),
-                      title: 'Contact Support',
-                      subtitle: 'Reach out for help',
-                      onTap: () => _openScreen(context, const ContactScreen()),
-                    ),
-                    SettingsTile(
-                      icon: Icons.info_outline_rounded,
-                      iconColor: const Color(0xFF8B5CF6),
-                      title: 'About Sanchora',
-                      subtitle: 'Learn more about the app',
-                      onTap: () => _openScreen(context, const AboutScreen()),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+
             const SizedBox(height: 28),
             // Animated Logout Button
             SlideTransition(
@@ -387,53 +337,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
   }
 }
 
-class PremiumScreen extends StatelessWidget {
-  const PremiumScreen({super.key});
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: const SanchoraPageHeader(title: 'Premium'),
-      body: const Center(child: Text('Premium Screen')),
-    );
-  }
-}
-
-class BillingScreen extends StatelessWidget {
-  const BillingScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: const SanchoraPageHeader(title: 'Billing & Payments'),
-      body: const Center(child: Text('Billing Screen')),
-    );
-  }
-}
-
-class CurrencyScreen extends StatelessWidget {
-  const CurrencyScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: const SanchoraPageHeader(title: 'Currency'),
-      body: const Center(child: Text('Currency Screen')),
-    );
-  }
-}
-
-class PrivacyScreen extends StatelessWidget {
-  const PrivacyScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: const SanchoraPageHeader(title: 'Data & Privacy'),
-      body: const Center(child: Text('Privacy Screen')),
-    );
-  }
-}
 
 class FaqScreen extends StatelessWidget {
   const FaqScreen({super.key});

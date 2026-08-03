@@ -1,19 +1,10 @@
 import 'package:intl/intl.dart';
 
-/// A reusable currency formatter utility for Sanchora.
-///
-/// Formats monetary values using the Indian Rupee (₹) by default.
-/// Designed to be reusable for future localization and multiple currencies.
-class CurrencyFormatter {
-  const CurrencyFormatter._();
+class CurrencyService {
+  CurrencyService._internal();
+  static final CurrencyService instance = CurrencyService._internal();
 
-  /// Formats a numeric [amount] into a localized currency string.
-  ///
-  /// - [symbol]: The currency symbol to use (defaults to '₹').
-  /// - [locale]: The locale for number formatting (defaults to 'en_IN').
-  /// - [decimalDigits]: Optional number of decimal places. If null, it defaults to
-  ///   0 for integer amounts (or whole numbers) and 2 for fractional amounts.
-  static String format(
+  String format(
     num amount, {
     String symbol = '₹',
     String locale = 'en_IN',

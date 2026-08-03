@@ -3,12 +3,12 @@ import 'package:flutter/material.dart';
 class SettingsSection extends StatelessWidget {
   const SettingsSection({
     super.key,
-    required this.title,
+    this.title,
     required this.children,
     this.showDividers = true,
   });
 
-  final String title;
+  final String? title;
   final List<Widget> children;
   final bool showDividers;
 
@@ -37,18 +37,19 @@ class SettingsSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.only(left: 4, bottom: 12),
-          child: Text(
-            title,
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-              color: theme.colorScheme.onSurface,
-              letterSpacing: -0.3,
+        if (title != null)
+          Padding(
+            padding: const EdgeInsets.only(left: 4, bottom: 12),
+            child: Text(
+              title!,
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: theme.colorScheme.onSurface,
+                letterSpacing: -0.3,
+              ),
             ),
           ),
-        ),
         Container(
           width: double.infinity,
           decoration: BoxDecoration(

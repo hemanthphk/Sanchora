@@ -13,7 +13,6 @@ class NotificationScheduler {
   static const String days3Key = 'notify_3_days';
   static const String day1Key = 'notify_1_day';
   static const String renewalDayKey = 'notify_renewal_day';
-  static const String trialEndingKey = 'notify_trial_ending';
   static const String quietHoursEnabledKey = 'notify_quiet_hours_enabled';
   static const String quietHoursStartKey = 'notify_quiet_hours_start'; // e.g. "22:00"
   static const String quietHoursEndKey = 'notify_quiet_hours_end';     // e.g. "07:00"
@@ -27,21 +26,7 @@ class NotificationScheduler {
 
     // Trial alert
     if (sub.isTrial) {
-      /*
-      // Disabled for MVP per user request, but kept future-ready
-      final trialEnabled = prefs.getBool(trialEndingKey) ?? true;
-      if (trialEnabled) {
-        // 1 day before trial ends
-        final date = sub.nextRenewalDate.subtract(const Duration(days: 1));
-        await _schedule(
-          id: baseId + 10,
-          title: '🆓 ${sub.name} Trial',
-          body: 'Ends tomorrow. Cancel before renewal to avoid charges.',
-          date: date,
-          prefs: prefs,
-        );
-      }
-      */
+
     } else {
       // Normal renewals
       if (prefs.getBool(days7Key) ?? false) {

@@ -9,6 +9,7 @@ class SettingsTile extends StatelessWidget {
     required this.subtitle,
     this.onTap,
     this.trailing,
+    this.bgColor,
   });
 
   final IconData icon;
@@ -17,6 +18,7 @@ class SettingsTile extends StatelessWidget {
   final String subtitle;
   final VoidCallback? onTap;
   final Widget? trailing;
+  final Color? bgColor;
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +38,7 @@ class SettingsTile extends StatelessWidget {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: iconColor.withValues(alpha: isDark ? 0.2 : 0.12),
+                  color: bgColor ?? iconColor.withValues(alpha: isDark ? 0.2 : 0.12),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 alignment: Alignment.center,

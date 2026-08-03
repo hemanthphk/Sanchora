@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:sanchora/core/utils/currency_formatter.dart';
+import 'package:sanchora/core/services/currency_service.dart';
 
 class HeroSummaryCard extends StatelessWidget {
   const HeroSummaryCard({super.key});
@@ -85,7 +85,7 @@ class HeroSummaryCard extends StatelessWidget {
                               fit: BoxFit.scaleDown,
                               alignment: Alignment.centerLeft,
                               child: Text(
-                                CurrencyFormatter.format(val.round()),
+                                CurrencyService.instance.format(val.round()),
                                 style: const TextStyle(
                                   fontSize: 44,
                                   fontWeight: FontWeight.w800,
@@ -121,13 +121,24 @@ class HeroSummaryCard extends StatelessWidget {
                                   color: const Color(0xFF34C759),
                                   borderRadius: BorderRadius.circular(999),
                                 ),
-                                child: const Text(
-                                  '↓ 12%',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 11.5,
-                                    fontWeight: FontWeight.w700,
-                                  ),
+                                child: const Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.arrow_downward_rounded,
+                                      color: Colors.white,
+                                      size: 12,
+                                    ),
+                                    SizedBox(width: 2),
+                                    Text(
+                                      '12%',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 11.5,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                               const SizedBox(width: 8),

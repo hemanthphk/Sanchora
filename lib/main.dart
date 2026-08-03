@@ -7,8 +7,8 @@ import 'package:timezone/data/latest.dart' as tz;
 import 'package:sanchora/features/notifications/services/notification_service.dart';
 import 'package:workmanager/workmanager.dart';
 import 'package:sanchora/features/profile/services/profile_service.dart';
-
-@pragma('vm:entry-point')
+import 'package:sanchora/features/notifications/services/notification_settings_service.dart';
+import 'package:sanchora/features/notifications/screens/notifications_inbox_screen.dart';
 void callbackDispatcher() {
   Workmanager().executeTask((task, inputData) async {
     // In the future, we'll calculate dynamic weekly/monthly summaries here
@@ -16,6 +16,8 @@ void callbackDispatcher() {
     return Future.value(true);
   });
 }
+
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -46,8 +48,25 @@ void main() async {
   runApp(const SanchoraApp());
 }
 
-class SanchoraApp extends StatelessWidget {
+class SanchoraApp extends StatefulWidget {
   const SanchoraApp({super.key});
+
+  @override
+  State<SanchoraApp> createState() => _SanchoraAppState();
+}
+
+class _SanchoraAppState extends State<SanchoraApp> {
+  @override
+  void initState() {
+    super.initState();
+    NotificationSettingsService.notificationTapStream.stream.listen((payload) {
+      if (navigatorKey.currentState != null) {
+        navigatorKey.currentState!.push(
+          MaterialPageRoute(builder: (context) => const NotificationsInboxScreen()),
+        );
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -56,6 +75,7 @@ class SanchoraApp extends StatelessWidget {
       builder: (context, _) {
         return MaterialApp(
           title: 'Sanchora',
+          navigatorKey: navigatorKey,
           debugShowCheckedModeBanner: false,
           theme: AppTheme.lightTheme,
           darkTheme: AppTheme.darkTheme,

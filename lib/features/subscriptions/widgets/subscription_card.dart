@@ -3,7 +3,7 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:intl/intl.dart';
 import 'package:sanchora/core/theme/app_colors.dart';
 import 'package:sanchora/core/theme/app_text_styles.dart';
-import 'package:sanchora/core/utils/currency_formatter.dart';
+import 'package:sanchora/core/services/currency_service.dart';
 import '../models/subscription_model.dart';
 import 'subscription_icon.dart';
 import '../presentation/pages/view_subscription_page.dart';
@@ -156,7 +156,7 @@ class SubscriptionCard extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           Text(
-                            '${CurrencyFormatter.format(subscription.currentPrice)}/${subscription.billingCycle == BillingCycle.monthly ? 'mo' : 'yr'}',
+                            '${CurrencyService.instance.format(subscription.currentPrice)}/${subscription.billingCycle == BillingCycle.monthly ? 'mo' : 'yr'}',
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w800,

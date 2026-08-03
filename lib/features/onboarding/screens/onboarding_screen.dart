@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sanchora/features/auth/screens/login_screen.dart';
-import 'package:sanchora/core/utils/currency_formatter.dart';
+import 'package:sanchora/core/services/currency_service.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -397,7 +397,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                           ),
                                         ),
                                         Text(
-                                          '${CurrencyFormatter.format(119)} / month',
+                                          '${CurrencyService.instance.format(119)} / month',
                                           style: TextStyle(
                                             fontSize: 12,
                                             color: Theme.of(
@@ -649,7 +649,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                   ),
                                   SizedBox(height: 6),
                                   Text(
-                                    CurrencyFormatter.format(3247),
+                                    CurrencyService.instance.format(3247),
                                     style: TextStyle(
                                       fontSize: 24,
                                       fontWeight: FontWeight.w800,
@@ -696,17 +696,17 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                           children: [
                                             _buildAnalyticsRow(
                                               'Netflix',
-                                              CurrencyFormatter.format(649),
+                                              CurrencyService.instance.format(649),
                                             ),
                                             SizedBox(height: 8),
                                             _buildAnalyticsRow(
                                               'Spotify',
-                                              CurrencyFormatter.format(119),
+                                              CurrencyService.instance.format(119),
                                             ),
                                             SizedBox(height: 8),
                                             _buildAnalyticsRow(
                                               'Amazon Prime',
-                                              CurrencyFormatter.format(299),
+                                              CurrencyService.instance.format(299),
                                             ),
                                           ],
                                         ),
@@ -949,25 +949,25 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                 _buildSubscriptionCard(
                                   iconColor: Color(0xFFFF3B30),
                                   title: 'Netflix',
-                                  amount: CurrencyFormatter.format(15.99),
+                                  amount: CurrencyService.instance.format(15.99),
                                 ),
                                 SizedBox(height: 10),
                                 _buildSubscriptionCard(
                                   iconColor: Color(0xFF1DB954),
                                   title: 'Spotify',
-                                  amount: CurrencyFormatter.format(9.99),
+                                  amount: CurrencyService.instance.format(9.99),
                                 ),
                                 SizedBox(height: 10),
                                 _buildSubscriptionCard(
                                   iconColor: Color(0xFFFF9900),
                                   title: 'Amazon Prime',
-                                  amount: CurrencyFormatter.format(8.99),
+                                  amount: CurrencyService.instance.format(8.99),
                                 ),
                                 SizedBox(height: 10),
                                 _buildSubscriptionCard(
                                   iconColor: Color(0xFFFF0000),
                                   title: 'YouTube Premium',
-                                  amount: CurrencyFormatter.format(13.99),
+                                  amount: CurrencyService.instance.format(13.99),
                                 ),
                               ],
                             ),

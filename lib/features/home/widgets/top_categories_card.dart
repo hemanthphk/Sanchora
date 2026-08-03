@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:sanchora/core/utils/currency_formatter.dart';
+import 'package:sanchora/core/services/currency_service.dart';
 import 'package:sanchora/features/categories/screens/top_categories_screen.dart';
 import 'package:sanchora/features/subscriptions/screens/subscriptions_screen.dart';
 import 'package:sanchora/features/home/utils/category_provider.dart';
@@ -66,13 +66,24 @@ class _TopCategoriesCardState extends State<TopCategoriesCard> {
                 borderRadius: BorderRadius.circular(8),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-                  child: Text(
-                    'View All →',
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                      color: theme.colorScheme.primary,
-                    ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'View All',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                          color: theme.colorScheme.primary,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      Icon(
+                        Icons.arrow_forward_ios_rounded,
+                        size: 14,
+                        color: theme.colorScheme.primary,
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -198,7 +209,7 @@ class _TopCategoriesCardState extends State<TopCategoriesCard> {
                   fit: BoxFit.scaleDown,
                   alignment: Alignment.centerLeft,
                   child: Text(
-                    CurrencyFormatter.format(data.amount),
+                    CurrencyService.instance.format(data.amount),
                     maxLines: 1,
                     style: TextStyle(
                       fontSize: 16,

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:sanchora/core/utils/currency_formatter.dart';
+import 'package:sanchora/core/services/currency_service.dart';
 
 class SubscriptionSummary extends StatelessWidget {
   const SubscriptionSummary({
@@ -105,7 +105,7 @@ class SubscriptionSummary extends StatelessWidget {
         ),
         const SizedBox(height: 3),
         Text(
-          CurrencyFormatter.format(amount),
+          CurrencyService.instance.format(amount),
           style: TextStyle(
             fontSize: 17,
             fontWeight: FontWeight.w800,

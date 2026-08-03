@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sanchora/features/subscriptions/models/subscription_model.dart';
 import 'package:sanchora/core/theme/app_colors.dart';
-import 'package:sanchora/core/utils/currency_formatter.dart';
+import 'package:sanchora/core/services/currency_service.dart';
 import 'package:sanchora/features/subscriptions/widgets/subscription_icon.dart';
 
 class AnalyticsCostConcentration extends StatelessWidget {
@@ -192,7 +192,7 @@ class AnalyticsCostConcentration extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    '${CurrencyFormatter.format(cost.round())}/mo',
+                    '${CurrencyService.instance.format(cost.round())}/mo',
                     style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w700,

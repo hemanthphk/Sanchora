@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sanchora/features/profile/screens/profile_screen.dart';
 import 'package:sanchora/core/widgets/app_header.dart';
-import 'package:sanchora/core/utils/currency_formatter.dart';
+import 'package:sanchora/core/services/currency_service.dart';
 import 'package:sanchora/features/home/widgets/spending_overview_card.dart';
 import 'package:sanchora/features/home/widgets/top_categories_card.dart';
 import 'package:sanchora/features/home/widgets/hero_summary_card.dart';
@@ -79,14 +79,25 @@ class _HomeScreenState extends State<HomeScreen> {
                     FittedBox(
                       fit: BoxFit.scaleDown,
                       alignment: Alignment.centerLeft,
-                      child: Text(
-                        '👋 Hi, Hemanth',
-                        maxLines: 1,
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.w800,
-                          color: Theme.of(context).colorScheme.onSurface,
-                        ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.waving_hand_rounded,
+                            size: 24,
+                            color: Theme.of(context).colorScheme.onSurface,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Hi, Hemanth',
+                            maxLines: 1,
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.w800,
+                              color: Theme.of(context).colorScheme.onSurface,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -266,13 +277,24 @@ class _HomeScreenState extends State<HomeScreen> {
                 onTap: () =>
                     pushScreen(const UpcomingPaymentsScreen()),
                 borderRadius: BorderRadius.circular(8),
-                child: const Text(
-                  'View All →',
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w700,
-                    color: Color(0xFF1677FF),
-                  ),
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'View All',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF1677FF),
+                      ),
+                    ),
+                    SizedBox(width: 4),
+                    Icon(
+                      Icons.arrow_forward_ios_rounded,
+                      size: 14,
+                      color: Color(0xFF1677FF),
+                    ),
+                  ],
                 ),
               ),
             ],
@@ -281,7 +303,7 @@ class _HomeScreenState extends State<HomeScreen> {
           _buildPaymentTile(
             name: 'Netflix',
             date: 'May 25, 2025',
-            amount: CurrencyFormatter.format(649),
+            amount: CurrencyService.instance.format(649),
             daysLeft: '2 days left',
             icon: Icons.play_circle_fill_rounded,
             color: const Color(0xFFFF3B30),
@@ -290,7 +312,7 @@ class _HomeScreenState extends State<HomeScreen> {
           _buildPaymentTile(
             name: 'Spotify Premium',
             date: 'May 27, 2025',
-            amount: CurrencyFormatter.format(119),
+            amount: CurrencyService.instance.format(119),
             daysLeft: '4 days left',
             icon: Icons.music_note_rounded,
             color: const Color(0xFF1DB954),
@@ -299,7 +321,7 @@ class _HomeScreenState extends State<HomeScreen> {
           _buildPaymentTile(
             name: 'Amazon Prime',
             date: 'May 30, 2025',
-            amount: CurrencyFormatter.format(179),
+            amount: CurrencyService.instance.format(179),
             daysLeft: '7 days left',
             icon: Icons.shopping_bag_rounded,
             color: const Color(0xFFFF9900),

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:sanchora/core/utils/currency_formatter.dart';
+import 'package:sanchora/core/services/currency_service.dart';
 
 class SpendingBarData {
   final String label;
@@ -87,7 +87,7 @@ class _SpendingOverviewCardState extends State<SpendingOverviewCard> {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
-                    CurrencyFormatter.format(2430),
+                    CurrencyService.instance.format(2430),
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.w800,
@@ -118,7 +118,7 @@ class _SpendingOverviewCardState extends State<SpendingOverviewCard> {
               child: AnimatedSwitcher(
                 duration: const Duration(milliseconds: 150),
                 child: Text(
-                  '${selectedBar.tooltipLabel ?? selectedBar.label} • ${CurrencyFormatter.format(selectedBar.amount)}',
+                  '${selectedBar.tooltipLabel ?? selectedBar.label} • ${CurrencyService.instance.format(selectedBar.amount)}',
                   key: ValueKey(selectedBar.label),
                   style: TextStyle(
                     fontSize: 12.5,
@@ -156,7 +156,7 @@ class _SpendingOverviewCardState extends State<SpendingOverviewCard> {
               Row(
                 children: [
                   Text(
-                    CurrencyFormatter.format(649),
+                    CurrencyService.instance.format(649),
                     style: TextStyle(
                       fontSize: 12.5,
                       fontWeight: FontWeight.w700,

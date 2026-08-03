@@ -4,8 +4,21 @@ import 'notification_settings_screen.dart';
 import '../services/notification_history_service.dart';
 import '../models/notification_message.dart';
 import 'package:sanchora/core/widgets/app_header.dart';
-class NotificationsInboxScreen extends StatelessWidget {
+class NotificationsInboxScreen extends StatefulWidget {
   const NotificationsInboxScreen({super.key});
+
+  @override
+  State<NotificationsInboxScreen> createState() => _NotificationsInboxScreenState();
+}
+
+class _NotificationsInboxScreenState extends State<NotificationsInboxScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      NotificationHistoryService.instance.markAllAsRead();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {

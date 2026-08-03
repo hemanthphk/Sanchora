@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sanchora/core/theme/app_colors.dart';
 import 'package:sanchora/core/theme/app_text_styles.dart';
-import 'package:sanchora/core/utils/currency_formatter.dart';
+import 'package:sanchora/core/services/currency_service.dart';
 import 'package:sanchora/core/widgets/sanchora_card.dart';
 import 'package:sanchora/features/subscriptions/models/subscription_model.dart';
 import 'package:sanchora/features/subscriptions/presentation/pages/view_subscription_page.dart';
@@ -79,7 +79,7 @@ class UpcomingPaymentCard extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          '${CurrencyFormatter.format(subscription.currentPrice)}/${subscription.billingCycle == BillingCycle.monthly ? 'month' : 'year'}',
+                          '${CurrencyService.instance.format(subscription.currentPrice)}/${subscription.billingCycle == BillingCycle.monthly ? 'month' : 'year'}',
                           style: TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.w600,

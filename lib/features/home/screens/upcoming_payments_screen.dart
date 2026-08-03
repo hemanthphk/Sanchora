@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sanchora/features/subscriptions/models/subscription_model.dart';
 import 'package:sanchora/features/subscriptions/services/subscription_service.dart';
-import 'package:sanchora/core/utils/currency_formatter.dart';
+import 'package:sanchora/core/services/currency_service.dart';
 import '../widgets/upcoming_payment_card.dart';
 import '../widgets/upcoming_payments_empty_state.dart';
 
@@ -205,7 +205,7 @@ class _UpcomingPaymentsScreenState extends State<UpcomingPaymentsScreen> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    '${CurrencyFormatter.format(_amountDueThisWeek)} due this week',
+                    '${CurrencyService.instance.format(_amountDueThisWeek)} due this week',
                     style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w500,

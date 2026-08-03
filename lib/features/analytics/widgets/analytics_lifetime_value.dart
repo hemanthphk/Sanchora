@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sanchora/features/subscriptions/models/subscription_model.dart';
 import 'package:sanchora/core/theme/app_colors.dart';
-import 'package:sanchora/core/utils/currency_formatter.dart';
+import 'package:sanchora/core/services/currency_service.dart';
 import 'package:sanchora/features/subscriptions/widgets/subscription_icon.dart';
 
 class AnalyticsLifetimeValue extends StatelessWidget {
@@ -139,7 +139,7 @@ class AnalyticsLifetimeValue extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           Text(
-                            CurrencyFormatter.format((item['totalPaid'] as double).round()),
+                            CurrencyService.instance.format((item['totalPaid'] as double).round()),
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w700,

@@ -1,8 +1,14 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
 
+import '../models/notification_settings_model.dart';
+import 'notification_settings_service.dart';
+
 class LocalNotificationProvider {
+  final NotificationSettingsService settingsService;
   final FlutterLocalNotificationsPlugin _plugin = FlutterLocalNotificationsPlugin();
+
+  LocalNotificationProvider({required this.settingsService});
 
   Future<void> initialize() async {
     const AndroidInitializationSettings androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
@@ -15,31 +21,16 @@ class LocalNotificationProvider {
       android: androidSettings,
       iOS: iosSettings,
     );
-    await _plugin.initialize(settings: initSettings);
-    
-    await _createAndroidChannels();
+    await _plugin.initialize(
+      settings: initSettings,
+      onDidReceiveNotificationResponse: _onNotificationTapped,
+    );
   }
 
-  Future<void> _createAndroidChannels() async {
-    final flutterLocalNotificationsPlugin = _plugin.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
-    if (flutterLocalNotificationsPlugin == null) return;
-
-    const AndroidNotificationChannel remindersChannel = AndroidNotificationChannel(
-      'reminders_channel',
-      'Reminders',
-      description: 'Notifications for subscription renewals and trials',
-      importance: Importance.high,
-    );
-    const AndroidNotificationChannel summariesChannel = AndroidNotificationChannel(
-      'summaries_channel',
-      'Summaries',
-      description: 'Weekly and monthly summaries',
-      importance: Importance.defaultImportance,
-    );
-
-    await flutterLocalNotificationsPlugin.createNotificationChannel(remindersChannel);
-    await flutterLocalNotificationsPlugin.createNotificationChannel(summariesChannel);
+  void _onNotificationTapped(NotificationResponse response) {
+    NotificationSettingsService.notificationTapStream.add(response.payload);
   }
+
 
   Future<void> showNotification({
     required int id,
@@ -47,10 +38,15 @@ class LocalNotificationProvider {
     required String body,
     String channelId = 'reminders_channel',
   }) async {
+    final settings = settingsService.settings;
+    final isPreviewHidden = settings.previewMode == NotificationPreviewMode.never;
+    final finalTitle = isPreviewHidden ? 'Sanchora' : title;
+    final finalBody = isPreviewHidden ? 'You have a new notification.' : body;
+
     await _plugin.show(
       id: id,
-      title: title,
-      body: body,
+      title: finalTitle,
+      body: finalBody,
       notificationDetails: _getDetails(channelId),
     );
   }
@@ -62,10 +58,15 @@ class LocalNotificationProvider {
     required DateTime scheduledDate,
     String channelId = 'reminders_channel',
   }) async {
+    final settings = settingsService.settings;
+    final isPreviewHidden = settings.previewMode == NotificationPreviewMode.never;
+    final finalTitle = isPreviewHidden ? 'Sanchora' : title;
+    final finalBody = isPreviewHidden ? 'You have a new notification.' : body;
+
     await _plugin.zonedSchedule(
       id: id,
-      title: title,
-      body: body,
+      title: finalTitle,
+      body: finalBody,
       scheduledDate: tz.TZDateTime.from(scheduledDate, tz.local),
       notificationDetails: _getDetails(channelId),
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
@@ -80,15 +81,31 @@ class LocalNotificationProvider {
     await _plugin.cancelAll();
   }
 
-  NotificationDetails _getDetails(String channelId) {
+  NotificationDetails _getDetails(String baseChannelId) {
+    final settings = settingsService.settings;
+    
+    // Dynamic channel ID to bypass Android's locked channel settings.
+    final String dynamicChannelId = '${baseChannelId}_s${settings.playSound}_v${settings.enableVibration}';
+    final String channelName = baseChannelId == 'reminders_channel' ? 'Reminders' : 'Summaries';
+    final String channelDescription = baseChannelId == 'reminders_channel' 
+        ? 'Notifications for subscription renewals and trials' 
+        : 'Weekly and monthly summaries';
+    final Importance importance = baseChannelId == 'reminders_channel' ? Importance.high : Importance.defaultImportance;
+    final Priority priority = baseChannelId == 'reminders_channel' ? Priority.high : Priority.defaultPriority;
+
     return NotificationDetails(
       android: AndroidNotificationDetails(
-        channelId,
-        channelId == 'reminders_channel' ? 'Reminders' : 'Summaries',
-        importance: channelId == 'reminders_channel' ? Importance.high : Importance.defaultImportance,
-        priority: channelId == 'reminders_channel' ? Priority.high : Priority.defaultPriority,
+        dynamicChannelId,
+        channelName,
+        channelDescription: channelDescription,
+        importance: importance,
+        priority: priority,
+        playSound: settings.playSound,
+        enableVibration: settings.enableVibration,
       ),
-      iOS: const DarwinNotificationDetails(),
+      iOS: DarwinNotificationDetails(
+        presentSound: settings.playSound,
+      ),
     );
   }
 }

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sanchora/features/subscriptions/models/subscription_model.dart';
 import 'package:sanchora/core/theme/app_colors.dart';
-import 'package:sanchora/core/utils/currency_formatter.dart';
+import 'package:sanchora/core/services/currency_service.dart';
 
 class AnalyticsSmartRecommendations extends StatelessWidget {
   final List<SubscriptionModel> subscriptions;
@@ -30,7 +30,7 @@ class AnalyticsSmartRecommendations extends StatelessWidget {
             recommendations.add(
               _RecommendationCard(
                 title: 'Switch to Annual',
-                description: 'Upgrade ${sub.name} to an annual plan and save ${CurrencyFormatter.format(savings.round())} every year.',
+                description: 'Upgrade ${sub.name} to an annual plan and save ${CurrencyService.instance.format(savings.round())} every year.',
                 icon: Icons.savings_rounded,
                 color: AppColors.success,
                 theme: theme,

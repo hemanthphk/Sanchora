@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:sanchora/core/utils/currency_formatter.dart';
+import 'package:sanchora/core/services/currency_service.dart';
 import 'package:sanchora/features/subscriptions/models/subscription_model.dart';
 
 class AiHeroCard extends StatelessWidget {
@@ -116,7 +116,7 @@ class AiHeroCard extends StatelessWidget {
       return 'You have no active subscriptions. Tap + to add one.';
     }
     if (savings > 50) {
-      return 'Potential monthly savings: ${CurrencyFormatter.format(savings)}. Consider switching $annualSwitchCount ${annualSwitchCount == 1 ? 'subscription' : 'subscriptions'} to annual billing.';
+      return 'Potential monthly savings: ${CurrencyService.instance.format(savings)}. Consider switching $annualSwitchCount ${annualSwitchCount == 1 ? 'subscription' : 'subscriptions'} to annual billing.';
     }
     if (topCategory.isNotEmpty && active >= 3) {
       return '$topCategory is your highest spending category. You are actively managing $active subscriptions.';

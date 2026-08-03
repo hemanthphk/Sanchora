@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sanchora/features/subscriptions/models/subscription_model.dart';
 import 'package:sanchora/core/theme/app_colors.dart';
-import 'package:sanchora/core/utils/currency_formatter.dart';
+import 'package:sanchora/core/services/currency_service.dart';
 
 class AnalyticsCategoryIntelligence extends StatefulWidget {
   final List<SubscriptionModel> subscriptions;
@@ -92,7 +92,7 @@ class _AnalyticsCategoryIntelligenceState extends State<AnalyticsCategoryIntelli
           _buildCategoryTile(
             title: 'Largest Category',
             category: largestCategory,
-            value: CurrencyFormatter.format(categoryCosts[largestCategory]!.round()),
+            value: CurrencyService.instance.format(categoryCosts[largestCategory]!.round()),
             icon: Icons.pie_chart_rounded,
             iconColor: const Color(0xFF3B82F6), // Blue
             theme: theme,
@@ -116,7 +116,7 @@ class _AnalyticsCategoryIntelligenceState extends State<AnalyticsCategoryIntelli
           _buildCategoryTile(
             title: 'Least Used',
             category: leastUsedCategory,
-            value: CurrencyFormatter.format(categoryCosts[leastUsedCategory]!.round()),
+            value: CurrencyService.instance.format(categoryCosts[leastUsedCategory]!.round()),
             icon: Icons.trending_down_rounded,
             iconColor: const Color(0xFFF59E0B), // Orange
             theme: theme,
@@ -267,7 +267,7 @@ class _AnalyticsCategoryIntelligenceState extends State<AnalyticsCategoryIntelli
                   style: TextStyle(fontSize: 14, color: theme.colorScheme.onSurface),
                 ),
                 Text(
-                  '${CurrencyFormatter.format(cost.round())}/mo',
+                  '${CurrencyService.instance.format(cost.round())}/mo',
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sanchora/features/subscriptions/models/subscription_model.dart';
-import 'package:sanchora/core/utils/currency_formatter.dart';
+import 'package:sanchora/core/services/currency_service.dart';
 
 class AnalyticsMonthlyInsight extends StatelessWidget {
   final List<SubscriptionModel> subscriptions;
@@ -29,7 +29,7 @@ class AnalyticsMonthlyInsight extends StatelessWidget {
       final cost = sub.billingCycle == BillingCycle.monthly ? sub.monthlyPrice : sub.yearlyPrice / 12;
       insights.add({
         'title': 'Highest Drain',
-        'desc': '${sub.name} is your most expensive service at ${CurrencyFormatter.format(cost.round())}/mo.',
+        'desc': '${sub.name} is your most expensive service at ${CurrencyService.instance.format(cost.round())}/mo.',
         'icon': Icons.diamond_rounded,
         'colors': [const Color(0xFF8A2387), const Color(0xFFE94057), const Color(0xFFF27121)],
       });
