@@ -6,6 +6,7 @@ import 'package:sanchora/features/splash/screens/splash_screen.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:sanchora/features/notifications/services/notification_service.dart';
 import 'package:workmanager/workmanager.dart';
+import 'package:sanchora/features/profile/services/profile_service.dart';
 
 @pragma('vm:entry-point')
 void callbackDispatcher() {
@@ -24,6 +25,9 @@ void main() async {
   
   // Initialize Notifications
   await NotificationService.instance.initialize();
+  
+  // Initialize Profile Service for avatars
+  await ProfileService.initialize();
   
   // Initialize Workmanager
   Workmanager().initialize(

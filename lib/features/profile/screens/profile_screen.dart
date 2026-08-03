@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:sanchora/features/auth/screens/login_screen.dart';
 import 'package:sanchora/features/home/screens/home_screen.dart';
 import 'package:sanchora/core/utils/currency_formatter.dart';
+import 'package:sanchora/core/widgets/sanchora_page_header.dart';
 import '../widgets/profile_app_bar.dart';
 import '../widgets/profile_header_card.dart';
 import '../widgets/analytics_summary_card.dart';
@@ -11,6 +12,7 @@ import '../widgets/logout_button.dart';
 import '../../add_subscription/presentation/pages/add_subscription_page.dart';
 import '../../analytics/screens/analytics_screen.dart';
 import '../../notifications/screens/notification_settings_screen.dart';
+import 'personal_information_screen.dart';
 import 'package:sanchora/core/services/navigation_event_bus.dart';
 import 'package:sanchora/core/widgets/sanchora_bottom_nav.dart';
 import 'dart:async';
@@ -138,8 +140,8 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                   email: 'hemanth@example.com',
                   avatarInitials: 'HP',
                   isPremium: true,
-                  onTap: () => _openScreen(context, const ProfileDetailsScreen()),
-                  onEditAvatarTap: () => _openScreen(context, const ProfileDetailsScreen()),
+                  onTap: () => _openScreen(context, const PersonalInformationScreen()),
+                  onEditAvatarTap: () => _openScreen(context, const PersonalInformationScreen()),
                 ),
               ),
             ),
@@ -171,7 +173,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                       iconColor: const Color(0xFF2563EB),
                       title: 'Personal Information',
                       subtitle: 'Update your personal details',
-                      onTap: () => _openScreen(context, const PersonalInfoScreen()),
+                      onTap: () => _openScreen(context, const PersonalInformationScreen()),
                     ),
                     SettingsTile(
                       icon: Icons.workspace_premium_rounded,
@@ -385,25 +387,13 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
   }
 }
 
-class PersonalInfoScreen extends StatelessWidget {
-  const PersonalInfoScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Personal Information')),
-      body: const Center(child: Text('Personal Information Screen')),
-    );
-  }
-}
-
 class PremiumScreen extends StatelessWidget {
   const PremiumScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Premium')),
+      appBar: const SanchoraPageHeader(title: 'Premium'),
       body: const Center(child: Text('Premium Screen')),
     );
   }
@@ -415,13 +405,11 @@ class BillingScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Billing & Payments')),
+      appBar: const SanchoraPageHeader(title: 'Billing & Payments'),
       body: const Center(child: Text('Billing Screen')),
     );
   }
 }
-
-
 
 class CurrencyScreen extends StatelessWidget {
   const CurrencyScreen({super.key});
@@ -429,7 +417,7 @@ class CurrencyScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Currency')),
+      appBar: const SanchoraPageHeader(title: 'Currency'),
       body: const Center(child: Text('Currency Screen')),
     );
   }
@@ -441,7 +429,7 @@ class PrivacyScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Data & Privacy')),
+      appBar: const SanchoraPageHeader(title: 'Data & Privacy'),
       body: const Center(child: Text('Privacy Screen')),
     );
   }
@@ -453,7 +441,7 @@ class FaqScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Help & FAQs')),
+      appBar: const SanchoraPageHeader(title: 'Help & FAQs'),
       body: const Center(child: Text('FAQ Screen')),
     );
   }
@@ -465,7 +453,7 @@ class ContactScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Contact Support')),
+      appBar: const SanchoraPageHeader(title: 'Contact Support'),
       body: const Center(child: Text('Contact Screen')),
     );
   }
@@ -477,20 +465,8 @@ class AboutScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('About Sanchora')),
+      appBar: const SanchoraPageHeader(title: 'About Sanchora'),
       body: const Center(child: Text('About Screen')),
-    );
-  }
-}
-
-class ProfileDetailsScreen extends StatelessWidget {
-  const ProfileDetailsScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Profile Details')),
-      body: const Center(child: Text('Profile Details Screen')),
     );
   }
 }
@@ -501,7 +477,7 @@ class SubscriptionsPlaceholderScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Subscriptions')),
+      appBar: const SanchoraPageHeader(title: 'Subscriptions'),
       body: const Center(child: Text('Subscriptions Screen')),
     );
   }

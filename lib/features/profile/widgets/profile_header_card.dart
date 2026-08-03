@@ -1,5 +1,6 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
-
+import 'package:sanchora/features/profile/services/profile_service.dart';
 class ProfileHeaderCard extends StatelessWidget {
   const ProfileHeaderCard({
     super.key,
@@ -51,33 +52,65 @@ class ProfileHeaderCard extends StatelessWidget {
               Stack(
                 clipBehavior: Clip.none,
                 children: [
-                  Container(
-                    width: 64,
-                    height: 64,
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFF0A84FF), Color(0xFF4DA3FF)],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      borderRadius: BorderRadius.circular(18),
-                      boxShadow: const [
-                        BoxShadow(
-                          color: Color(0x240A84FF),
-                          blurRadius: 14,
-                          offset: Offset(0, 6),
+                  ValueListenableBuilder<String?>(
+                    valueListenable: ProfileService.avatarPathNotifier,
+                    builder: (context, avatarPath, _) {
+                      if (avatarPath != null) {
+                        if (File(avatarPath).existsSync()) {
+                          return Container(
+                            width: 64,
+                            height: 64,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(18),
+                              boxShadow: const [
+                                BoxShadow(
+                                  color: Color(0x240A84FF),
+                                  blurRadius: 14,
+                                  offset: Offset(0, 6),
+                                ),
+                              ],
+                              image: DecorationImage(
+                                image: FileImage(File(avatarPath)),
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          );
+                        } else {
+                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                            ProfileService.removeAvatar();
+                          });
+                        }
+                      }
+                      
+                      return Container(
+                        width: 64,
+                        height: 64,
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFF0A84FF), Color(0xFF4DA3FF)],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          borderRadius: BorderRadius.circular(18),
+                          boxShadow: const [
+                            BoxShadow(
+                              color: Color(0x240A84FF),
+                              blurRadius: 14,
+                              offset: Offset(0, 6),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                    alignment: Alignment.center,
-                    child: Text(
-                      avatarInitials,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 22,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
+                        alignment: Alignment.center,
+                        child: Text(
+                          avatarInitials,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 22,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      );
+                    },
                   ),
                   Positioned(
                     bottom: -3,

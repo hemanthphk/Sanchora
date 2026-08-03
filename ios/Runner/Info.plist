@@ -66,5 +66,11 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSCameraUsageDescription</key>
+	<string>Used to take a profile picture.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Used to select a profile picture from your gallery.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Used for video recording when capturing a profile picture.</string>
 </dict>
 </plist>
