@@ -88,12 +88,13 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with SingleTickerProv
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final summary = SubscriptionService.instance.dashboardSummary;
     final subscriptions = SubscriptionService.instance.subscriptions;
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
-        child: subscriptions.isEmpty
+        child: summary.activeSubscriptions == 0 && subscriptions.isEmpty
             ? const AnalyticsEmptyState()
             : CustomScrollView(
                 controller: _scrollController,

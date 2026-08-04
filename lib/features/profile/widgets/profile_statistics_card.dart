@@ -14,9 +14,9 @@ class ProfileStatisticsCard extends StatelessWidget {
     return ListenableBuilder(
       listenable: subscriptionService,
       builder: (context, _) {
-        final activeSubs = subscriptionService.activeSubscriptionCount;
-        final totalSpent = CurrencyService.instance.format(subscriptionService.totalSpent, compact: true);
-        final totalSaved = CurrencyService.instance.format(subscriptionService.totalSaved, compact: true);
+        final activeSubs = subscriptionService.dashboardSummary.activeSubscriptions;
+        final totalSpent = CurrencyService.instance.format(subscriptionService.dashboardSummary.lifetimeSpend, compact: true);
+        final totalSaved = CurrencyService.instance.format(subscriptionService.dashboardSummary.totalSaved, compact: true);
 
         return Container(
           width: double.infinity,

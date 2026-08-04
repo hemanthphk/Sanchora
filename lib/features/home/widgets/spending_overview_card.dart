@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sanchora/core/services/currency_service.dart';
+import 'package:sanchora/features/subscriptions/services/subscription_service.dart';
 
 class SpendingBarData {
   final String label;
@@ -23,22 +24,41 @@ class SpendingOverviewCard extends StatefulWidget {
 }
 
 class _SpendingOverviewCardState extends State<SpendingOverviewCard> {
-  final List<SpendingBarData> _spendingData = const [
-    SpendingBarData(label: 'Mon', amount: 320, heightFactor: 0.49),
-    SpendingBarData(label: 'Tue', amount: 480, heightFactor: 0.74),
-    SpendingBarData(label: 'Wed', amount: 190, heightFactor: 0.29),
-    SpendingBarData(label: 'Thu', amount: 410, heightFactor: 0.63),
-    SpendingBarData(label: 'Fri', amount: 720, heightFactor: 1.0),
-    SpendingBarData(label: 'Sat', amount: 430, heightFactor: 0.60, tooltipLabel: 'Yesterday'),
-    SpendingBarData(label: 'Sun', amount: 649, heightFactor: 0.90, tooltipLabel: 'Today'),
-  ];
-
   int _selectedIndex = 6; // Default to 'Today'
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final selectedBar = _spendingData[_selectedIndex];
+    
+    final spendingMap = SubscriptionService.instance.dashboardSummary.last7DaysSpending;
+    final sortedKeys = spendingMap.keys.toList()..sort();
+    
+    double maxAmount = 0;
+    for (var amount in spendingMap.values) {
+      if (amount > maxAmount) maxAmount = amount;
+    }
+    
+    final now = DateTime.now();
+    final todayMidnight = DateTime(now.year, now.month, now.day);
+    final yesterdayMidnight = todayMidnight.subtract(const Duration(days: 1));
+    
+    final spendingData = sortedKeys.map((date) {
+      final amount = spendingMap[date]!;
+      final heightFactor = maxAmount == 0 ? 0.01 : amount / maxAmount; // default to 0.01 so bar is slightly visible
+      final isToday = date == todayMidnight;
+      final isYesterday = date == yesterdayMidnight;
+      
+      final days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+      return SpendingBarData(
+        label: days[date.weekday - 1],
+        amount: amount,
+        heightFactor: heightFactor,
+        tooltipLabel: isToday ? 'Today' : (isYesterday ? 'Yesterday' : null),
+      );
+    }).toList();
+
+    final selectedBar = spendingData[_selectedIndex];
+    final summary = SubscriptionService.instance.dashboardSummary;
 
     return Container(
       width: double.infinity,
@@ -87,7 +107,7 @@ class _SpendingOverviewCardState extends State<SpendingOverviewCard> {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
-                    CurrencyService.instance.format(2430),
+                    CurrencyService.instance.format(summary.monthlySpend),
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.w800,
@@ -134,7 +154,7 @@ class _SpendingOverviewCardState extends State<SpendingOverviewCard> {
             height: 115,
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.end,
-              children: _spendingData
+              children: spendingData
                   .asMap()
                   .entries
                   .map((e) => _buildInteractiveBar(context, e.key, e.value))
@@ -156,7 +176,7 @@ class _SpendingOverviewCardState extends State<SpendingOverviewCard> {
               Row(
                 children: [
                   Text(
-                    CurrencyService.instance.format(649),
+                    summary.highestSpendAmount > 0 ? CurrencyService.instance.format(summary.highestSpendAmount) : CurrencyService.instance.format(0),
                     style: TextStyle(
                       fontSize: 12.5,
                       fontWeight: FontWeight.w700,
@@ -164,7 +184,7 @@ class _SpendingOverviewCardState extends State<SpendingOverviewCard> {
                     ),
                   ),
                   Text(
-                    ' • Netflix',
+                    summary.highestSpendSubscriptionName.isNotEmpty ? ' • ${summary.highestSpendSubscriptionName}' : ' • None',
                     style: TextStyle(
                       fontSize: 12,
                       color: theme.colorScheme.onSurfaceVariant,

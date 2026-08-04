@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sanchora/core/services/currency_service.dart';
 import 'package:sanchora/features/subscriptions/models/subscription_model.dart';
+import 'package:sanchora/features/subscriptions/services/subscription_service.dart';
 
 class AiHeroCard extends StatelessWidget {
   final List<SubscriptionModel> subscriptions;
@@ -12,7 +13,7 @@ class AiHeroCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final activeCount = subscriptions.where((s) => s.status != SubscriptionStatus.expired).length;
+    final activeCount = SubscriptionService.instance.dashboardSummary.activeSubscriptions;
     
     double potentialSavings = 0;
     final categorySpending = <String, double>{};

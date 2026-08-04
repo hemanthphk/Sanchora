@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'dart:ui';
 import 'package:sanchora/core/services/currency_service.dart';
+import 'package:sanchora/features/subscriptions/services/subscription_service.dart';
 
 class HeroSummaryCard extends StatelessWidget {
   const HeroSummaryCard({super.key});
@@ -20,227 +22,277 @@ class HeroSummaryCard extends StatelessWidget {
         );
       },
       child: Container(
-        height: 185,
+        height: 200,
         width: double.infinity,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(28),
           gradient: const LinearGradient(
-            colors: [Color(0xFF0A84FF), Color(0xFF2563EB)],
+            colors: [
+              Color(0xFF0A84FF), 
+              Color(0xFF2563EB), 
+              Color(0xFF005BEA)
+            ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF0A84FF).withValues(alpha: 0.22),
+              color: const Color(0xFF2563EB).withValues(alpha: 0.4),
               blurRadius: 24,
               offset: const Offset(0, 10),
             ),
           ],
         ),
-        child: Stack(
-          children: [
-            // Subtle radial light highlight from top-left
-            Positioned.fill(
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(28),
-                  gradient: RadialGradient(
-                    center: const Alignment(-0.8, -0.8),
-                    radius: 1.3,
-                    colors: [
-                      Colors.white.withValues(alpha: 0.18),
-                      Colors.transparent,
-                    ],
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(28),
+          child: Stack(
+            children: [
+              // 1. Flowing Wave Lines (Bottom-Left to Top-Right)
+              Positioned.fill(
+                child: CustomPaint(
+                  painter: WaveLinesPainter(),
+                ),
+              ),
+              // 2. Large transparent "S" watermark
+              Positioned(
+                right: -25,
+                bottom: -55,
+                child: Text(
+                  'S',
+                  style: TextStyle(
+                    fontSize: 220,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white.withValues(alpha: 0.09),
+                    height: 1.0,
+                    letterSpacing: -10,
                   ),
                 ),
               ),
-            ),
-            // Card Content
-            Padding(
-              padding: const EdgeInsets.fromLTRB(22, 20, 20, 20),
-              child: Row(
-                children: [
-                  // LEFT SECTION (65%)
-                  Expanded(
-                    flex: 65,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              
+              // CARD CONTENT
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // TOP SECTION
+                    Column(
                       children: [
-                        Text(
-                          'Total Spent This Month',
-                          style: TextStyle(
-                            fontSize: 13.5,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.white.withValues(alpha: 0.82),
-                            letterSpacing: 0.2,
-                          ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Container(
+                              width: 24,
+                              height: 24,
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(alpha: 0.2),
+                                borderRadius: BorderRadius.circular(7),
+                              ),
+                              child: const Icon(
+                                Icons.account_balance_wallet_rounded,
+                                color: Colors.white,
+                                size: 14,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Total Spent This Month',
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.white.withValues(alpha: 0.85),
+                                letterSpacing: 0.3,
+                              ),
+                            ),
+                          ],
                         ),
+                        const SizedBox(height: 4),
                         TweenAnimationBuilder<double>(
-                          tween: Tween<double>(begin: 0.0, end: 2430.0),
+                          tween: Tween<double>(begin: 0.0, end: SubscriptionService.instance.dashboardSummary.monthlySpend),
                           duration: const Duration(milliseconds: 1400),
                           curve: Curves.easeOutCubic,
                           builder: (context, val, child) {
                             return FittedBox(
                               fit: BoxFit.scaleDown,
-                              alignment: Alignment.centerLeft,
                               child: Text(
                                 CurrencyService.instance.format(val.round()),
-                                style: const TextStyle(
-                                  fontSize: 44,
+                                style: TextStyle(
+                                  fontSize: 56,
                                   fontWeight: FontWeight.w800,
                                   color: Colors.white,
-                                  letterSpacing: -1.2,
+                                  letterSpacing: -1.5,
                                   height: 1.1,
                                 ),
                               ),
                             );
                           },
                         ),
-                        TweenAnimationBuilder<double>(
-                          tween: Tween<double>(begin: 0.0, end: 1.0),
-                          duration: const Duration(milliseconds: 800),
-                          curve: const Interval(0.4, 1.0, curve: Curves.easeOut),
-                          builder: (context, val, child) {
-                            return Opacity(
-                              opacity: val.clamp(0.0, 1.0),
-                              child: Transform.translate(
-                                offset: Offset(0, 8 * (1 - val)),
-                                child: child,
-                              ),
-                            );
-                          },
-                          child: Row(
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 3.5,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFF34C759),
-                                  borderRadius: BorderRadius.circular(999),
-                                ),
-                                child: const Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(
-                                      Icons.arrow_downward_rounded,
-                                      color: Colors.white,
-                                      size: 12,
-                                    ),
-                                    SizedBox(width: 2),
-                                    Text(
-                                      '12%',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 11.5,
-                                        fontWeight: FontWeight.w700,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                'vs last month',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w500,
-                                  color: Colors.white.withValues(alpha: 0.78),
-                                ),
-                              ),
-                            ],
+                      ],
+                    ),
+                    
+                    // THIN DIVIDER
+                    Container(
+                      height: 1,
+                      width: double.infinity,
+                      color: Colors.white.withValues(alpha: 0.1),
+                    ),
+                    
+                    // BOTTOM SECTION: 2 GLASS CARDS
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _buildGlassCard(
+                            icon: Icons.inventory_2_outlined,
+                            value: SubscriptionService.instance.dashboardSummary.activeSubscriptions.toString(),
+                            label: 'Active Subs',
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: _buildGlassCard(
+                            icon: Icons.notifications_none_outlined,
+                            value: SubscriptionService.instance.dashboardSummary.upcomingPayments.toString(),
+                            label: 'Upcoming Due',
+                            showDot: true,
                           ),
                         ),
                       ],
                     ),
-                  ),
-                  // SUBTLE DIVIDER
-                  Container(
-                    width: 1,
-                    height: double.infinity,
-                    margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                    color: Colors.white.withValues(alpha: 0.14),
-                  ),
-                  // RIGHT SECTION (35%)
-                  Expanded(
-                    flex: 35,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        _buildRightStat(
-                          label: 'Active Subscriptions',
-                          value: '8',
-                          icon: Icons.subscriptions_rounded,
-                        ),
-                        _buildRightStat(
-                          label: 'Upcoming Payments',
-                          value: '3',
-                          icon: Icons.calendar_today_rounded,
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildRightStat({
-    required String label,
-    required String value,
+  Widget _buildGlassCard({
     required IconData icon,
+    required String value,
+    required String label,
+    bool showDot = false,
   }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Text(
-              value,
-              style: const TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.w800,
-                color: Colors.white,
-                letterSpacing: -0.5,
-                height: 1.0,
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.15), width: 1),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(22),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.11),
+              // Subtle inner highlight effect
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Colors.white.withValues(alpha: 0.15),
+                  Colors.white.withValues(alpha: 0.0),
+                ],
               ),
             ),
-            Container(
-              width: 28,
-              height: 28,
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.18),
-                shape: BoxShape.circle,
-              ),
-              alignment: Alignment.center,
-              child: Icon(icon, size: 14, color: Colors.white),
-            ),
-          ],
-        ),
-        const SizedBox(height: 4),
-        FittedBox(
-          fit: BoxFit.scaleDown,
-          alignment: Alignment.centerLeft,
-          child: Text(
-            label,
-            maxLines: 1,
-            style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w500,
-              color: Colors.white.withValues(alpha: 0.75),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // Icon in glass circle
+                Stack(
+                  children: [
+                    Container(
+                      width: 34,
+                      height: 34,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.white.withValues(alpha: 0.12),
+                      ),
+                      child: Icon(icon, size: 16, color: Colors.white),
+                    ),
+                    if (showDot)
+                      Positioned(
+                        top: 8,
+                        right: 8,
+                        child: Container(
+                          width: 6,
+                          height: 6,
+                          decoration: const BoxDecoration(
+                            color: Color(0xFF4ADE80),
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        value,
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          height: 1.1,
+                        ),
+                      ),
+                      Text(
+                        label,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 13, // 14-16px requested, but 13-14 fits better usually. Let's use 14.
+                          fontWeight: FontWeight.w500,
+                          color: Colors.white.withValues(alpha: 0.85),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
         ),
-      ],
+      ),
     );
   }
+}
+
+class WaveLinesPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.white.withValues(alpha: 0.06)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.2
+      ..isAntiAlias = true;
+
+    // Line 1
+    final path1 = Path()
+      ..moveTo(0, size.height * 0.7)
+      ..quadraticBezierTo(size.width * 0.4, size.height * 0.85, size.width, size.height * 0.1);
+
+    // Line 2
+    final path2 = Path()
+      ..moveTo(0, size.height * 0.85)
+      ..quadraticBezierTo(size.width * 0.5, size.height * 1.0, size.width, size.height * 0.25);
+
+    // Line 3
+    final path3 = Path()
+      ..moveTo(0, size.height * 1.0)
+      ..quadraticBezierTo(size.width * 0.6, size.height * 1.15, size.width, size.height * 0.4);
+
+    canvas.drawPath(path1, paint);
+    canvas.drawPath(path2, paint);
+    canvas.drawPath(path3, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

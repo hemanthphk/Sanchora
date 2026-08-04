@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:sanchora/features/profile/services/profile_service.dart';
+import 'package:sanchora/features/subscriptions/services/subscription_service.dart';
+import 'package:sanchora/features/subscriptions/models/subscription_model.dart';
+import 'package:sanchora/features/subscriptions/presentation/pages/view_subscription_page.dart';
 import 'package:sanchora/features/profile/screens/profile_screen.dart';
 import 'package:sanchora/core/widgets/app_header.dart';
 import 'package:sanchora/core/services/currency_service.dart';
@@ -69,27 +73,36 @@ class _HomeScreenState extends State<HomeScreen> {
               actions: [_buildNotificationButton()],
             ),
             Expanded(
-              child: SingleChildScrollView(
-                controller: _scrollController,
-                padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 4),
-                    FittedBox(
-                      fit: BoxFit.scaleDown,
-                      alignment: Alignment.centerLeft,
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.waving_hand_rounded,
-                            size: 24,
-                            color: Theme.of(context).colorScheme.onSurface,
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Hi, Hemanth',
+              child: ListenableBuilder(
+                listenable: Listenable.merge([
+                  SubscriptionService.instance,
+                  ProfileService.currentUserNotifier,
+                ]),
+                builder: (context, _) {
+                  final user = ProfileService.currentUserNotifier.value;
+                  final firstName = user.name.split(' ').first;
+                  final hour = DateTime.now().hour;
+                  String greeting = 'Good Evening';
+                  if (hour < 12) {
+                    greeting = 'Good Morning';
+                  } else if (hour < 17) {
+                    greeting = 'Good Afternoon';
+                  }
+
+                  final hasSubscriptions = SubscriptionService.instance.subscriptions.isNotEmpty;
+
+                  return SingleChildScrollView(
+                    controller: _scrollController,
+                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 4),
+                        FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            '$greeting, $firstName',
                             maxLines: 1,
                             style: TextStyle(
                               fontSize: 24,
@@ -97,34 +110,37 @@ class _HomeScreenState extends State<HomeScreen> {
                               color: Theme.of(context).colorScheme.onSurface,
                             ),
                           ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    FittedBox(
-                      fit: BoxFit.scaleDown,
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        "Here's your subscriptions overview.",
-                        maxLines: 1,
-                        style: TextStyle(
-                          fontSize: 14.5,
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                          height: 1.45,
                         ),
-                      ),
+                        const SizedBox(height: 8),
+                        FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            "Stay on top of your subscriptions.",
+                            maxLines: 1,
+                            style: TextStyle(
+                              fontSize: 14.5,
+                              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.75),
+                              height: 1.45,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        _buildSummaryCard(),
+                        const SizedBox(height: 16),
+                        if (hasSubscriptions) ...[
+                          _buildUpcomingPaymentsCard(),
+                          const SizedBox(height: 16),
+                          _buildSpendingOverviewCard(),
+                          const SizedBox(height: 16),
+                          _buildTopCategoriesCard(),
+                        ] else
+                          _buildEmptyState(),
+                        SizedBox(height: isCompact ? 10 : 8),
+                      ],
                     ),
-                    const SizedBox(height: 16),
-                    _buildSummaryCard(),
-                    const SizedBox(height: 16),
-                    _buildUpcomingPaymentsCard(),
-                    const SizedBox(height: 16),
-                    _buildSpendingOverviewCard(),
-                    const SizedBox(height: 16),
-                    _buildTopCategoriesCard(),
-                    SizedBox(height: isCompact ? 10 : 8),
-                  ],
-                ),
+                  );
+                }
               ),
             ),
           ],
@@ -242,10 +258,13 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildSummaryCard() {
-    return const HeroSummaryCard();
+    return HeroSummaryCard();
   }
 
   Widget _buildUpcomingPaymentsCard() {
+    final upcoming = SubscriptionService.instance.upcomingRenewals.take(3).toList();
+    if (upcoming.isEmpty) return const SizedBox.shrink();
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(18, 16, 18, 16),
@@ -300,38 +319,56 @@ class _HomeScreenState extends State<HomeScreen> {
             ],
           ),
           const SizedBox(height: 12),
-          _buildPaymentTile(
-            name: 'Netflix',
-            date: 'May 25, 2025',
-            amount: CurrencyService.instance.format(649),
-            daysLeft: '2 days left',
-            icon: Icons.play_circle_fill_rounded,
-            color: const Color(0xFFFF3B30),
-          ),
-          const SizedBox(height: 10),
-          _buildPaymentTile(
-            name: 'Spotify Premium',
-            date: 'May 27, 2025',
-            amount: CurrencyService.instance.format(119),
-            daysLeft: '4 days left',
-            icon: Icons.music_note_rounded,
-            color: const Color(0xFF1DB954),
-          ),
-          const SizedBox(height: 10),
-          _buildPaymentTile(
-            name: 'Amazon Prime',
-            date: 'May 30, 2025',
-            amount: CurrencyService.instance.format(179),
-            daysLeft: '7 days left',
-            icon: Icons.shopping_bag_rounded,
-            color: const Color(0xFFFF9900),
-          ),
+          ...upcoming.asMap().entries.map((entry) {
+            final sub = entry.value;
+            final isLast = entry.key == upcoming.length - 1;
+            
+            // Format date
+            final months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            final formattedDate = '${months[sub.nextRenewalDate.month - 1]} ${sub.nextRenewalDate.day}, ${sub.nextRenewalDate.year}';
+            
+            // Calculate days left
+            final today = DateTime.now();
+            final todayMidnight = DateTime(today.year, today.month, today.day);
+            final nextMidnight = DateTime(sub.nextRenewalDate.year, sub.nextRenewalDate.month, sub.nextRenewalDate.day);
+            final diff = nextMidnight.difference(todayMidnight).inDays;
+            
+            String daysLeftStr = '';
+            if (diff == 0) {
+              daysLeftStr = 'Today';
+            } else if (diff == 1) {
+              daysLeftStr = 'Tomorrow';
+            } else if (diff < 0) {
+              daysLeftStr = 'Overdue';
+            } else {
+              daysLeftStr = '$diff days left';
+            }
+
+            // Extract color from UI (using default blue if not found, since color isn't in model directly but we can use icon mapping logic or just default)
+            // Wait, we need the category color. For simplicity, we can just use a fixed color or extract it from CategoryProvider.
+            // But let's just use the primary color for now, since iconUrl is a string.
+            // Actually, we can use CategoryProvider.getCategorySummaries to get the color, but for now let's just use a default color.
+            
+            return Padding(
+              padding: EdgeInsets.only(bottom: isLast ? 0 : 10),
+              child: _buildPaymentTile(
+                subscription: sub,
+                name: sub.name,
+                date: formattedDate,
+                amount: CurrencyService.instance.format(sub.currentPrice),
+                daysLeft: daysLeftStr,
+                icon: Icons.payments_rounded, // fallback icon
+                color: Theme.of(context).colorScheme.primary,
+              ),
+            );
+          }),
         ],
       ),
     );
   }
 
   Widget _buildPaymentTile({
+    required SubscriptionModel subscription,
     required String name,
     required String date,
     required String amount,
@@ -340,7 +377,7 @@ class _HomeScreenState extends State<HomeScreen> {
     required Color color,
   }) {
     return InkWell(
-      onTap: () => pushScreen(const SubscriptionDetailsPlaceholderScreen()),
+      onTap: () => pushScreen(ViewSubscriptionPage(subscription: subscription)),
       borderRadius: BorderRadius.circular(18),
       child: Container(
         padding: const EdgeInsets.all(12),
@@ -424,11 +461,61 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildSpendingOverviewCard() {
-    return const SpendingOverviewCard();
+    return SpendingOverviewCard();
   }
 
   Widget _buildTopCategoriesCard() {
     return const TopCategoriesCard();
+  }
+
+  Widget _buildEmptyState() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.5),
+          style: BorderStyle.solid,
+          width: 1,
+        ),
+      ),
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.add_card_rounded,
+              size: 40,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+          ),
+          const SizedBox(height: 20),
+          Text(
+            'No Subscriptions Yet',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w800,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Add your first subscription to track spending and get renewal reminders.',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 14,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   void _showGlobalActionsMenu(BuildContext context) {
@@ -704,18 +791,6 @@ class UpcomingPaymentsPlaceholderScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const UpcomingPaymentsScreen();
-  }
-}
-
-class SubscriptionDetailsPlaceholderScreen extends StatelessWidget {
-  const SubscriptionDetailsPlaceholderScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const PlaceholderScreen(
-      title: 'Subscription Details',
-      message: 'Subscription Details Screen',
-    );
   }
 }
 

@@ -43,24 +43,6 @@ class AnalyticsEmptyState extends StatelessWidget {
             ),
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 40),
-          ElevatedButton(
-            onPressed: () {
-              // Navigation to add subscription handled by main tab bar,
-              // or we can invoke a callback here. For now, rely on bottom nav.
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-              elevation: 0,
-            ),
-            child: const Text(
-              'Add Subscription',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
-            ),
-          ),
         ],
       ),
     );
