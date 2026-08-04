@@ -2,6 +2,8 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:sanchora/models/user_model.dart';
+
 class ProfileService {
   const ProfileService();
 
@@ -9,6 +11,17 @@ class ProfileService {
 
   /// Global notifier for the avatar path
   static final ValueNotifier<String?> avatarPathNotifier = ValueNotifier(null);
+
+  /// Global notifier for the current user
+  static final ValueNotifier<UserModel> currentUserNotifier = ValueNotifier(
+    UserModel(
+      id: 'SNC-8472-9104',
+      name: 'Hemanth Paruchuri',
+      email: 'hemanth@example.com',
+      createdAt: DateTime(2023, 10, 15),
+      isPremium: false,
+    ),
+  );
 
   /// Load the saved avatar path and verify the file exists
   static Future<void> initialize() async {

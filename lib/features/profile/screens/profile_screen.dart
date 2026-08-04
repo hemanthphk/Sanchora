@@ -3,11 +3,10 @@ import 'package:sanchora/features/auth/screens/login_screen.dart';
 import 'package:sanchora/features/home/screens/home_screen.dart';
 import 'package:sanchora/features/profile/screens/premium_screen.dart';
 import 'package:sanchora/features/profile/screens/privacy_screen.dart';
-import 'package:sanchora/core/services/currency_service.dart';
 import 'package:sanchora/core/widgets/sanchora_page_header.dart';
 import '../widgets/profile_app_bar.dart';
 import '../widgets/profile_header_card.dart';
-import '../widgets/analytics_summary_card.dart';
+import '../widgets/profile_statistics_card.dart';
 import '../widgets/settings_section.dart';
 import '../widgets/settings_tile.dart';
 import '../widgets/logout_button.dart';
@@ -32,8 +31,6 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
   late final AnimationController _animationController;
   late final Animation<double> _headerFade;
   late final Animation<Offset> _headerSlide;
-  late final Animation<double> _analyticsFade;
-  late final Animation<Offset> _analyticsSlide;
   late final Animation<double> _settingsFade;
   late final Animation<Offset> _settingsSlide;
   late final Animation<double> _logoutFade;
@@ -59,18 +56,6 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
     ).animate(CurvedAnimation(
       parent: _animationController,
       curve: const Interval(0.0, 0.45, curve: Curves.easeOutCubic),
-    ));
-
-    _analyticsFade = CurvedAnimation(
-      parent: _animationController,
-      curve: const Interval(0.15, 0.60, curve: Curves.easeOut),
-    );
-    _analyticsSlide = Tween<Offset>(
-      begin: const Offset(0, 0.08),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: const Interval(0.15, 0.60, curve: Curves.easeOutCubic),
     ));
 
     _settingsFade = CurvedAnimation(
@@ -139,27 +124,17 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
               child: FadeTransition(
                 opacity: _headerFade,
                 child: ProfileHeaderCard(
-                  name: 'Hemanth Paruchuri',
-                  email: 'hemanth@example.com',
-                  avatarInitials: 'HP',
-                  isPremium: true,
                   onTap: () => _openScreen(context, const PersonalInformationScreen()),
-                  onEditAvatarTap: () => _openScreen(context, const PersonalInformationScreen()),
                 ),
               ),
             ),
-            const SizedBox(height: 10),
-            // Animated Analytics Container
+            const SizedBox(height: 14),
+            // Profile Statistics Card
             SlideTransition(
-              position: _analyticsSlide,
+              position: _headerSlide,
               child: FadeTransition(
-                opacity: _analyticsFade,
-                child: AnalyticsSummaryCard(
-                  totalSubscriptions: '18',
-                  totalSpent: CurrencyService.instance.format(2400, compact: true),
-                  totalSaved: CurrencyService.instance.format(480),
-                  memberSince: 'Oct 2023',
-                ),
+                opacity: _headerFade,
+                child: const ProfileStatisticsCard(),
               ),
             ),
             const SizedBox(height: 28),

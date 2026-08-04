@@ -8,8 +8,6 @@ import 'package:sanchora/features/profile/services/profile_service.dart';
 
 class ProfileAvatarPicker extends StatefulWidget {
   final String initials;
-  final String name;
-  final String email;
   final VoidCallback? onCameraTap;
   final VoidCallback? onGalleryTap;
   final VoidCallback? onRemoveTap;
@@ -17,8 +15,6 @@ class ProfileAvatarPicker extends StatefulWidget {
   const ProfileAvatarPicker({
     super.key,
     required this.initials,
-    required this.name,
-    required this.email,
     this.onCameraTap,
     this.onGalleryTap,
     this.onRemoveTap,
@@ -311,20 +307,21 @@ class _ProfileAvatarPickerState extends State<ProfileAvatarPicker> {
 
   Widget _buildInitialsAvatar() {
     return Container(
-      width: 80,
-      height: 80,
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
+      width: 116,
+      height: 116,
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
           colors: [Color(0xFF0A84FF), Color(0xFF4DA3FF)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(28),
-        boxShadow: const [
+        shape: BoxShape.circle,
+        boxShadow: [
           BoxShadow(
-            color: Color(0x330A84FF),
-            blurRadius: 16,
-            offset: Offset(0, 6),
+            color: Color(0x400A84FF),
+            blurRadius: 24,
+            spreadRadius: 2,
+            offset: Offset(0, 4),
           ),
         ],
       ),
@@ -333,7 +330,7 @@ class _ProfileAvatarPickerState extends State<ProfileAvatarPicker> {
         widget.initials,
         style: const TextStyle(
           color: Colors.white,
-          fontSize: 28,
+          fontSize: 40,
           fontWeight: FontWeight.w800,
           letterSpacing: -1,
         ),
@@ -375,15 +372,16 @@ class _ProfileAvatarPickerState extends State<ProfileAvatarPicker> {
                     if (avatarPath != null) {
                       if (File(avatarPath).existsSync()) {
                         return Container(
-                          width: 80,
-                          height: 80,
+                          width: 116,
+                          height: 116,
                           decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(28),
+                            shape: BoxShape.circle,
                             boxShadow: const [
                               BoxShadow(
-                                color: Color(0x330A84FF),
-                                blurRadius: 16,
-                                offset: Offset(0, 6),
+                                color: Color(0x400A84FF),
+                                blurRadius: 24,
+                                spreadRadius: 2,
+                                offset: Offset(0, 4),
                               ),
                             ],
                             image: DecorationImage(
@@ -406,12 +404,12 @@ class _ProfileAvatarPickerState extends State<ProfileAvatarPicker> {
                     child: Container(
                       decoration: BoxDecoration(
                         color: Colors.black.withValues(alpha: 0.4),
-                        borderRadius: BorderRadius.circular(28),
+                        shape: BoxShape.circle,
                       ),
                       alignment: Alignment.center,
                       child: const SizedBox(
-                        width: 24,
-                        height: 24,
+                        width: 28,
+                        height: 28,
                         child: CircularProgressIndicator(
                           strokeWidth: 2.5,
                           valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
@@ -421,64 +419,31 @@ class _ProfileAvatarPickerState extends State<ProfileAvatarPicker> {
                   )
                 else
                   Positioned(
-                    bottom: -4,
-                    right: -4,
+                    bottom: 0,
+                    right: 4,
                     child: Container(
-                      width: 30,
-                      height: 30,
+                      width: 38,
+                      height: 38,
                       decoration: BoxDecoration(
-                        color: theme.colorScheme.surface,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: borderColor, width: 1.5),
+                        color: const Color(0xFF0A84FF),
+                        shape: BoxShape.circle,
+                        border: Border.all(color: theme.scaffoldBackgroundColor, width: 3),
                         boxShadow: [
                           BoxShadow(
-                            color: theme.shadowColor.withValues(alpha: 0.1),
+                            color: const Color(0xFF0A84FF).withValues(alpha: 0.3),
                             blurRadius: 8,
                             offset: const Offset(0, 2),
                           ),
                         ],
                       ),
-                      child: Icon(
-                        Icons.camera_alt_rounded,
-                        size: 16,
-                        color: theme.colorScheme.onSurface,
+                      child: const Icon(
+                        Icons.edit_rounded,
+                        size: 18,
+                        color: Colors.white,
                       ),
                     ),
                   ),
               ],
-            ),
-          ),
-          const SizedBox(height: 12),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                widget.name,
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: -0.5,
-                  color: theme.colorScheme.onSurface,
-                ),
-              ),
-              const SizedBox(width: 6),
-              Container(
-                padding: const EdgeInsets.all(2),
-                decoration: const BoxDecoration(
-                  color: Color(0xFF10B981),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(Icons.check, size: 12, color: Colors.white),
-              ),
-            ],
-          ),
-          const SizedBox(height: 2),
-          Text(
-            widget.email,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-              color: theme.colorScheme.onSurfaceVariant,
             ),
           ),
         ],

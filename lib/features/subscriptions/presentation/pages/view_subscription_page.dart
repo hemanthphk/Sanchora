@@ -157,6 +157,11 @@ class _ViewSubscriptionPageState extends State<ViewSubscriptionPage> {
         textColor = AppColors.error;
         text = 'Expired';
         break;
+      case SubscriptionStatus.cancelled:
+        bgColor = AppColors.error.withValues(alpha: 0.15); // Or a specific cancelled color
+        textColor = AppColors.error;
+        text = 'Cancelled';
+        break;
     }
 
     return Container(

@@ -8,6 +8,7 @@ import 'package:sanchora/features/profile/utils/phone_input_formatter.dart';
 import 'package:sanchora/core/widgets/sanchora_page_header.dart';
 import 'package:sanchora/features/auth/screens/change_password_screen.dart';
 import 'package:sanchora/features/auth/screens/connected_accounts_screen.dart';
+import 'package:sanchora/features/profile/services/profile_service.dart';
 
 class PersonalInformationScreen extends StatefulWidget {
   const PersonalInformationScreen({super.key});
@@ -18,8 +19,8 @@ class PersonalInformationScreen extends StatefulWidget {
 
 class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
   // Original Data
-  final String _origName = 'Hemanth Paruchuri';
-  final String _origEmail = 'hemanth@example.com';
+  late String _origName;
+  late String _origEmail;
   final String _origPhone = '+91 98765 43210';
   final String _origDob = '15 Aug 1995';
   final String _origGender = 'Male';
@@ -55,6 +56,10 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
   @override
   void initState() {
     super.initState();
+    final user = ProfileService.currentUserNotifier.value;
+    _origName = user.name;
+    _origEmail = user.email;
+
     _nameController = TextEditingController(text: _origName);
     
     String initialPhone = _origPhone;
@@ -241,10 +246,19 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
     }
     // TODO: Send phoneForStorage to backend instead of raw UI text
 
+    final currentUser = ProfileService.currentUserNotifier.value;
+    final updatedUser = currentUser.copyWith(
+      name: _nameController.text,
+      email: _emailController.text,
+    );
+    ProfileService.currentUserNotifier.value = updatedUser;
+
     await Future.delayed(const Duration(milliseconds: 300));
     if (!mounted) return;
 
     setState(() {
+      _origName = _nameController.text;
+      _origEmail = _emailController.text;
       _hasChanges = false;
     });
 
@@ -701,9 +715,9 @@ class _PersonalInformationScreenState extends State<PersonalInformationScreen> {
                   physics: const BouncingScrollPhysics(),
                   children: [
                     ProfileAvatarPicker(
-                      initials: 'HP',
-                      name: _origName,
-                      email: _origEmail,
+                      initials: _nameController.text.isNotEmpty 
+                          ? _nameController.text.trim().split(' ').take(2).map((e) => e.isNotEmpty ? e[0] : '').join('').toUpperCase()
+                          : 'U',
                       onCameraTap: () {},
                       onGalleryTap: () {},
                       onRemoveTap: () {},

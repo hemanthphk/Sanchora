@@ -10,6 +10,22 @@ class SubscriptionService extends ChangeNotifier {
 
   List<SubscriptionModel> get subscriptions => dummySubscriptions;
 
+  int get activeSubscriptionCount {
+    return dummySubscriptions.where((sub) => sub.status == SubscriptionStatus.active).length;
+  }
+
+  double get totalSpent {
+    return dummySubscriptions
+        .where((sub) => sub.status == SubscriptionStatus.active)
+        .fold(0.0, (sum, sub) => sum + sub.currentPrice);
+  }
+
+  double get totalSaved {
+    return dummySubscriptions
+        .where((sub) => sub.status == SubscriptionStatus.cancelled)
+        .fold(0.0, (sum, sub) => sum + sub.currentPrice);
+  }
+
   void addSubscription(SubscriptionModel subscription) {
     dummySubscriptions.insert(0, subscription);
     NotificationService.instance.scheduler.scheduleRemindersForSubscription(subscription);
