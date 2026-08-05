@@ -106,6 +106,7 @@ class AnalyticsTimeline extends StatelessWidget {
                     SubscriptionIcon(
                       iconIdentifier: sub.iconUrl.isNotEmpty ? sub.iconUrl : sub.name,
                       fallbackName: sub.name,
+                      category: sub.category,
                       size: 40,
                       borderRadius: 12,
                     ),

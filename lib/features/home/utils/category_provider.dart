@@ -23,20 +23,23 @@ class CategorySummary {
 
 class CategoryProvider {
   static const Map<String, CategoryStyle> _styles = {
-    'Entertainment': CategoryStyle(Icons.play_circle_fill_rounded, Color(0xFF4F46E5)),
-    'Shopping': CategoryStyle(Icons.shopping_bag_rounded, Color(0xFFFF9500)),
-    'Education': CategoryStyle(Icons.school_rounded, Color(0xFF007AFF)),
-    'Music': CategoryStyle(Icons.music_note_rounded, Color(0xFFE91E63)),
-    'Productivity': CategoryStyle(Icons.work_rounded, Color(0xFF34C759)),
-    'AI': CategoryStyle(Icons.smart_toy_rounded, Color(0xFF5E5CE6)),
-    'Gaming': CategoryStyle(Icons.sports_esports_rounded, Color(0xFFFF3B30)),
-    'Finance': CategoryStyle(Icons.account_balance_wallet_rounded, Color(0xFF32ADE6)),
-    'Health': CategoryStyle(Icons.favorite_rounded, Color(0xFFFF2D55)),
-    'Streaming': CategoryStyle(Icons.live_tv_rounded, Color(0xFF4F46E5)),
+    'Streaming': CategoryStyle(Icons.play_circle_outline_rounded, Color(0xFFEF4444)),
+    'Music': CategoryStyle(Icons.music_note_rounded, Color(0xFF10B981)),
+    'Gaming': CategoryStyle(Icons.sports_esports_outlined, Color(0xFF8B5CF6)),
+    'Cloud Storage': CategoryStyle(Icons.cloud_outlined, Color(0xFF3B82F6)),
+    'Design': CategoryStyle(Icons.palette_outlined, Color(0xFFF59E0B)),
+    'Productivity': CategoryStyle(Icons.work_outline_rounded, Color(0xFF0EA5E9)),
+    'Education': CategoryStyle(Icons.school_outlined, Color(0xFF14B8A6)),
+    'Finance': CategoryStyle(Icons.account_balance_wallet_outlined, Color(0xFFF59E0B)),
+    'Shopping': CategoryStyle(Icons.shopping_bag_outlined, Color(0xFFEC4899)),
+    'Food': CategoryStyle(Icons.restaurant_outlined, Color(0xFFF97316)),
+    'Fitness': CategoryStyle(Icons.fitness_center_outlined, Color(0xFF10B981)),
+    'Security': CategoryStyle(Icons.security_outlined, Color(0xFF64748B)),
+    'Other': CategoryStyle(Icons.inventory_2_outlined, Color(0xFF8E8E93)),
   };
 
   static CategoryStyle getStyleForCategory(String category) {
-    return _styles[category] ?? const CategoryStyle(Icons.category_rounded, Color(0xFF8E8E93));
+    return _styles[category] ?? const CategoryStyle(Icons.inventory_2_outlined, Color(0xFF8E8E93));
   }
 
   static List<CategorySummary> getCategorySummaries({

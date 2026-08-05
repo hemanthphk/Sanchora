@@ -177,6 +177,7 @@ class AnalyticsCostConcentration extends StatelessWidget {
                   SubscriptionIcon(
                     iconIdentifier: sub.iconUrl.isNotEmpty ? sub.iconUrl : sub.name,
                     fallbackName: sub.name,
+                    category: sub.category,
                     size: 32,
                     borderRadius: 8,
                   ),

@@ -97,31 +97,83 @@ class AiHeroCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 6),
-            Text(
-              _getInsightText(activeCount, potentialSavings, topCategory, potentialAnnualSwitchCount),
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: Colors.white.withValues(alpha: 0.9),
-                height: 1.4,
-              ),
-            ),
+            _buildInsightContent(context, activeCount, potentialSavings, topCategory, potentialAnnualSwitchCount, subscriptions),
           ],
         ),
       ),
     );
   }
 
-  String _getInsightText(int active, double savings, String topCategory, int annualSwitchCount) {
+  Widget _buildInsightContent(BuildContext context, int active, double savings, String topCategory, int annualSwitchCount, List<SubscriptionModel> subscriptions) {
     if (active == 0) {
-      return 'You have no active subscriptions. Tap + to add one.';
+      return Text(
+        'No active subscriptions available.',
+        style: TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+          color: Colors.white.withValues(alpha: 0.9),
+          height: 1.4,
+        ),
+      );
     }
+    
+    double totalMonthlyEquivalent = 0.0;
+    int validActiveCount = 0;
+
+    for (var sub in subscriptions) {
+      if (sub.status == SubscriptionStatus.active || sub.status == SubscriptionStatus.upcoming) {
+        if (sub.isTrial || sub.name.toLowerCase().contains('trial') || sub.currentPrice == 0) {
+          continue;
+        }
+        validActiveCount++;
+        totalMonthlyEquivalent += sub.monthlyPrice;
+      }
+    }
+
+    final avgCost = validActiveCount > 0 ? totalMonthlyEquivalent / validActiveCount : 0.0;
+    final avgCostStr = CurrencyService.instance.format(avgCost.roundToDouble());
+    
+    List<Widget> insights = [];
+    
     if (savings > 50) {
-      return 'Potential monthly savings: ${CurrencyService.instance.format(savings)}. Consider switching $annualSwitchCount ${annualSwitchCount == 1 ? 'subscription' : 'subscriptions'} to annual billing.';
+      insights.add(Text(
+        'Potential monthly savings: ${CurrencyService.instance.format(savings)}. Consider switching $annualSwitchCount ${annualSwitchCount == 1 ? 'subscription' : 'subscriptions'} to annual billing.',
+        style: TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+          color: Colors.white.withValues(alpha: 0.9),
+          height: 1.4,
+        ),
+      ));
+      insights.add(const SizedBox(height: 12));
     }
+    
     if (topCategory.isNotEmpty && active >= 3) {
-      return '$topCategory is your highest spending category. You are actively managing $active subscriptions.';
+      insights.add(Text(
+        '$topCategory is your highest spending category.',
+        style: TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+          color: Colors.white.withValues(alpha: 0.9),
+          height: 1.4,
+        ),
+      ));
+      insights.add(const SizedBox(height: 12));
     }
-    return 'You have $active active subscriptions. Your portfolio is well balanced.';
+    
+    insights.add(Text(
+      'Average monthly cost is $avgCostStr per subscription.',
+      style: TextStyle(
+        fontSize: 14,
+        fontWeight: FontWeight.w500,
+        color: Colors.white.withValues(alpha: 0.9),
+        height: 1.4,
+      ),
+    ));
+    
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: insights,
+    );
   }
 }

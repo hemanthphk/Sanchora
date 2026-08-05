@@ -95,6 +95,7 @@ class _ViewSubscriptionPageState extends State<ViewSubscriptionPage> {
           SubscriptionIcon(
             iconIdentifier: subscription.iconUrl,
             fallbackName: subscription.name,
+            category: subscription.category,
             size: 56,
             borderRadius: 14,
             backgroundColor: theme.colorScheme.surface,

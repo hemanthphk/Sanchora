@@ -134,6 +134,7 @@ class UpcomingPaymentCard extends StatelessWidget {
     return SubscriptionIcon(
       iconIdentifier: subscription.iconUrl,
       fallbackName: subscription.name,
+      category: subscription.category,
       size: 42,
       borderRadius: 12,
       backgroundColor: theme.colorScheme.surface,

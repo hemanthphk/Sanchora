@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
@@ -175,81 +176,123 @@ class _ProfileAvatarPickerState extends State<ProfileAvatarPicker> {
 
     final theme = Theme.of(context);
     
-    showModalBottomSheet(
+    showGeneralDialog(
       context: context,
-      backgroundColor: Colors.transparent,
-      builder: (context) {
-        return Container(
-          padding: const EdgeInsets.fromLTRB(20, 16, 20, 36),
-          decoration: BoxDecoration(
-            color: theme.scaffoldBackgroundColor,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(2),
-                ),
+      barrierDismissible: true,
+      barrierLabel: 'Update Profile Photo',
+      barrierColor: Colors.black.withValues(alpha: 0.5),
+      transitionDuration: const Duration(milliseconds: 250),
+      pageBuilder: (context, animation, secondaryAnimation) {
+        return Align(
+          alignment: Alignment.bottomCenter,
+          child: Material(
+            color: Colors.transparent,
+            child: Container(
+              padding: EdgeInsets.fromLTRB(20, 16, 20, 36 + MediaQuery.of(context).padding.bottom),
+              decoration: BoxDecoration(
+                color: theme.scaffoldBackgroundColor,
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
               ),
-              const SizedBox(height: 24),
-              Text(
-                'Update Profile Photo',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: -0.5,
-                  color: theme.colorScheme.onSurface,
-                ),
-              ),
-              const SizedBox(height: 24),
-              _buildSheetOption(
-                icon: Icons.camera_alt_rounded,
-                title: 'Take a Photo',
-                color: const Color(0xFF2563EB),
-                onTap: () {
-                  Navigator.pop(context);
-                  _pickAndCropImage(ImageSource.camera);
-                },
-              ),
-              const SizedBox(height: 12),
-              _buildSheetOption(
-                icon: Icons.photo_library_rounded,
-                title: 'Choose from Gallery',
-                color: const Color(0xFF10B981),
-                onTap: () {
-                  Navigator.pop(context);
-                  _pickAndCropImage(ImageSource.gallery);
-                },
-              ),
-              const SizedBox(height: 12),
-              ValueListenableBuilder<String?>(
-                valueListenable: ProfileService.avatarPathNotifier,
-                builder: (context, avatarPath, _) {
-                  if (avatarPath == null) return const SizedBox.shrink();
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: _buildSheetOption(
-                      icon: Icons.delete_outline_rounded,
-                      title: 'Remove Photo',
-                      color: const Color(0xFFF87171),
-                      isDestructive: true,
-                      onTap: () {
-                        Navigator.pop(context);
-                        _showRemoveDialog();
-                      },
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(2),
                     ),
-                  );
-                },
+                  ),
+                  const SizedBox(height: 24),
+                  Text(
+                    'Update Profile Photo',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: -0.5,
+                      color: theme.colorScheme.onSurface,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  _buildSheetOption(
+                    icon: Icons.camera_alt_rounded,
+                    title: 'Take a Photo',
+                    color: const Color(0xFF2563EB),
+                    onTap: () {
+                      Navigator.pop(context);
+                      _pickAndCropImage(ImageSource.camera);
+                    },
+                  ),
+                  const SizedBox(height: 12),
+                  _buildSheetOption(
+                    icon: Icons.photo_library_rounded,
+                    title: 'Choose from Gallery',
+                    color: const Color(0xFF10B981),
+                    onTap: () {
+                      Navigator.pop(context);
+                      _pickAndCropImage(ImageSource.gallery);
+                    },
+                  ),
+                  const SizedBox(height: 12),
+                  ValueListenableBuilder<String?>(
+                    valueListenable: ProfileService.avatarPathNotifier,
+                    builder: (context, avatarPath, _) {
+                      if (avatarPath == null) return const SizedBox.shrink();
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: _buildSheetOption(
+                          icon: Icons.delete_outline_rounded,
+                          title: 'Remove Photo',
+                          color: const Color(0xFFF87171),
+                          isDestructive: true,
+                          onTap: () {
+                            Navigator.pop(context);
+                            _showRemoveDialog();
+                          },
+                        ),
+                      );
+                    },
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         );
       },
+      transitionBuilder: (context, animation, secondaryAnimation, child) {
+        final curve = CurvedAnimation(parent: animation, curve: Curves.easeOutQuint);
+        return FadeTransition(
+          opacity: curve,
+          child: ScaleTransition(
+            scale: Tween<double>(begin: 0.9, end: 1.0).animate(curve),
+            child: child,
+          ),
+        );
+      },
+    );
+  }
+
+  void _showFullScreenPreview(BuildContext context, String? avatarPath) {
+    if (_isLoading) return;
+
+    Navigator.of(context).push(
+      PageRouteBuilder(
+        opaque: false,
+        barrierDismissible: true,
+        barrierColor: Colors.transparent,
+        transitionDuration: const Duration(milliseconds: 300),
+        reverseTransitionDuration: const Duration(milliseconds: 300),
+        pageBuilder: (context, animation, secondaryAnimation) {
+          return FadeTransition(
+            opacity: animation,
+            child: _FullScreenAvatarPreview(
+              avatarPath: avatarPath,
+              initials: widget.initials,
+            ),
+          );
+        },
+      ),
     );
   }
 
@@ -326,13 +369,16 @@ class _ProfileAvatarPickerState extends State<ProfileAvatarPicker> {
         ],
       ),
       alignment: Alignment.center,
-      child: Text(
-        widget.initials,
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 40,
-          fontWeight: FontWeight.w800,
-          letterSpacing: -1,
+      child: Material(
+        color: Colors.transparent,
+        child: Text(
+          widget.initials,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 40,
+            fontWeight: FontWeight.w800,
+            letterSpacing: -1,
+          ),
         ),
       ),
     );
@@ -361,66 +407,77 @@ class _ProfileAvatarPickerState extends State<ProfileAvatarPicker> {
       ),
       child: Column(
         children: [
-          GestureDetector(
-            onTap: _showImagePickerSheet,
-            child: Stack(
-              clipBehavior: Clip.none,
-              children: [
-                ValueListenableBuilder<String?>(
-                  valueListenable: ProfileService.avatarPathNotifier,
-                  builder: (context, avatarPath, _) {
-                    if (avatarPath != null) {
-                      if (File(avatarPath).existsSync()) {
-                        return Container(
-                          width: 116,
-                          height: 116,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            boxShadow: const [
-                              BoxShadow(
-                                color: Color(0x400A84FF),
-                                blurRadius: 24,
-                                spreadRadius: 2,
-                                offset: Offset(0, 4),
-                              ),
-                            ],
-                            image: DecorationImage(
-                              image: FileImage(File(avatarPath)),
-                              fit: BoxFit.cover,
+          Stack(
+            clipBehavior: Clip.none,
+            children: [
+              ValueListenableBuilder<String?>(
+                valueListenable: ProfileService.avatarPathNotifier,
+                builder: (context, avatarPath, _) {
+                  Widget avatarWidget;
+                  if (avatarPath != null) {
+                    if (File(avatarPath).existsSync()) {
+                      avatarWidget = Container(
+                        width: 116,
+                        height: 116,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          boxShadow: const [
+                            BoxShadow(
+                              color: Color(0x400A84FF),
+                              blurRadius: 24,
+                              spreadRadius: 2,
+                              offset: Offset(0, 4),
                             ),
+                          ],
+                          image: DecorationImage(
+                            image: FileImage(File(avatarPath)),
+                            fit: BoxFit.cover,
                           ),
-                        );
-                      } else {
-                        WidgetsBinding.instance.addPostFrameCallback((_) {
-                          ProfileService.removeAvatar();
-                        });
-                      }
-                    }
-                    return _buildInitialsAvatar();
-                  },
-                ),
-                if (_isLoading)
-                  Positioned.fill(
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.4),
-                        shape: BoxShape.circle,
-                      ),
-                      alignment: Alignment.center,
-                      child: const SizedBox(
-                        width: 28,
-                        height: 28,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2.5,
-                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                         ),
+                      );
+                    } else {
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        ProfileService.removeAvatar();
+                      });
+                      avatarWidget = _buildInitialsAvatar();
+                    }
+                  } else {
+                    avatarWidget = _buildInitialsAvatar();
+                  }
+
+                  return GestureDetector(
+                    onTap: () => _showFullScreenPreview(context, avatarPath),
+                    child: Hero(
+                      tag: 'profile_avatar_image',
+                      child: avatarWidget,
+                    ),
+                  );
+                },
+              ),
+              if (_isLoading)
+                Positioned.fill(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.4),
+                      shape: BoxShape.circle,
+                    ),
+                    alignment: Alignment.center,
+                    child: const SizedBox(
+                      width: 28,
+                      height: 28,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2.5,
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                       ),
                     ),
-                  )
-                else
-                  Positioned(
-                    bottom: 0,
-                    right: 4,
+                  ),
+                )
+              else
+                Positioned(
+                  bottom: 0,
+                  right: 4,
+                  child: GestureDetector(
+                    onTap: _showImagePickerSheet,
                     child: Container(
                       width: 38,
                       height: 38,
@@ -443,10 +500,117 @@ class _ProfileAvatarPickerState extends State<ProfileAvatarPicker> {
                       ),
                     ),
                   ),
-              ],
+                ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _FullScreenAvatarPreview extends StatelessWidget {
+  final String? avatarPath;
+  final String initials;
+
+  const _FullScreenAvatarPreview({
+    required this.avatarPath,
+    required this.initials,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      body: Stack(
+        children: [
+          Positioned.fill(
+            child: GestureDetector(
+              onTap: () => Navigator.of(context).pop(),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+                child: Container(
+                  color: Colors.black.withValues(alpha: 0.7),
+                ),
+              ),
+            ),
+          ),
+          SafeArea(
+            child: Dismissible(
+              key: const Key('full_screen_avatar'),
+              direction: DismissDirection.vertical,
+              onDismissed: (_) => Navigator.of(context).pop(),
+              child: Center(
+                child: InteractiveViewer(
+                  minScale: 0.5,
+                  maxScale: 4.0,
+                  clipBehavior: Clip.none,
+                  child: Hero(
+                    tag: 'profile_avatar_image',
+                    child: _buildAvatar(),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Align(
+                alignment: Alignment.topLeft,
+                child: IconButton(
+                  icon: const Icon(Icons.close_rounded, color: Colors.white, size: 28),
+                  onPressed: () => Navigator.of(context).pop(),
+                ),
+              ),
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildAvatar() {
+    if (avatarPath != null && File(avatarPath!).existsSync()) {
+      return Container(
+        width: 320,
+        height: 320,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          image: DecorationImage(
+            image: FileImage(File(avatarPath!)),
+            fit: BoxFit.cover,
+          ),
+        ),
+      );
+    }
+    
+    return Container(
+      width: 320,
+      height: 320,
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Color(0xFF0A84FF), Color(0xFF4DA3FF)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        shape: BoxShape.circle,
+      ),
+      alignment: Alignment.center,
+      child: Material(
+        color: Colors.transparent,
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(
+            initials,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 110,
+              fontWeight: FontWeight.w800,
+              letterSpacing: -2,
+            ),
+          ),
+        ),
       ),
     );
   }

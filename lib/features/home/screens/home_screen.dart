@@ -1,17 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:sanchora/features/profile/services/profile_service.dart';
 import 'package:sanchora/features/subscriptions/services/subscription_service.dart';
-import 'package:sanchora/features/subscriptions/models/subscription_model.dart';
-import 'package:sanchora/features/subscriptions/presentation/pages/view_subscription_page.dart';
 import 'package:sanchora/features/profile/screens/profile_screen.dart';
 import 'package:sanchora/core/widgets/app_header.dart';
-import 'package:sanchora/core/services/currency_service.dart';
 import 'package:sanchora/features/home/widgets/spending_overview_card.dart';
 import 'package:sanchora/features/home/widgets/top_categories_card.dart';
 import 'package:sanchora/features/home/widgets/hero_summary_card.dart';
 import 'package:sanchora/features/home/screens/upcoming_payments_screen.dart';
 import 'package:sanchora/features/notifications/services/notification_history_service.dart';
 import 'package:sanchora/features/notifications/screens/notifications_inbox_screen.dart';
+import 'package:sanchora/features/home/widgets/upcoming_payment_card.dart';
 import 'package:sanchora/core/services/navigation_event_bus.dart';
 import 'package:sanchora/core/widgets/sanchora_bottom_nav.dart';
 import 'dart:async';
@@ -19,7 +17,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:sanchora/features/settings/screens/appearance_screen.dart';
 import 'package:sanchora/features/settings/screens/subscription_calendar_placeholder_screen.dart';
 import 'package:sanchora/features/settings/screens/budget_settings_placeholder_screen.dart';
-import 'package:sanchora/features/settings/screens/help_feedback_screen.dart';
+import 'package:sanchora/features/help_feedback/screens/help_feedback_screen.dart';
 import 'package:sanchora/features/settings/screens/about_sanchora_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -319,47 +317,9 @@ class _HomeScreenState extends State<HomeScreen> {
             ],
           ),
           const SizedBox(height: 12),
-          ...upcoming.asMap().entries.map((entry) {
-            final sub = entry.value;
-            final isLast = entry.key == upcoming.length - 1;
-            
-            // Format date
-            final months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-            final formattedDate = '${months[sub.nextRenewalDate.month - 1]} ${sub.nextRenewalDate.day}, ${sub.nextRenewalDate.year}';
-            
-            // Calculate days left
-            final today = DateTime.now();
-            final todayMidnight = DateTime(today.year, today.month, today.day);
-            final nextMidnight = DateTime(sub.nextRenewalDate.year, sub.nextRenewalDate.month, sub.nextRenewalDate.day);
-            final diff = nextMidnight.difference(todayMidnight).inDays;
-            
-            String daysLeftStr = '';
-            if (diff == 0) {
-              daysLeftStr = 'Today';
-            } else if (diff == 1) {
-              daysLeftStr = 'Tomorrow';
-            } else if (diff < 0) {
-              daysLeftStr = 'Overdue';
-            } else {
-              daysLeftStr = '$diff days left';
-            }
-
-            // Extract color from UI (using default blue if not found, since color isn't in model directly but we can use icon mapping logic or just default)
-            // Wait, we need the category color. For simplicity, we can just use a fixed color or extract it from CategoryProvider.
-            // But let's just use the primary color for now, since iconUrl is a string.
-            // Actually, we can use CategoryProvider.getCategorySummaries to get the color, but for now let's just use a default color.
-            
-            return Padding(
-              padding: EdgeInsets.only(bottom: isLast ? 0 : 10),
-              child: _buildPaymentTile(
-                subscription: sub,
-                name: sub.name,
-                date: formattedDate,
-                amount: CurrencyService.instance.format(sub.currentPrice),
-                daysLeft: daysLeftStr,
-                icon: Icons.payments_rounded, // fallback icon
-                color: Theme.of(context).colorScheme.primary,
-              ),
+          ...upcoming.map((sub) {
+            return UpcomingPaymentCard(
+              subscription: sub,
             );
           }),
         ],
@@ -367,98 +327,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildPaymentTile({
-    required SubscriptionModel subscription,
-    required String name,
-    required String date,
-    required String amount,
-    required String daysLeft,
-    required IconData icon,
-    required Color color,
-  }) {
-    return InkWell(
-      onTap: () => pushScreen(ViewSubscriptionPage(subscription: subscription)),
-      borderRadius: BorderRadius.circular(18),
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surfaceContainerHighest,
-          borderRadius: BorderRadius.circular(18),
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 42,
-              height: 42,
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(14),
-              ),
-              child: Icon(icon, color: color, size: 20),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    name,
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    date,
-                    style: TextStyle(
-                      fontSize: 12.5,
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  amount,
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.surfaceContainerHighest,
-                    borderRadius: BorderRadius.circular(999),
-                  ),
-                  child: Text(
-                    daysLeft,
-                    style: TextStyle(
-                      fontSize: 10.5,
-                      fontWeight: FontWeight.w700,
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 
   Widget _buildSpendingOverviewCard() {
     return SpendingOverviewCard();

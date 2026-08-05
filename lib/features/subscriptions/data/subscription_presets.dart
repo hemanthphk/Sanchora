@@ -34,19 +34,11 @@ const List<SubscriptionPresetModel> subscriptionPresets = [
     iconKey: 'youtube_premium',
   ),
   SubscriptionPresetModel(
-    name: 'Disney+ Hotstar',
-    defaultCategory: 'Streaming',
-    defaultBillingCycle: 'Yearly',
-    website: 'https://hotstar.com',
-    aiDetectionKeywords: ['disney+', 'hotstar'],
-    iconKey: 'hotstar',
-  ),
-  SubscriptionPresetModel(
     name: 'JioHotstar',
     defaultCategory: 'Streaming',
     defaultBillingCycle: 'Yearly',
     website: 'https://jiohotstar.com',
-    aiDetectionKeywords: ['jiohotstar', 'jio hotstar'],
+    aiDetectionKeywords: ['jiohotstar', 'jio hotstar', 'hotstar', 'hot', 'jio'],
     iconKey: 'jiohotstar',
   ),
   SubscriptionPresetModel(
@@ -75,7 +67,7 @@ const List<SubscriptionPresetModel> subscriptionPresets = [
   ),
   SubscriptionPresetModel(
     name: 'ChatGPT Plus',
-    defaultCategory: 'AI',
+    defaultCategory: 'Productivity',
     defaultBillingCycle: 'Monthly',
     website: 'https://chatgpt.com',
     aiDetectionKeywords: ['chatgpt', 'openai', 'chatgpt plus'],
@@ -83,7 +75,7 @@ const List<SubscriptionPresetModel> subscriptionPresets = [
   ),
   SubscriptionPresetModel(
     name: 'Gemini Advanced',
-    defaultCategory: 'AI',
+    defaultCategory: 'Productivity',
     defaultBillingCycle: 'Monthly',
     website: 'https://gemini.google.com',
     aiDetectionKeywords: ['gemini advanced', 'google one ai'],
@@ -91,7 +83,7 @@ const List<SubscriptionPresetModel> subscriptionPresets = [
   ),
   SubscriptionPresetModel(
     name: 'Claude Pro',
-    defaultCategory: 'AI',
+    defaultCategory: 'Productivity',
     defaultBillingCycle: 'Monthly',
     website: 'https://claude.ai',
     aiDetectionKeywords: ['claude pro', 'anthropic'],
@@ -115,7 +107,7 @@ const List<SubscriptionPresetModel> subscriptionPresets = [
   ),
   SubscriptionPresetModel(
     name: 'Google One',
-    defaultCategory: 'Productivity',
+    defaultCategory: 'Cloud Storage',
     defaultBillingCycle: 'Yearly',
     website: 'https://one.google.com',
     aiDetectionKeywords: ['google one', 'google drive storage'],
@@ -123,7 +115,7 @@ const List<SubscriptionPresetModel> subscriptionPresets = [
   ),
   SubscriptionPresetModel(
     name: 'Canva Pro',
-    defaultCategory: 'Productivity',
+    defaultCategory: 'Design',
     defaultBillingCycle: 'Yearly',
     website: 'https://canva.com',
     aiDetectionKeywords: ['canva pro', 'canva'],
@@ -131,7 +123,7 @@ const List<SubscriptionPresetModel> subscriptionPresets = [
   ),
   SubscriptionPresetModel(
     name: 'Figma Professional',
-    defaultCategory: 'Productivity',
+    defaultCategory: 'Design',
     defaultBillingCycle: 'Monthly',
     website: 'https://figma.com',
     aiDetectionKeywords: ['figma', 'figma pro'],
@@ -139,7 +131,7 @@ const List<SubscriptionPresetModel> subscriptionPresets = [
   ),
   SubscriptionPresetModel(
     name: 'Adobe Creative Cloud',
-    defaultCategory: 'Productivity',
+    defaultCategory: 'Design',
     defaultBillingCycle: 'Monthly',
     website: 'https://adobe.com',
     aiDetectionKeywords: ['adobe', 'creative cloud'],
@@ -147,7 +139,7 @@ const List<SubscriptionPresetModel> subscriptionPresets = [
   ),
   SubscriptionPresetModel(
     name: 'Notion AI',
-    defaultCategory: 'AI',
+    defaultCategory: 'Productivity',
     defaultBillingCycle: 'Monthly',
     website: 'https://notion.so',
     aiDetectionKeywords: ['notion ai', 'notion'],

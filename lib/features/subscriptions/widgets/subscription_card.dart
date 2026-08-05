@@ -208,6 +208,7 @@ class SubscriptionCard extends StatelessWidget {
     return SubscriptionIcon(
       iconIdentifier: subscription.iconUrl,
       fallbackName: subscription.name,
+      category: subscription.category,
       size: 44,
       borderRadius: 12,
       backgroundColor: theme.colorScheme.surface,
@@ -261,14 +262,29 @@ class SubscriptionCard extends StatelessWidget {
 
   Color _getCategoryColor(ThemeData theme, String category) {
     switch (category.toLowerCase()) {
-      case 'entertainment':
-        return Colors.purple;
+      case 'streaming':
+        return const Color(0xFFEF4444);
+      case 'music':
+      case 'fitness':
+        return const Color(0xFF10B981);
+      case 'gaming':
+        return const Color(0xFF8B5CF6);
+      case 'cloud storage':
+      case 'cloud':
+        return const Color(0xFF3B82F6);
+      case 'design':
+      case 'finance':
+        return const Color(0xFFF59E0B);
       case 'productivity':
-        return Colors.blue;
-      case 'utility':
-        return Colors.orange;
+        return const Color(0xFF0EA5E9);
       case 'education':
-        return Colors.teal;
+        return const Color(0xFF14B8A6);
+      case 'shopping':
+        return const Color(0xFFEC4899);
+      case 'food':
+        return const Color(0xFFF97316);
+      case 'security':
+        return const Color(0xFF64748B);
       default:
         return theme.colorScheme.primary;
     }

@@ -4,7 +4,6 @@ import 'package:sanchora/features/subscriptions/models/subscription_model.dart';
 import 'package:sanchora/features/subscriptions/models/subscription_preset_model.dart';
 import 'package:sanchora/features/subscriptions/services/subscription_preset_service.dart';
 import 'package:sanchora/features/subscriptions/services/subscription_service.dart';
-import 'package:sanchora/features/subscriptions/services/subscription_icon_registry.dart';
 import 'package:sanchora/features/subscriptions/widgets/subscription_icon.dart';
 
 class AddSubscriptionPage extends StatefulWidget {
@@ -30,13 +29,16 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
   final List<String> _categories = [
     "Streaming",
     "Music",
-    "Shopping",
-    "Productivity",
-    "AI",
     "Gaming",
-    "Finance",
+    "Cloud Storage",
+    "Design",
+    "Productivity",
     "Education",
-    "Health",
+    "Finance",
+    "Shopping",
+    "Food",
+    "Fitness",
+    "Security",
     "Other",
   ];
 
@@ -179,6 +181,7 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
                     SubscriptionIcon(
                       iconIdentifier: preset.iconKey ?? preset.name,
                       fallbackName: preset.name,
+                      category: preset.defaultCategory,
                       size: 36,
                       borderRadius: 10,
                       backgroundColor: (preset.brandColor ?? theme.colorScheme.primary).withValues(alpha: 0.15),
@@ -274,7 +277,7 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
     }
 
     final presetMatch = _presetService.findPresetByName(name);
-    final iconUrl = SubscriptionIconRegistry.getIconUrl(presetMatch?.iconKey ?? name);
+    final iconUrl = presetMatch?.iconKey ?? name;
 
     final id = _isEditMode ? widget.subscriptionToEdit!.id : DateTime.now().millisecondsSinceEpoch.toString();
 
@@ -438,7 +441,7 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
                                 color: isSelected ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.15) : Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
                                 borderRadius: BorderRadius.circular(12),
                               ),
-                              child: Text(_getCategoryEmoji(cat), style: const TextStyle(fontSize: 20)),
+                              child: Icon(_getCategoryIcon(cat), size: 24, color: isSelected ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onSurfaceVariant),
                             ),
                             const SizedBox(width: 16),
                             Expanded(
@@ -467,19 +470,22 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
     );
   }
 
-  String _getCategoryEmoji(String category) {
+  IconData _getCategoryIcon(String category) {
     switch (category) {
-      case 'Streaming': return '🎬';
-      case 'Music': return '🎵';
-      case 'Shopping': return '🛒';
-      case 'Productivity': return '💼';
-      case 'AI': return '🤖';
-      case 'Gaming': return '🎮';
-      case 'Finance': return '💰';
-      case 'Education': return '🎓';
-      case 'Health': return '🏋';
-      case 'Other': return '✨';
-      default: return '📁';
+      case 'Streaming': return Icons.play_circle_outline_rounded;
+      case 'Music': return Icons.music_note_rounded;
+      case 'Gaming': return Icons.sports_esports_outlined;
+      case 'Cloud Storage': return Icons.cloud_outlined;
+      case 'Design': return Icons.palette_outlined;
+      case 'Productivity': return Icons.work_outline_rounded;
+      case 'Education': return Icons.school_outlined;
+      case 'Finance': return Icons.account_balance_wallet_outlined;
+      case 'Shopping': return Icons.shopping_bag_outlined;
+      case 'Food': return Icons.restaurant_outlined;
+      case 'Fitness': return Icons.fitness_center_outlined;
+      case 'Security': return Icons.security_outlined;
+      case 'Other': return Icons.inventory_2_outlined;
+      default: return Icons.inventory_2_outlined;
     }
   }
 
@@ -698,7 +704,7 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
                                                 color: theme.colorScheme.primary.withValues(alpha: 0.1),
                                                 borderRadius: BorderRadius.circular(12),
                                               ),
-                                              child: Text(_getCategoryEmoji(_selectedCategory), style: const TextStyle(fontSize: 16)),
+                                              child: Icon(_getCategoryIcon(_selectedCategory), size: 20, color: theme.colorScheme.primary),
                                             ),
                                             const SizedBox(width: 12),
                                             Expanded(
