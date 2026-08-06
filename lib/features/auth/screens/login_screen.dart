@@ -1,6 +1,11 @@
+import 'dart:async';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:sanchora/features/navigation/main_navigation.dart';
+import 'package:sanchora/features/profile/widgets/profile_info_section.dart';
+import 'package:sanchora/features/auth/services/firebase_auth_service.dart';
+import 'package:sanchora/features/auth/screens/complete_profile_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -9,397 +14,641 @@ class LoginScreen extends StatefulWidget {
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin {
   final TextEditingController _phoneController = TextEditingController();
-  final FocusNode _phoneFocusNode = FocusNode();
-  String? _errorText;
+  final FocusNode _phoneFocus = FocusNode();
 
-  bool get _isValidPhone => RegExp(r'^\d{10}$').hasMatch(
-    _phoneController.text.trim(),
-  );
+  String? _phoneError;
+  bool _isPhoneValid = false;
+
+  bool _showOtp = false;
+  bool _isSendingOtp = false;
+  bool _isVerifyingOtp = false;
+  bool _otpVerified = false;
+  String? _otpError;
+  User? _loggedInUser;
+
+  final List<TextEditingController> _otpControllers = List.generate(6, (_) => TextEditingController());
+  final List<FocusNode> _otpFocusNodes = List.generate(6, (_) => FocusNode());
+
+  int _resendCountdown = 30;
+  Timer? _countdownTimer;
+
+  // Animations
+  late AnimationController _heroAnimController;
+  late Animation<double> _logoFadeAnim;
+  late Animation<Offset> _logoSlideAnim;
+  late Animation<double> _textFadeAnim;
+
+  late AnimationController _otpAnimController;
+  late Animation<double> _otpExpandAnim;
+  late Animation<double> _otpFadeAnim;
+
+  @override
+  void initState() {
+    super.initState();
+    _setupAnimations();
+    _setupListeners();
+  }
+
+  void _setupAnimations() {
+    _heroAnimController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1000),
+    );
+
+    _logoFadeAnim = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _heroAnimController, curve: const Interval(0.0, 0.5, curve: Curves.easeOut)),
+    );
+
+    _logoSlideAnim = Tween<Offset>(begin: const Offset(0, 0.2), end: Offset.zero).animate(
+      CurvedAnimation(parent: _heroAnimController, curve: const Interval(0.0, 0.5, curve: Curves.easeOutCubic)),
+    );
+
+    _textFadeAnim = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _heroAnimController, curve: const Interval(0.3, 0.8, curve: Curves.easeOut)),
+    );
+
+    _heroAnimController.forward();
+
+    _otpAnimController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 400),
+    );
+
+    _otpExpandAnim = CurvedAnimation(parent: _otpAnimController, curve: Curves.easeInOutCubic);
+    _otpFadeAnim = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _otpAnimController, curve: const Interval(0.5, 1.0, curve: Curves.easeIn)),
+    );
+  }
+
+  void _setupListeners() {
+    _phoneController.addListener(() {
+      final text = _phoneController.text.replaceAll(RegExp(r'\D'), '');
+      setState(() {
+        _isPhoneValid = text.length == 10;
+        if (_phoneError != null && _isPhoneValid) _phoneError = null;
+      });
+    });
+
+    for (int i = 0; i < 6; i++) {
+      _otpControllers[i].addListener(() {
+        if (_otpError != null) {
+          setState(() => _otpError = null);
+        }
+        final text = _otpControllers[i].text;
+        if (text.isNotEmpty && i < 5) {
+          _otpFocusNodes[i + 1].requestFocus();
+        }
+        _checkAutoVerify();
+      });
+    }
+  }
 
   @override
   void dispose() {
     _phoneController.dispose();
-    _phoneFocusNode.dispose();
+    _phoneFocus.dispose();
+    _countdownTimer?.cancel();
+    _heroAnimController.dispose();
+    _otpAnimController.dispose();
+    for (var c in _otpControllers) {
+      c.dispose();
+    }
+    for (var f in _otpFocusNodes) {
+      f.dispose();
+    }
     super.dispose();
   }
 
-  void _handleContinue() {
-    if (!_isValidPhone) {
-      setState(() {
-        _errorText = 'Please enter a valid 10-digit mobile number';
-      });
-      _phoneFocusNode.requestFocus();
+  void _startCountdown() {
+    _countdownTimer?.cancel();
+    setState(() => _resendCountdown = 30);
+    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_resendCountdown > 0) {
+        setState(() => _resendCountdown--);
+      } else {
+        timer.cancel();
+      }
+    });
+  }
+
+  Future<void> _handleSendOtp() async {
+    _phoneError = _isPhoneValid ? null : '10 digits required';
+
+    if (!_isPhoneValid) {
+      setState(() {});
       return;
     }
 
-    setState(() => _errorText = null);
+    setState(() {
+      _isSendingOtp = true;
+    });
 
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (_) => const MainNavigation()),
-    );
+    final phone = '+91${_phoneController.text.replaceAll(RegExp(r'\D'), '')}';
+
+    try {
+      await FirebaseAuthService.instance.verifyPhoneNumber(
+        phoneNumber: phone,
+        verificationCompleted: (PhoneAuthCredential credential) async {
+          await _handleAutoVerification(credential);
+        },
+        verificationFailed: (FirebaseAuthException e) {
+          setState(() {
+            _isSendingOtp = false;
+            _otpError = e.message ?? 'Verification failed';
+          });
+          if (!_showOtp && mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(_otpError!)),
+            );
+          }
+        },
+        codeSent: (String verificationId, int? resendToken) {
+          setState(() {
+            _isSendingOtp = false;
+            _showOtp = true;
+          });
+          _otpAnimController.forward();
+          _startCountdown();
+          _otpFocusNodes[0].requestFocus();
+        },
+        codeAutoRetrievalTimeout: (String verificationId) {},
+      );
+    } catch (e) {
+      setState(() {
+        _isSendingOtp = false;
+        _otpError = e.toString();
+      });
+      if (!_showOtp && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(_otpError!)),
+        );
+      }
+    }
+  }
+
+  Future<void> _handleAutoVerification(PhoneAuthCredential credential) async {
+    setState(() => _isVerifyingOtp = true);
+    try {
+      final userCred = await FirebaseAuth.instance.signInWithCredential(credential);
+      await _finalizeLogin(userCred.user!);
+    } catch (e) {
+      setState(() {
+        _isVerifyingOtp = false;
+        _otpError = 'Auto-verification failed';
+      });
+    }
+  }
+
+  void _checkAutoVerify() {
+    final otp = _otpControllers.map((c) => c.text).join();
+    if (otp.length == 6 && !_isVerifyingOtp && !_otpVerified) {
+      _verifyOtp(otp);
+    }
+  }
+
+  Future<void> _verifyOtp(String otp) async {
+    setState(() {
+      _isVerifyingOtp = true;
+      _otpError = null;
+    });
+
+    try {
+      final userCred = await FirebaseAuthService.instance.verifyOTP(otp);
+      await _finalizeLogin(userCred.user!);
+    } catch (e) {
+      setState(() {
+        _isVerifyingOtp = false;
+        _otpError = 'Invalid OTP. Please try again.';
+      });
+      // Clear OTP
+      for (var c in _otpControllers) {
+        c.clear();
+      }
+      _otpFocusNodes[0].requestFocus();
+    }
+  }
+
+  Future<void> _finalizeLogin(User user) async {
+    setState(() {
+      _otpVerified = true;
+      _loggedInUser = user;
+      _isVerifyingOtp = false;
+    });
+  }
+
+  Future<void> _handleContinue() async {
+    if (_loggedInUser == null) return;
+    
+    setState(() => _isVerifyingOtp = true);
+
+    try {
+      final exists = await FirebaseAuthService.instance.checkUserExists(_loggedInUser!.uid);
+      if (mounted) {
+        if (exists) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => const MainNavigation()),
+          );
+        } else {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (_) => CompleteProfileScreen(
+                user: _loggedInUser!,
+                phone: '+91${_phoneController.text.replaceAll(RegExp(r'\D'), '')}',
+              ),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      setState(() => _isVerifyingOtp = false);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to check user status.')),
+        );
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final screenHeight = MediaQuery.of(context).size.height;
-    final logoSize = (screenHeight * 0.20).clamp(124.0, 168.0);
-    final topSpacing = (screenHeight * 0.025).clamp(10.0, 18.0);
-
+    
     return Scaffold(
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        body: SafeArea(
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              return SingleChildScrollView(
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    minHeight: constraints.maxHeight,
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        SizedBox(height: topSpacing),
-                        _buildBrandHeader(logoSize),
-                        const SizedBox(height: 4),
-                        _buildWelcomeSection(),
-                        const SizedBox(height: 4),
-                        _buildPhoneCard(),
-                        const SizedBox(height: 10),
-                        _buildDividerRow(),
-                        const SizedBox(height: 12),
-                        _buildGoogleButton(),
-                        const SizedBox(height: 16),
-                        _buildFooterLinks(),
-                      ],
-                    ),
-                  ),
-                ),
-              );
-            },
-          ),
-        ),
-    );
-  }
-
-  Widget _buildBrandHeader(double logoSize) {
-    return Column(
-      children: [
-        Text(
-          'Sanchora',
-          style: TextStyle(
-            fontSize: 34,
-            fontWeight: FontWeight.w800,
-            color: Theme.of(context).colorScheme.onSurface,
-          ),
-        ),
-        const SizedBox(height: 3),
-        Text(
-          'One App. Every Subscription.',
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: 15,
-            fontWeight: FontWeight.w500,
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildWelcomeSection() {
-    return Column(
-      children: [
-        Text(
-          'Welcome Back',
-          style: TextStyle(
-            fontSize: 23,
-            fontWeight: FontWeight.w800,
-            color: Theme.of(context).colorScheme.onSurface,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          'Sign in to manage all your subscriptions in one place.',
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: 15,
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-            height: 1.45,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildPhoneCard() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(20, 18, 20, 20),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x140B1F4D),
-            blurRadius: 18,
-            offset: Offset(0, 10),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Mobile number',
-            style: TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w700,
-              color: Theme.of(context).colorScheme.onSurface,
-            ),
-          ),
-          const SizedBox(height: 10),
-          TextField(
-            controller: _phoneController,
-            focusNode: _phoneFocusNode,
-            onChanged: (_) {
-              if (_errorText != null) {
-                setState(() => _errorText = null);
-              }
-            },
-            keyboardType: TextInputType.phone,
-            inputFormatters: [
-              FilteringTextInputFormatter.digitsOnly,
-              LengthLimitingTextInputFormatter(10),
-            ],
-            decoration: InputDecoration(
-              hintText: 'Enter your mobile number',
-              hintStyle: const TextStyle(color: Color(0xFF94A3B8)),
-              isDense: true,
-              prefixIcon: SizedBox(
-                width: 92,
+      backgroundColor: theme.scaffoldBackgroundColor,
+      body: SafeArea(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              physics: const ClampingScrollPhysics(),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: constraints.maxHeight),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: Column(
                     children: [
-                      const Icon(Icons.phone_rounded, color: Color(0xFF1677FF)),
-                      const SizedBox(width: 8),
-                      Text(
-                        '+91',
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w700,
-                          color: Theme.of(context).colorScheme.onSurface,
-                        ),
-                      ),
+                      SizedBox(height: (screenHeight * 0.08) - 20),
+                      _buildHeroSection(theme, isDark),
+                      SizedBox(height: screenHeight * 0.04),
+                      _buildAuthCard(theme, isDark),
+                      const SizedBox(height: 32),
                     ],
                   ),
                 ),
               ),
-              prefixIconConstraints: const BoxConstraints(minWidth: 92, minHeight: 48),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-              filled: true,
-              fillColor: Theme.of(context).cardColor,
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: BorderSide(color: Theme.of(context).dividerColor, width: 1),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeroSection(ThemeData theme, bool isDark) {
+    return Column(
+      children: [
+        SlideTransition(
+          position: _logoSlideAnim,
+          child: FadeTransition(
+            opacity: _logoFadeAnim,
+            child: Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: theme.colorScheme.primary.withValues(alpha: 0.2),
+                    blurRadius: 24,
+                    offset: const Offset(0, 12),
+                  ),
+                ],
               ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: const BorderSide(color: Color(0xFF1677FF), width: 1.3),
-              ),
-              errorBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: const BorderSide(color: Color(0xFFEF4444), width: 1),
-              ),
-              focusedErrorBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: const BorderSide(color: Color(0xFFEF4444), width: 1.3),
-              ),
-              errorText: _errorText,
-              errorStyle: const TextStyle(fontSize: 12),
-            ),
-          ),
-          const SizedBox(height: 14),
-          SizedBox(
-            width: double.infinity,
-            height: 58,
-            child: FilledButton.icon(
-              onPressed: _isValidPhone ? _handleContinue : null,
-              icon: const Icon(Icons.arrow_forward_rounded, size: 20),
-              label: const Text(
-                'Continue',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
-              ),
-              style: FilledButton.styleFrom(
-                backgroundColor: const Color(0xFF1677FF),
-                disabledBackgroundColor: const Color(0xFF9FC5FF),
-                disabledForegroundColor: Colors.white,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(20),
+                child: Image.asset(
+                  'assets/images/sanchora_logo.png',
+                  fit: BoxFit.cover,
                 ),
-                elevation: 0,
               ),
             ),
           ),
+        ),
+        const SizedBox(height: 24),
+        FadeTransition(
+          opacity: _textFadeAnim,
+          child: Column(
+            children: [
+              Text(
+                'Welcome to Sanchora',
+                style: TextStyle(
+                  fontSize: 28,
+                  fontFamily: 'Poppins',
+                  fontWeight: FontWeight.w700,
+                  color: theme.colorScheme.onSurface,
+                  letterSpacing: -0.5,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'One App. Every Subscription.',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontFamily: 'Poppins',
+                  fontWeight: FontWeight.w600,
+                  color: theme.colorScheme.primary,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Text(
+                  'Securely sign in to manage all your subscriptions in one place.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontFamily: 'Poppins',
+                    color: theme.colorScheme.onSurfaceVariant,
+                    height: 1.5,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAuthCard(ThemeData theme, bool isDark) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(24, 24, 24, 20),
+      decoration: BoxDecoration(
+        color: theme.cardColor,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: theme.shadowColor.withValues(alpha: isDark ? 0.2 : 0.05),
+            blurRadius: 32,
+            offset: const Offset(0, 16),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          PremiumInputCard(
+            label: 'Mobile Number',
+            icon: Icons.phone_rounded,
+            controller: _phoneController,
+            focusNode: _phoneFocus,
+            keyboardType: TextInputType.phone,
+            hintText: '+91 Enter 10-digit number',
+            errorText: _phoneError,
+            readOnly: _otpVerified,
+            isVerified: _otpVerified,
+            inputFormatters: [
+              FilteringTextInputFormatter.digitsOnly,
+              LengthLimitingTextInputFormatter(10),
+            ],
+          ),
+          const SizedBox(height: 16),
+          _buildOtpSection(theme),
+          const SizedBox(height: 20),
+          _buildPrimaryButton(theme),
         ],
       ),
     );
   }
 
-  Widget _buildDividerRow() {
-    return Row(
-      children: [
-        Expanded(child: Divider(color: Theme.of(context).dividerColor, thickness: 0.8)),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 10),
-          child: Text(
-            'OR',
-            style: TextStyle(
-              fontSize: 12.5,
-              fontWeight: FontWeight.w600,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
-          ),
-        ),
-        Expanded(child: Divider(color: Theme.of(context).dividerColor, thickness: 0.8)),
-      ],
-    );
-  }
-
-  Widget _buildGoogleButton() {
-    return SizedBox(
-      width: double.infinity,
-      height: 58,
-      child: OutlinedButton.icon(
-        onPressed: () {},
-        icon: const Icon(Icons.g_mobiledata_rounded, size: 22),
-        label: const Text(
-          'Continue with Google',
-          style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
-        ),
-        style: OutlinedButton.styleFrom(
-          foregroundColor: Theme.of(context).colorScheme.onSurface,
-          side: BorderSide(color: Theme.of(context).dividerColor, width: 1.0),
-          padding: const EdgeInsets.symmetric(vertical: 14),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildFooterLinks() {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 4),
-      child: RichText(
-        textAlign: TextAlign.center,
-        text: TextSpan(
-          style: TextStyle(
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-            fontSize: 13,
-            height: 1.5,
-          ),
+  Widget _buildOtpSection(ThemeData theme) {
+    return SizeTransition(
+      sizeFactor: _otpExpandAnim,
+      alignment: Alignment.topCenter,
+      child: FadeTransition(
+        opacity: _otpFadeAnim,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const TextSpan(text: 'By continuing, you agree to our\n'),
-            WidgetSpan(
-              child: GestureDetector(
-                onTap: () {},
-                child: const Text(
-                  'Terms & Conditions',
+            const Divider(height: 32),
+            Text(
+              'Enter OTP',
+              style: TextStyle(
+                fontSize: 14,
+                fontFamily: 'Poppins',
+                fontWeight: FontWeight.w600,
+                color: theme.colorScheme.onSurface,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(6, (index) {
+                return Flexible(
+                  child: Container(
+                    height: 56,
+                    constraints: const BoxConstraints(maxWidth: 48),
+                    margin: const EdgeInsets.symmetric(horizontal: 2.0),
+                    child: TextField(
+                      controller: _otpControllers[index],
+                      focusNode: _otpFocusNodes[index],
+                      keyboardType: TextInputType.number,
+                      textAlign: TextAlign.center,
+                      textAlignVertical: TextAlignVertical.center,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly,
+                        LengthLimitingTextInputFormatter(6),
+                      ],
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w600,
+                        color: theme.colorScheme.onSurface,
+                      ),
+                      decoration: InputDecoration(
+                        counterText: '',
+                        contentPadding: EdgeInsets.zero,
+                        filled: true,
+                        fillColor: theme.colorScheme.surface,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          borderSide: BorderSide(color: theme.dividerColor),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          borderSide: BorderSide(color: theme.colorScheme.primary, width: 2),
+                        ),
+                      ),
+                      onChanged: (value) {
+                        if (value.length == 6) {
+                          for (int i = 0; i < 6; i++) {
+                            _otpControllers[i].text = value[i];
+                          }
+                          _otpFocusNodes[5].requestFocus();
+                          _checkAutoVerify();
+                          return;
+                        }
+                        if (value.length > 1) {
+                          _otpControllers[index].text = value.substring(value.length - 1);
+                        }
+                        if (value.isNotEmpty && index < 5) {
+                          _otpFocusNodes[index + 1].requestFocus();
+                        } else if (value.isEmpty && index > 0) {
+                          _otpFocusNodes[index - 1].requestFocus();
+                        }
+                        _checkAutoVerify();
+                      },
+                    ),
+                  ),
+                );
+              }),
+            ),
+            if (_otpError != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Text(
+                  _otpError!,
                   style: TextStyle(
-                    color: Color(0xFF1677FF),
-                    fontWeight: FontWeight.w700,
+                    fontSize: 12,
+                    color: theme.colorScheme.error,
                   ),
                 ),
               ),
-            ),
-            const TextSpan(text: ' and '),
-            WidgetSpan(
-              child: GestureDetector(
-                onTap: () {},
-                child: const Text(
-                  'Privacy Policy',
-                  style: TextStyle(
-                    color: Color(0xFF1677FF),
-                    fontWeight: FontWeight.w700,
+            const SizedBox(height: 16),
+            if (_otpVerified)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.check_circle_rounded, color: Colors.green.shade600, size: 20),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Verified successfully',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontFamily: 'Poppins',
+                      fontWeight: FontWeight.w600,
+                      color: Colors.green.shade600,
+                    ),
                   ),
-                ),
+                ],
+              )
+            else
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    _resendCountdown > 0 ? 'Resend code in ' : 'Didn\'t receive code? ',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  if (_resendCountdown > 0)
+                    Text(
+                      '0:${_resendCountdown.toString().padLeft(2, '0')}',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: theme.colorScheme.primary,
+                      ),
+                    )
+                  else
+                    GestureDetector(
+                      onTap: _handleSendOtp,
+                      child: Text(
+                        'Resend OTP',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: theme.colorScheme.primary,
+                        ),
+                      ),
+                    ),
+                ],
               ),
-            ),
           ],
         ),
       ),
     );
   }
-}
 
-class OtpVerificationScreen extends StatelessWidget {
-  const OtpVerificationScreen({super.key, required this.phoneNumber});
+  Widget _buildPrimaryButton(ThemeData theme) {
+    if (!_showOtp) {
+      return _buildButton(
+        theme: theme,
+        label: 'Send OTP',
+        isLoading: _isSendingOtp,
+        isEnabled: _isPhoneValid && !_isSendingOtp,
+        onTap: _handleSendOtp,
+      );
+    }
 
-  final String phoneNumber;
+    return _buildButton(
+      theme: theme,
+      label: 'Continue',
+      isLoading: _isVerifyingOtp,
+      isEnabled: _otpVerified && !_isVerifyingOtp,
+      onTap: _handleContinue,
+    );
+  }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      body: SafeArea(
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(
-                  Icons.verified_user_rounded,
-                  size: 64,
-                  color: Color(0xFF1677FF),
-                ),
-                const SizedBox(height: 20),
-                Text(
-                  'OTP Verification',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.w800,
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  'A placeholder verification screen for $phoneNumber.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 15,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    height: 1.45,
-                  ),
-                ),
-                const SizedBox(height: 24),
-                SizedBox(
-                  width: double.infinity,
-                  height: 52,
-                  child: FilledButton(
-                    onPressed: () => Navigator.pop(context),
-                    style: FilledButton.styleFrom(
-                      backgroundColor: const Color(0xFF1677FF),
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
+  Widget _buildButton({
+    required ThemeData theme,
+    required String label,
+    required bool isLoading,
+    required bool isEnabled,
+    required VoidCallback onTap,
+  }) {
+    return Container(
+      height: 56,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        gradient: isEnabled
+            ? LinearGradient(
+                colors: [
+                  theme.colorScheme.primary,
+                  theme.colorScheme.primary.withValues(alpha: 0.8),
+                ],
+              )
+            : null,
+        color: isEnabled ? null : theme.disabledColor.withValues(alpha: 0.1),
+        boxShadow: isEnabled
+            ? [
+                BoxShadow(
+                  color: theme.colorScheme.primary.withValues(alpha: 0.3),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                )
+              ]
+            : null,
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: isEnabled ? onTap : null,
+          child: Center(
+            child: isLoading
+                ? const SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2.5,
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                     ),
-                    child: const Text('Back to Login'),
+                  )
+                : Text(
+                    label,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontFamily: 'Poppins',
+                      fontWeight: FontWeight.w600,
+                      color: isEnabled ? Colors.white : theme.disabledColor,
+                    ),
                   ),
-                ),
-              ],
-            ),
           ),
         ),
       ),

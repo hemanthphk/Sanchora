@@ -20,7 +20,7 @@ class FaqTile extends StatefulWidget {
 }
 
 class _FaqTileState extends State<FaqTile> {
-  final ExpansionTileController _controller = ExpansionTileController();
+  final ExpansibleController _controller = ExpansibleController();
 
   @override
   void didUpdateWidget(FaqTile oldWidget) {

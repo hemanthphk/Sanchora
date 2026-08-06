@@ -11,6 +11,8 @@ class PremiumInputCard extends StatefulWidget {
   final String? errorText;
   final FocusNode? focusNode;
   final List<TextInputFormatter>? inputFormatters;
+  final bool readOnly;
+  final bool isVerified;
 
   const PremiumInputCard({
     super.key,
@@ -23,6 +25,8 @@ class PremiumInputCard extends StatefulWidget {
     this.errorText,
     this.focusNode,
     this.inputFormatters,
+    this.readOnly = false,
+    this.isVerified = false,
   });
 
   @override
@@ -101,7 +105,7 @@ class _PremiumInputCardState extends State<PremiumInputCard> {
         borderRadius: BorderRadius.circular(24),
         child: InkWell(
           borderRadius: BorderRadius.circular(24),
-          onTap: () {
+          onTap: widget.readOnly ? null : () {
             if (!_isFocused) {
               setState(() {
                 _isFocused = true;
@@ -201,14 +205,23 @@ class _PremiumInputCardState extends State<PremiumInputCard> {
                   duration: const Duration(milliseconds: 200),
                   switchInCurve: Curves.easeOutCubic,
                   switchOutCurve: Curves.easeOutCubic,
-                  child: Icon(
-                    _isFocused ? Icons.check_rounded : Icons.edit_rounded,
-                    key: ValueKey(_isFocused),
-                    size: 18,
-                    color: _isFocused 
-                        ? theme.colorScheme.primary 
-                        : theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
-                  ),
+                  child: widget.isVerified
+                      ? Icon(
+                          Icons.check_circle_rounded,
+                          key: const ValueKey('verified'),
+                          size: 18,
+                          color: Colors.green.shade600,
+                        )
+                      : widget.readOnly
+                          ? const SizedBox.shrink()
+                          : Icon(
+                              _isFocused ? Icons.check_rounded : Icons.edit_rounded,
+                              key: ValueKey(_isFocused),
+                              size: 18,
+                              color: _isFocused 
+                                  ? theme.colorScheme.primary 
+                                  : theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+                            ),
                 ),
               ],
             ),

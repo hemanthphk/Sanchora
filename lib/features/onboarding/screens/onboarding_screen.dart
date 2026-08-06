@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sanchora/features/auth/screens/login_screen.dart';
 import 'package:sanchora/core/services/currency_service.dart';
 
@@ -52,11 +53,16 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     }
   }
 
-  void _goToLogin() {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (_) => LoginScreen()),
-    );
+  void _goToLogin() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isOnboardingCompleted', true);
+    
+    if (mounted) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => LoginScreen()),
+      );
+    }
   }
 
   @override
@@ -130,7 +136,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               ),
             ),
             Padding(
-              padding: EdgeInsets.fromLTRB(24, 0, 24, 24),
+              padding: EdgeInsets.fromLTRB(24, 14, 24, 24),
               child: Column(
                 children: [
                   Row(
@@ -230,7 +236,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
-                              'Already have an account? ',
+                              'Already a member? ',
                               style: TextStyle(
                                 color: Theme.of(
                                   context,
@@ -322,169 +328,132 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   ),
                 ),
                 Container(
-                  width: 250,
-                  height: 388,
+                  width: double.infinity,
+                  constraints: BoxConstraints(maxWidth: 380),
+                  margin: EdgeInsets.symmetric(horizontal: 24),
+                  padding: EdgeInsets.all(24),
                   decoration: BoxDecoration(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.surfaceContainerHighest,
-                    borderRadius: BorderRadius.circular(36),
+                    color: Theme.of(context).cardColor,
+                    borderRadius: BorderRadius.circular(24),
+                    border: Border.all(
+                      color: Theme.of(context).brightness == Brightness.dark 
+                          ? Colors.white.withValues(alpha: 0.05) 
+                          : Colors.black.withValues(alpha: 0.03),
+                      width: 1,
+                    ),
                     boxShadow: [
-                      BoxShadow(
-                        color: Color(0x1A0B1F4D),
-                        blurRadius: 30,
-                        offset: Offset(0, 20),
-                      ),
+                      if (Theme.of(context).brightness == Brightness.light)
+                        BoxShadow(
+                          color: Color(0x1A0B1F4D),
+                          blurRadius: 32,
+                          offset: Offset(0, 16),
+                        ),
                     ],
                   ),
-                  child: Padding(
-                    padding: EdgeInsets.fromLTRB(20, 16, 20, 16),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      mainAxisSize: MainAxisSize.max,
-                      children: [
-                        Text(
-                          'Upcoming Payment',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w700,
-                            color: Theme.of(context).colorScheme.onSurface,
-                          ),
-                        ),
-                        SizedBox(height: 12),
-                        Container(
-                          width: double.infinity,
-                          padding: EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).scaffoldBackgroundColor,
-                            borderRadius: BorderRadius.circular(24),
-                          ),
-                          child: Column(
-                            children: [
-                              Row(
-                                children: [
-                                  Container(
-                                    width: 44,
-                                    height: 44,
-                                    decoration: BoxDecoration(
-                                      color: Color(
-                                        0xFF1DB954,
-                                      ).withValues(alpha: 0.16),
-                                      borderRadius: BorderRadius.circular(14),
-                                    ),
-                                    child: Center(
-                                      child: Icon(
-                                        Icons.music_note_rounded,
-                                        color: Color(0xFF1DB954),
-                                        size: 22,
-                                      ),
-                                    ),
-                                  ),
-                                  SizedBox(width: 12),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          'Spotify Premium',
-                                          style: TextStyle(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w700,
-                                            color: Theme.of(
-                                              context,
-                                            ).colorScheme.onSurface,
-                                          ),
-                                        ),
-                                        Text(
-                                          '${CurrencyService.instance.format(119)} / month',
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            color: Theme.of(
-                                              context,
-                                            ).colorScheme.onSurfaceVariant,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Container(
-                                    padding: EdgeInsets.symmetric(
-                                      horizontal: 8,
-                                      vertical: 4,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: Theme.of(
-                                        context,
-                                      ).colorScheme.surfaceContainerHighest,
-                                      borderRadius: BorderRadius.circular(999),
-                                    ),
-                                    child: Text(
-                                      'Active',
-                                      style: TextStyle(
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.w700,
-                                        color: const Color(0xFF0A84FF),
-                                      ),
-                                    ),
-                                  ),
-                                ],
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            width: 56,
+                            height: 56,
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).brightness == Brightness.dark ? Colors.white.withValues(alpha: 0.1) : Colors.grey.shade100,
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            clipBehavior: Clip.antiAlias,
+                            child: Image.network(
+                              'https://logo.clearbit.com/spotify.com',
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) => Icon(
+                                Icons.music_note_rounded,
+                                color: Theme.of(context).colorScheme.onSurfaceVariant,
                               ),
-                              SizedBox(height: 16),
-                              Row(
-                                children: [
-                                  Text(
-                                    'Due on',
-                                    style: TextStyle(
-                                      fontSize: 13,
-                                      color: Theme.of(
-                                        context,
-                                      ).colorScheme.onSurfaceVariant,
-                                    ),
-                                  ),
-                                  Spacer(),
-                                  Text(
-                                    '25 May 2025',
-                                    style: TextStyle(
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w700,
-                                      color: Theme.of(
-                                        context,
-                                      ).colorScheme.onSurface,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              SizedBox(height: 16),
-                              SizedBox(
-                                width: double.infinity,
-                                child: ElevatedButton(
-                                  onPressed: () {},
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: const Color(0xFF0A84FF),
-                                    foregroundColor: Theme.of(
-                                      context,
-                                    ).cardColor,
-                                    padding: EdgeInsets.symmetric(vertical: 14),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(16),
-                                    ),
-                                    elevation: 0,
-                                  ),
-                                  child: Text(
-                                    'View Details',
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w700,
-                                    ),
+                            ),
+                          ),
+                          SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Spotify',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w700,
+                                    color: Theme.of(context).colorScheme.onSurface,
                                   ),
                                 ),
+                                SizedBox(height: 4),
+                                Text(
+                                  '${CurrencyService.instance.format(119)} / month',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 24),
+                      Container(
+                        padding: EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).brightness == Brightness.dark 
+                              ? Theme.of(context).colorScheme.surfaceContainerHighest 
+                              : const Color(0xFFEEF2FF),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Due: 25 May',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: Theme.of(context).colorScheme.onSurface,
                               ),
-                            ],
+                            ),
+                            SizedBox(height: 4),
+                            Text(
+                              'Status: Due Tomorrow',
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: const Color(0xFFEA580C),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: 24),
+                      SizedBox(
+                        width: double.infinity,
+                        child: FilledButton(
+                          onPressed: () {},
+                          style: FilledButton.styleFrom(
+                            backgroundColor: const Color(0xFF0A84FF),
+                            foregroundColor: Colors.white,
+                            padding: EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                          ),
+                          child: Text(
+                            'View Details',
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
               ],
@@ -532,8 +501,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       child: LayoutBuilder(
         builder: (context, constraints) {
           final availableHeight = constraints.maxHeight;
-          final phoneHeight = (availableHeight * 0.62).clamp(300.0, 460.0);
-          final contentSpacing = availableHeight < 700 ? 8.0 : 10.0;
 
           return Column(
             children: [
@@ -589,214 +556,95 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       ),
                     ),
                     Container(
-                      width: 250,
-                      height: phoneHeight,
+                      width: double.infinity,
+                      constraints: BoxConstraints(maxWidth: 380),
+                      margin: EdgeInsets.symmetric(horizontal: 24),
+                      padding: EdgeInsets.all(24),
                       decoration: BoxDecoration(
-                        color: Theme.of(context).brightness == Brightness.light
-                            ? const Color(0xFFEEF2FF)
-                            : Theme.of(
-                                context,
-                              ).colorScheme.surfaceContainerHighest,
-                        borderRadius: BorderRadius.circular(36),
+                        color: Theme.of(context).cardColor,
+                        borderRadius: BorderRadius.circular(24),
+                        border: Border.all(
+                          color: Theme.of(context).brightness == Brightness.dark 
+                              ? Colors.white.withValues(alpha: 0.05) 
+                              : Colors.black.withValues(alpha: 0.03),
+                          width: 1,
+                        ),
                         boxShadow: [
-                          BoxShadow(
-                            color: Color(0x1A0B1F4D),
-                            blurRadius: 30,
-                            offset: Offset(0, 20),
-                          ),
+                          if (Theme.of(context).brightness == Brightness.light)
+                            BoxShadow(
+                              color: Color(0x1A0B1F4D),
+                              blurRadius: 32,
+                              offset: Offset(0, 16),
+                            ),
                         ],
                       ),
-                      child: Padding(
-                        padding: EdgeInsets.fromLTRB(16, 16, 16, 12),
-                        child: Column(
-                          children: [
-                            Container(
-                              width: 92,
-                              height: 18,
-                              decoration: BoxDecoration(
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.outlineVariant,
-                                borderRadius: BorderRadius.circular(999),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          _buildAnalyticsRow(
+                            'https://logo.clearbit.com/netflix.com',
+                            'Netflix',
+                            CurrencyService.instance.format(649),
+                          ),
+                          SizedBox(height: 12),
+                          _buildAnalyticsRow(
+                            'https://logo.clearbit.com/spotify.com',
+                            'Spotify',
+                            CurrencyService.instance.format(119),
+                          ),
+                          SizedBox(height: 12),
+                          _buildAnalyticsRow(
+                            'https://logo.clearbit.com/amazon.com',
+                            'Amazon Prime',
+                            CurrencyService.instance.format(299),
+                          ),
+                          SizedBox(height: 24),
+                          Container(
+                            width: double.infinity,
+                            padding: EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).brightness == Brightness.light
+                                  ? const Color(0xFFF3F9FF)
+                                  : Theme.of(context).colorScheme.surfaceContainerHighest,
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                color: Theme.of(context).colorScheme.outlineVariant,
+                                width: 1,
                               ),
                             ),
-                            SizedBox(height: contentSpacing),
-                            Container(
-                              width: double.infinity,
-                              padding: EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                gradient: const LinearGradient(
-                                  colors: [
-                                    Color(0xFF0A84FF),
-                                    Color(0xFF2563EB),
-                                  ],
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Spending trend',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
+                                    color: Theme.of(context).colorScheme.onSurface,
+                                  ),
                                 ),
-                                borderRadius: BorderRadius.circular(22),
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Monthly Spending',
-                                    style: TextStyle(
-                                      fontSize: 13,
-                                      color: Theme.of(
-                                        context,
-                                      ).cardColor.withValues(alpha: 0.7),
-                                    ),
-                                  ),
-                                  SizedBox(height: 6),
-                                  Text(
-                                    CurrencyService.instance.format(3247),
-                                    style: TextStyle(
-                                      fontSize: 24,
-                                      fontWeight: FontWeight.w800,
-                                      color: Theme.of(context).cardColor,
-                                    ),
-                                  ),
-                                  SizedBox(height: 6),
-                                  Text(
-                                    '+12% vs last month',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: Theme.of(
-                                        context,
-                                      ).cardColor.withValues(alpha: 0.7),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            SizedBox(height: contentSpacing),
-                            Expanded(
-                              child: Container(
-                                width: double.infinity,
-                                padding: EdgeInsets.all(12),
-                                decoration: BoxDecoration(
-                                  color:
-                                      Theme.of(context).brightness ==
-                                          Brightness.light
-                                      ? const Color(0xFFF3F9FF)
-                                      : Theme.of(
-                                          context,
-                                        ).colorScheme.surfaceContainerHighest,
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                                child: LayoutBuilder(
-                                  builder: (context, listConstraints) {
-                                    return SingleChildScrollView(
-                                      child: ConstrainedBox(
-                                        constraints: BoxConstraints(
-                                          minHeight: listConstraints.maxHeight,
-                                        ),
-                                        child: Column(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            _buildAnalyticsRow(
-                                              'Netflix',
-                                              CurrencyService.instance.format(649),
-                                            ),
-                                            SizedBox(height: 8),
-                                            _buildAnalyticsRow(
-                                              'Spotify',
-                                              CurrencyService.instance.format(119),
-                                            ),
-                                            SizedBox(height: 8),
-                                            _buildAnalyticsRow(
-                                              'Amazon Prime',
-                                              CurrencyService.instance.format(299),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
+                                SizedBox(height: 16),
+                                LayoutBuilder(
+                                  builder: (context, chartConstraints) {
+                                    final barHeight = (chartConstraints.maxWidth * 0.18).clamp(28.0, 70.0);
+                                    return Row(
+                                      crossAxisAlignment: CrossAxisAlignment.end,
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        _buildChartBar(barHeight, const Color(0xFF0A84FF)),
+                                        _buildChartBar(barHeight + 20, const Color(0xFF2563EB)),
+                                        _buildChartBar(barHeight + 36, const Color(0xFF0A84FF)),
+                                        _buildChartBar(barHeight + 14, const Color(0xFF0A84FF)),
+                                        _buildChartBar(barHeight + 46, const Color(0xFF2563EB)),
+                                        _buildChartBar(barHeight + 28, const Color(0xFF0A84FF)),
+                                      ],
                                     );
                                   },
                                 ),
-                              ),
+                              ],
                             ),
-                            SizedBox(height: contentSpacing),
-                            Container(
-                              width: double.infinity,
-                              padding: EdgeInsets.all(10),
-                              decoration: BoxDecoration(
-                                color:
-                                    Theme.of(context).brightness ==
-                                        Brightness.light
-                                    ? const Color(0xFFF3F9FF)
-                                    : Theme.of(
-                                        context,
-                                      ).colorScheme.surfaceContainerHighest,
-                                borderRadius: BorderRadius.circular(18),
-                                border: Border.all(
-                                  color: Theme.of(
-                                    context,
-                                  ).colorScheme.outlineVariant,
-                                  width: 1,
-                                ),
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Spending trend',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w700,
-                                      color: Theme.of(
-                                        context,
-                                      ).colorScheme.onSurface,
-                                    ),
-                                  ),
-                                  SizedBox(height: 10),
-                                  LayoutBuilder(
-                                    builder: (context, chartConstraints) {
-                                      final barHeight =
-                                          (chartConstraints.maxWidth * 0.18)
-                                              .clamp(28.0, 86.0);
-                                      return Row(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.end,
-                                        children: [
-                                          _buildChartBar(
-                                            barHeight,
-                                            const Color(0xFF0A84FF),
-                                          ),
-                                          SizedBox(width: 6),
-                                          _buildChartBar(
-                                            barHeight + 20,
-                                            const Color(0xFF2563EB),
-                                          ),
-                                          SizedBox(width: 6),
-                                          _buildChartBar(
-                                            barHeight + 36,
-                                            const Color(0xFF0A84FF),
-                                          ),
-                                          SizedBox(width: 6),
-                                          _buildChartBar(
-                                            barHeight + 14,
-                                            const Color(0xFF0A84FF),
-                                          ),
-                                          SizedBox(width: 6),
-                                          _buildChartBar(
-                                            barHeight + 46,
-                                            const Color(0xFF2563EB),
-                                          ),
-                                          SizedBox(width: 6),
-                                          _buildChartBar(
-                                            barHeight + 28,
-                                            const Color(0xFF0A84FF),
-                                          ),
-                                        ],
-                                      );
-                                    },
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
@@ -909,72 +757,63 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   ),
                 ),
                 Container(
-                  width: 240,
-                  height: 420,
+                  width: double.infinity,
+                  constraints: BoxConstraints(maxWidth: 380),
+                  margin: EdgeInsets.symmetric(horizontal: 24),
+                  padding: EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.surfaceContainerHighest,
-                    borderRadius: BorderRadius.circular(36),
+                    color: Theme.of(context).cardColor,
+                    borderRadius: BorderRadius.circular(24),
+                    border: Border.all(
+                      color: Theme.of(context).brightness == Brightness.dark 
+                          ? Colors.white.withValues(alpha: 0.05) 
+                          : Colors.black.withValues(alpha: 0.03),
+                      width: 1,
+                    ),
                     boxShadow: [
-                      BoxShadow(
-                        color: Color(0x1A0B1F4D),
-                        blurRadius: 30,
-                        offset: Offset(0, 20),
-                      ),
+                      if (Theme.of(context).brightness == Brightness.light)
+                        BoxShadow(
+                          color: Color(0x1A0B1F4D),
+                          blurRadius: 32,
+                          offset: Offset(0, 16),
+                        ),
                     ],
                   ),
-                  child: Padding(
-                    padding: EdgeInsets.fromLTRB(16, 14, 16, 16),
-                    child: Column(
-                      children: [
-                        Container(
-                          height: 18,
-                          width: 92,
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.outlineVariant,
-                            borderRadius: BorderRadius.circular(999),
-                          ),
-                        ),
-                        SizedBox(height: 14),
-                        Expanded(
-                          child: Container(
-                            padding: EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: Theme.of(context).scaffoldBackgroundColor,
-                              borderRadius: BorderRadius.circular(28),
-                            ),
-                            child: Column(
-                              children: [
-                                _buildSubscriptionCard(
-                                  iconColor: Color(0xFFFF3B30),
-                                  title: 'Netflix',
-                                  amount: CurrencyService.instance.format(15.99),
-                                ),
-                                SizedBox(height: 10),
-                                _buildSubscriptionCard(
-                                  iconColor: Color(0xFF1DB954),
-                                  title: 'Spotify',
-                                  amount: CurrencyService.instance.format(9.99),
-                                ),
-                                SizedBox(height: 10),
-                                _buildSubscriptionCard(
-                                  iconColor: Color(0xFFFF9900),
-                                  title: 'Amazon Prime',
-                                  amount: CurrencyService.instance.format(8.99),
-                                ),
-                                SizedBox(height: 10),
-                                _buildSubscriptionCard(
-                                  iconColor: Color(0xFFFF0000),
-                                  title: 'YouTube Premium',
-                                  amount: CurrencyService.instance.format(13.99),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _buildSubscriptionCard(
+                        logoUrl: 'https://logo.clearbit.com/netflix.com',
+                        title: 'Netflix',
+                        amount: CurrencyService.instance.format(649),
+                        status: 'Active',
+                        statusColor: const Color(0xFF166534),
+                      ),
+                      SizedBox(height: 12),
+                      _buildSubscriptionCard(
+                        logoUrl: 'https://logo.clearbit.com/spotify.com',
+                        title: 'Spotify',
+                        amount: CurrencyService.instance.format(119),
+                        status: 'Due Soon',
+                        statusColor: const Color(0xFFEA580C),
+                      ),
+                      SizedBox(height: 12),
+                      _buildSubscriptionCard(
+                        logoUrl: 'https://logo.clearbit.com/amazon.com',
+                        title: 'Amazon Prime',
+                        amount: CurrencyService.instance.format(299),
+                        status: 'Auto Renew',
+                        statusColor: const Color(0xFF0A84FF),
+                      ),
+                      SizedBox(height: 12),
+                      _buildSubscriptionCard(
+                        logoUrl: 'https://logo.clearbit.com/youtube.com',
+                        title: 'YouTube',
+                        amount: CurrencyService.instance.format(149),
+                        status: 'Active',
+                        statusColor: const Color(0xFF166534),
+                      ),
+                    ],
                   ),
                 ),
               ],
@@ -1017,44 +856,52 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   Widget _buildSubscriptionCard({
-    required Color iconColor,
+    required String logoUrl,
     required String title,
     required String amount,
+    required String status,
+    required Color statusColor,
   }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(16),
+        color: isDark ? Theme.of(context).colorScheme.surfaceContainerHighest : Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(
+          color: isDark ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.05),
+          width: 1,
+        ),
         boxShadow: [
-          BoxShadow(
-            color: Theme.of(context).shadowColor.withValues(alpha: 0.08),
-            blurRadius: 10,
-            offset: Offset(0, 4),
-          ),
+          if (!isDark)
+            BoxShadow(
+              color: Theme.of(context).shadowColor.withValues(alpha: 0.06),
+              blurRadius: 16,
+              offset: Offset(0, 8),
+            ),
         ],
       ),
       child: Row(
         children: [
           Container(
-            width: 36,
-            height: 36,
+            width: 42,
+            height: 42,
             decoration: BoxDecoration(
-              color: iconColor.withValues(alpha: 0.16),
-              borderRadius: BorderRadius.circular(12),
+              color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.grey.shade100,
+              borderRadius: BorderRadius.circular(14),
             ),
-            child: Center(
-              child: Container(
-                width: 20,
-                height: 20,
-                decoration: BoxDecoration(
-                  color: iconColor,
-                  borderRadius: BorderRadius.circular(6),
-                ),
+            clipBehavior: Clip.antiAlias,
+            child: Image.network(
+              logoUrl,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) => Icon(
+                Icons.subscriptions_rounded,
+                size: 20,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
           ),
-          SizedBox(width: 10),
+          SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -1062,15 +909,17 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 Text(
                   title,
                   style: TextStyle(
-                    fontSize: 13,
+                    fontSize: 14,
                     fontWeight: FontWeight.w700,
                     color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
+                SizedBox(height: 2),
                 Text(
                   amount,
                   style: TextStyle(
-                    fontSize: 12,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                 ),
@@ -1078,17 +927,18 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             ),
           ),
           Container(
-            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceContainerHighest,
+              color: statusColor.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(999),
             ),
             child: Text(
-              'Active',
+              status,
               style: TextStyle(
-                fontSize: 10,
+                fontSize: 11,
                 fontWeight: FontWeight.w700,
-                color: Color(0xFF166534),
+                color: statusColor,
+                letterSpacing: 0.2,
               ),
             ),
           ),
@@ -1097,15 +947,34 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     );
   }
 
-  Widget _buildAnalyticsRow(String title, String amount) {
+  Widget _buildAnalyticsRow(String logoUrl, String title, String amount) {
     return Row(
       children: [
+        Container(
+          width: 20,
+          height: 20,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(6),
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: Image.network(
+            logoUrl,
+            fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) => Icon(
+              Icons.subscriptions_rounded,
+              size: 12,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ),
+        SizedBox(width: 8),
         Text(
           title,
           style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w700,
-            color: Theme.of(context).colorScheme.onSurface, // Primary text
+            color: Theme.of(context).colorScheme.onSurface,
           ),
         ),
         Spacer(),
@@ -1114,7 +983,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w700,
-            color: const Color(0xFF0A84FF),
+            color: Theme.of(context).brightness == Brightness.dark 
+                ? Colors.white 
+                : const Color(0xFF0A84FF),
           ),
         ),
       ],
@@ -1126,8 +997,22 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       width: 20,
       height: height,
       decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(999),
+        gradient: LinearGradient(
+          colors: [
+            color.withValues(alpha: 0.7),
+            color,
+          ],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+        ),
+        borderRadius: BorderRadius.circular(8),
+        boxShadow: [
+          BoxShadow(
+            color: color.withValues(alpha: 0.2),
+            blurRadius: 8,
+            offset: Offset(0, 4),
+          ),
+        ],
       ),
     );
   }

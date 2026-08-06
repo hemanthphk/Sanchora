@@ -9,6 +9,9 @@ import 'package:workmanager/workmanager.dart';
 import 'package:sanchora/features/profile/services/profile_service.dart';
 import 'package:sanchora/features/notifications/services/notification_settings_service.dart';
 import 'package:sanchora/features/notifications/screens/notifications_inbox_screen.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+
 void callbackDispatcher() {
   Workmanager().executeTask((task, inputData) async {
     // In the future, we'll calculate dynamic weekly/monthly summaries here
@@ -21,6 +24,11 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Initialize Firebase
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   
   // Initialize timezone for local notifications
   tz.initializeTimeZones();

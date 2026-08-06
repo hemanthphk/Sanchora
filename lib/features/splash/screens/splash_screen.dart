@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sanchora/features/navigation/main_navigation.dart';
+import 'package:sanchora/features/auth/screens/login_screen.dart';
 import 'package:sanchora/features/onboarding/screens/onboarding_screen.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -34,12 +39,33 @@ class _SplashScreenState extends State<SplashScreen>
 
     _controller.forward();
 
-    Future.delayed(const Duration(seconds: 2), () {
+    Future.delayed(const Duration(seconds: 2), () async {
       if (mounted) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const OnboardingScreen()),
-        );
+        final prefs = await SharedPreferences.getInstance();
+        final isOnboardingCompleted = prefs.getBool('isOnboardingCompleted') ?? false;
+
+        if (!mounted) return;
+
+        if (!isOnboardingCompleted) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => const OnboardingScreen()),
+          );
+          return;
+        }
+
+        final user = FirebaseAuth.instance.currentUser;
+        if (user != null) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => const MainNavigation()),
+          );
+        } else {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => const LoginScreen()),
+          );
+        }
       }
     });
   }
@@ -68,10 +94,23 @@ class _SplashScreenState extends State<SplashScreen>
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Image.asset(
-                        'assets/images/sanchora_logo.png',
-                        width: logoSize,
-                        fit: BoxFit.contain,
+                      GestureDetector(
+                        onDoubleTap: () async {
+                          if (kDebugMode) {
+                            final prefs = await SharedPreferences.getInstance();
+                            await prefs.remove('isOnboardingCompleted');
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('DEBUG: Onboarding reset')),
+                              );
+                            }
+                          }
+                        },
+                        child: Image.asset(
+                          'assets/images/sanchora_logo.png',
+                          width: logoSize,
+                          fit: BoxFit.contain,
+                        ),
                       ),
                       const SizedBox(height: 24),
                       Text(

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "8756555168",
+    "project_id": "sanchora",
+    "storage_bucket": "sanchora.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:8756555168:android:a26608a25a0284cd4c48c5",
+        "android_client_info": {
+          "package_name": "in.sanchora.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDP9tNcbyx2CIl_bFfZiD0crlYaVQ1Gx_Y"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
