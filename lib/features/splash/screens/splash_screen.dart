@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sanchora/features/navigation/main_navigation.dart';
+import 'package:sanchora/features/auth/screens/verify_email_screen.dart';
 import 'package:sanchora/features/auth/screens/login_screen.dart';
 import 'package:sanchora/features/onboarding/screens/onboarding_screen.dart';
 
@@ -39,7 +40,9 @@ class _SplashScreenState extends State<SplashScreen>
 
     _controller.forward();
 
-    Future.delayed(const Duration(seconds: 2), () async {
+    Future.microtask(() async {
+      await _controller.forward();
+
       if (mounted) {
         final prefs = await SharedPreferences.getInstance();
         final isOnboardingCompleted = prefs.getBool('isOnboardingCompleted') ?? false;
@@ -47,27 +50,42 @@ class _SplashScreenState extends State<SplashScreen>
         if (!mounted) return;
 
         if (!isOnboardingCompleted) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (_) => const OnboardingScreen()),
-          );
+          _navigateTo(context, const OnboardingScreen());
           return;
         }
 
-        final user = FirebaseAuth.instance.currentUser;
+        var user = FirebaseAuth.instance.currentUser;
         if (user != null) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (_) => const MainNavigation()),
-          );
+          await user.reload();
+          user = FirebaseAuth.instance.currentUser;
+          
+          if (!mounted) return;
+          
+          if (user != null && user.emailVerified) {
+            _navigateTo(context, const MainNavigation());
+          } else {
+            _navigateTo(context, const VerifyEmailScreen());
+          }
         } else {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (_) => const LoginScreen()),
-          );
+          _navigateTo(context, const LoginScreen());
         }
       }
     });
+  }
+
+  void _navigateTo(BuildContext context, Widget screen) {
+    Navigator.of(context).pushReplacement(
+      PageRouteBuilder(
+        pageBuilder: (_, _, _) => screen,
+        transitionDuration: const Duration(milliseconds: 300),
+        transitionsBuilder: (_, animation, _, child) {
+          return FadeTransition(
+            opacity: animation,
+            child: child,
+          );
+        },
+      ),
+    );
   }
 
   @override

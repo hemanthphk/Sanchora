@@ -13,6 +13,7 @@ class PremiumInputCard extends StatefulWidget {
   final List<TextInputFormatter>? inputFormatters;
   final bool readOnly;
   final bool isVerified;
+  final bool obscureText;
 
   const PremiumInputCard({
     super.key,
@@ -27,6 +28,7 @@ class PremiumInputCard extends StatefulWidget {
     this.inputFormatters,
     this.readOnly = false,
     this.isVerified = false,
+    this.obscureText = false,
   });
 
   @override
@@ -156,9 +158,10 @@ class _PremiumInputCardState extends State<PremiumInputCard> {
                           controller: widget.controller,
                           focusNode: _focusNode,
                           keyboardType: widget.keyboardType,
+                          obscureText: widget.obscureText,
                           onChanged: widget.onChanged,
                           inputFormatters: widget.inputFormatters,
-                          readOnly: !_isFocused,
+                          readOnly: !_isFocused || widget.readOnly,
                           cursorColor: theme.colorScheme.primary,
                           cursorWidth: 2,
                           cursorRadius: const Radius.circular(2),

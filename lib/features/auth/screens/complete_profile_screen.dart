@@ -2,7 +2,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:sanchora/features/navigation/main_navigation.dart';
 import 'package:sanchora/features/profile/widgets/profile_info_section.dart';
-import 'package:sanchora/features/auth/services/firebase_auth_service.dart';
+import 'package:sanchora/features/auth/screens/verify_email_screen.dart';
+import 'package:sanchora/features/auth/services/firestore_service.dart';
 
 class CompleteProfileScreen extends StatefulWidget {
   final User user;
@@ -112,18 +113,26 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> with Tick
     });
 
     try {
-      await FirebaseAuthService.instance.createUserProfile(
+      await FirestoreService.instance.createUserProfile(
         user: widget.user,
         name: _nameController.text.trim(),
         email: _emailController.text.trim(),
         phone: widget.phone,
       );
 
+      await widget.user.reload();
       if (mounted) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const MainNavigation()),
-        );
+        if (FirebaseAuth.instance.currentUser?.emailVerified == true) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => const MainNavigation()),
+          );
+        } else {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => const VerifyEmailScreen()),
+          );
+        }
       }
     } catch (e) {
       setState(() {

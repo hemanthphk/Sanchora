@@ -1,30 +1,36 @@
-import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:sanchora/features/navigation/main_navigation.dart';
-import 'package:sanchora/features/auth/screens/sign_up_screen.dart';
-import 'package:sanchora/features/auth/screens/forgot_password_screen.dart';
 import 'package:sanchora/features/auth/screens/verify_email_screen.dart';
 import 'package:sanchora/features/profile/widgets/profile_info_section.dart';
 import 'package:sanchora/features/auth/services/firebase_auth_service.dart';
 import 'package:sanchora/features/auth/services/firestore_service.dart';
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+class SignUpScreen extends StatefulWidget {
+  const SignUpScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<SignUpScreen> createState() => _SignUpScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin {
+class _SignUpScreenState extends State<SignUpScreen> with TickerProviderStateMixin {
+  final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmPasswordController = TextEditingController();
 
+  final FocusNode _nameFocus = FocusNode();
   final FocusNode _emailFocus = FocusNode();
+  final FocusNode _phoneFocus = FocusNode();
   final FocusNode _passwordFocus = FocusNode();
+  final FocusNode _confirmPasswordFocus = FocusNode();
 
   final _formKey = GlobalKey<FormState>();
 
   String? _errorText;
+  String? _passwordErrorText;
+  String? _emailErrorText;
   bool _isLoading = false;
   bool _isGoogleLoading = false;
 
@@ -61,18 +67,100 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
     _heroAnimController.forward();
   }
 
+  void _validateEmail(String value) {
+    if (value.isEmpty) {
+      setState(() => _emailErrorText = 'Email is required');
+      return;
+    }
+    final emailRegex = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
+    if (!emailRegex.hasMatch(value)) {
+      setState(() => _emailErrorText = 'Enter a valid email address');
+      return;
+    }
+    setState(() => _emailErrorText = null);
+  }
+
+  void _validatePassword(String value) {
+    if (value.isEmpty) {
+      setState(() => _passwordErrorText = 'Password is required');
+      return;
+    }
+    if (value.length < 8) {
+      setState(() => _passwordErrorText = 'Use at least 8 characters');
+      return;
+    }
+    if (!RegExp(r'[A-Z]').hasMatch(value)) {
+      setState(() => _passwordErrorText = 'Add at least 1 uppercase letter');
+      return;
+    }
+    if (!RegExp(r'[a-z]').hasMatch(value)) {
+      setState(() => _passwordErrorText = 'Add at least 1 lowercase letter');
+      return;
+    }
+    if (!RegExp(r'[0-9]').hasMatch(value)) {
+      setState(() => _passwordErrorText = 'Include a number');
+      return;
+    }
+    if (!RegExp(r'[^a-zA-Z0-9]').hasMatch(value)) {
+      setState(() => _passwordErrorText = 'Add a special character');
+      return;
+    }
+    setState(() => _passwordErrorText = null);
+  }
+
   @override
   void dispose() {
+    _nameController.dispose();
     _emailController.dispose();
+    _phoneController.dispose();
     _passwordController.dispose();
+    _confirmPasswordController.dispose();
+    
+    _nameFocus.dispose();
     _emailFocus.dispose();
+    _phoneFocus.dispose();
     _passwordFocus.dispose();
+    _confirmPasswordFocus.dispose();
+    
     _heroAnimController.dispose();
     super.dispose();
   }
 
-  Future<void> _handleLogin() async {
-    if (!_formKey.currentState!.validate()) return;
+  Future<void> _handleSignUp() async {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    final name = _nameController.text.trim();
+    final email = _emailController.text.trim();
+    final phone = _phoneController.text.trim();
+    final password = _passwordController.text;
+    final confirmPassword = _confirmPasswordController.text;
+
+    // Optional safety: re-check password validity
+    if (password.isEmpty || password.length < 8 || 
+        !RegExp(r'[A-Z]').hasMatch(password) || 
+        !RegExp(r'[a-z]').hasMatch(password) || 
+        !RegExp(r'[0-9]').hasMatch(password) || 
+        !RegExp(r'[^a-zA-Z0-9]').hasMatch(password)) {
+      setState(() => _errorText = 'Invalid password.');
+      return;
+    }
+
+    if (name.isEmpty || email.isEmpty || confirmPassword.isEmpty) {
+      setState(() => _errorText = 'Please fill in all required fields.');
+      return;
+    }
+
+    if (password != confirmPassword) {
+      setState(() => _errorText = 'Passwords do not match.');
+      return;
+    }
+
+    if (password.length < 6) {
+      setState(() => _errorText = 'Password must be at least 6 characters.');
+      return;
+    }
 
     setState(() {
       _isLoading = true;
@@ -80,40 +168,29 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
     });
 
     try {
-      final userCred = await FirebaseAuthService.instance.signInWithEmailAndPassword(
-        _emailController.text.trim(),
-        _passwordController.text,
-      );
-
+      final userCred = await FirebaseAuthService.instance.createUserWithEmailAndPassword(email, password);
+      
       if (userCred.user != null) {
-        // Ensure user document exists, or create basic one (fallback)
-        final exists = await FirestoreService.instance.checkUserExists(userCred.user!.uid);
-        if (!exists) {
-           await FirestoreService.instance.createUserProfile(
-             user: userCred.user!, 
-             name: userCred.user!.displayName ?? 'User', 
-             email: userCred.user!.email ?? '',
-           );
-        }
-
-        await userCred.user!.reload();
+        await FirestoreService.instance.createUserProfile(
+          user: userCred.user!, 
+          name: name, 
+          email: email,
+          phone: phone.isNotEmpty ? phone : null,
+        );
+        
+        await userCred.user!.sendEmailVerification();
+        
         if (mounted) {
-          if (FirebaseAuth.instance.currentUser?.emailVerified == true) {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (_) => const MainNavigation()),
-            );
-          } else {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (_) => const VerifyEmailScreen()),
-            );
-          }
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (_) => const VerifyEmailScreen()),
+            (route) => false,
+          );
         }
       }
     } on FirebaseAuthException catch (e) {
       setState(() {
-        _errorText = e.message ?? 'Login failed. Please try again.';
+        _errorText = e.message ?? 'Sign up failed. Please try again.';
       });
     } catch (e) {
       setState(() {
@@ -149,14 +226,16 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
         await userCred.user!.reload();
         if (mounted) {
           if (FirebaseAuth.instance.currentUser?.emailVerified == true) {
-            Navigator.pushReplacement(
+            Navigator.pushAndRemoveUntil(
               context,
               MaterialPageRoute(builder: (_) => const MainNavigation()),
+              (route) => false,
             );
           } else {
-            Navigator.pushReplacement(
+            Navigator.pushAndRemoveUntil(
               context,
               MaterialPageRoute(builder: (_) => const VerifyEmailScreen()),
+              (route) => false,
             );
           }
         }
@@ -179,6 +258,14 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
     
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back_rounded, color: theme.colorScheme.onSurface),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ),
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
@@ -190,12 +277,10 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                   padding: const EdgeInsets.symmetric(horizontal: 24),
                   child: Column(
                     children: [
-                      SizedBox(height: (screenHeight * 0.08) - 20),
+                      SizedBox(height: (screenHeight * 0.02)),
                       _buildHeroSection(theme),
                       SizedBox(height: screenHeight * 0.04),
                       _buildAuthCard(theme, isDark),
-                      const SizedBox(height: 32),
-                      _buildSignUpLink(theme),
                       const SizedBox(height: 32),
                     ],
                   ),
@@ -216,20 +301,20 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
           child: FadeTransition(
             opacity: _logoFadeAnim,
             child: Container(
-              width: 80,
-              height: 80,
+              width: 64,
+              height: 64,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
                     color: theme.colorScheme.primary.withValues(alpha: 0.2),
-                    blurRadius: 24,
-                    offset: const Offset(0, 12),
+                    blurRadius: 16,
+                    offset: const Offset(0, 8),
                   ),
                 ],
               ),
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(16),
                 child: Image.asset(
                   'assets/images/sanchora_logo.png',
                   fit: BoxFit.cover,
@@ -244,7 +329,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
           child: Column(
             children: [
               Text(
-                'Welcome Back',
+                'Create Account',
                 style: TextStyle(
                   fontSize: 28,
                   fontFamily: 'Poppins',
@@ -255,7 +340,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
               ),
               const SizedBox(height: 8),
               Text(
-                'One App. Every Subscription.',
+                'Join Sanchora today.',
                 style: TextStyle(
                   fontSize: 16,
                   fontFamily: 'Poppins',
@@ -287,44 +372,105 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
       child: Form(
         key: _formKey,
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            _buildGoogleButton(theme),
-            const SizedBox(height: 24),
-            Row(
-              children: [
-                Expanded(child: Divider(color: theme.dividerColor)),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Text(
-                    'OR',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _buildGoogleButton(theme),
+          const SizedBox(height: 24),
+          Row(
+            children: [
+              Expanded(child: Divider(color: theme.dividerColor)),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Text(
+                  'OR',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: theme.colorScheme.onSurfaceVariant,
                   ),
                 ),
-                Expanded(child: Divider(color: theme.dividerColor)),
-              ],
-            ),
-            const SizedBox(height: 24),
+              ),
+              Expanded(child: Divider(color: theme.dividerColor)),
+            ],
+          ),
+          const SizedBox(height: 24),
+          PremiumInputCard(
+            label: 'Full Name',
+            icon: Icons.person_rounded,
+            controller: _nameController,
+            focusNode: _nameFocus,
+            keyboardType: TextInputType.name,
+            hintText: 'Enter your full name',
+            errorText: null,
+          ),
+          FormField<String>(
+            initialValue: _emailController.text,
+            validator: (value) {
+              if (value == null || value.isEmpty) return 'Email is required';
+              final emailRegex = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
+              if (!emailRegex.hasMatch(value)) return 'Enter a valid email address';
+              return null;
+            },
+            builder: (field) {
+              return PremiumInputCard(
+                label: 'Email',
+                icon: Icons.email_rounded,
+                controller: _emailController,
+                focusNode: _emailFocus,
+                keyboardType: TextInputType.emailAddress,
+                hintText: 'Enter your email',
+                errorText: field.errorText ?? _emailErrorText,
+                onChanged: (val) {
+                  field.didChange(val);
+                  _validateEmail(val);
+                },
+              );
+            },
+          ),
+          PremiumInputCard(
+            label: 'Phone Number (Optional)',
+            icon: Icons.phone_rounded,
+            controller: _phoneController,
+            focusNode: _phoneFocus,
+            keyboardType: TextInputType.phone,
+            hintText: 'Enter your phone number',
+            errorText: null,
+          ),
+          FormField<String>(
+            initialValue: _passwordController.text,
+            validator: (value) {
+              if (value == null || value.isEmpty) return 'Password is required';
+              if (value.length < 8) return 'Use at least 8 characters';
+              if (!RegExp(r'[A-Z]').hasMatch(value)) return 'Add at least 1 uppercase letter';
+              if (!RegExp(r'[a-z]').hasMatch(value)) return 'Add at least 1 lowercase letter';
+              if (!RegExp(r'[0-9]').hasMatch(value)) return 'Include a number';
+              if (!RegExp(r'[^a-zA-Z0-9]').hasMatch(value)) return 'Add a special character';
+              return null;
+            },
+            builder: (field) {
+              return PremiumInputCard(
+                label: 'Password',
+                icon: Icons.lock_rounded,
+                controller: _passwordController,
+                focusNode: _passwordFocus,
+                keyboardType: TextInputType.visiblePassword,
+                hintText: 'Create a password',
+                errorText: field.errorText ?? _passwordErrorText,
+                onChanged: (val) {
+                  field.didChange(val);
+                  _validatePassword(val);
+                },
+                obscureText: true,
+              );
+            },
+          ),
             PremiumInputCard(
-              label: 'Email',
-              icon: Icons.email_rounded,
-              controller: _emailController,
-              focusNode: _emailFocus,
-              keyboardType: TextInputType.emailAddress,
-              hintText: 'Enter your email',
-              errorText: null,
-            ),
-            PremiumInputCard(
-              label: 'Password',
-              icon: Icons.lock_rounded,
-              controller: _passwordController,
-              focusNode: _passwordFocus,
+              label: 'Confirm Password',
+              icon: Icons.lock_outline_rounded,
+              controller: _confirmPasswordController,
+              focusNode: _confirmPasswordFocus,
               keyboardType: TextInputType.visiblePassword,
-              hintText: 'Enter your password',
+              hintText: 'Confirm your password',
               errorText: null,
               obscureText: true,
             ),
@@ -339,26 +485,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                 textAlign: TextAlign.center,
               ),
             ],
-            Align(
-              alignment: Alignment.centerRight,
-              child: TextButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const ForgotPasswordScreen()),
-                  );
-                },
-                child: Text(
-                  'Forgot Password?',
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: theme.colorScheme.primary,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 24),
             _buildPrimaryButton(theme),
           ],
         ),
@@ -444,7 +571,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
-          onTap: isEnabled ? _handleLogin : null,
+          onTap: isEnabled ? _handleSignUp : null,
           child: Center(
             child: _isLoading
                 ? const SizedBox(
@@ -456,7 +583,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                     ),
                   )
                 : Text(
-                    'Login',
+                    'Create Account',
                     style: TextStyle(
                       fontSize: 16,
                       fontFamily: 'Poppins',
@@ -467,37 +594,6 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
           ),
         ),
       ),
-    );
-  }
-  
-  Widget _buildSignUpLink(ThemeData theme) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Text(
-          "Don't have an account? ",
-          style: TextStyle(
-            fontSize: 14,
-            color: theme.colorScheme.onSurfaceVariant,
-          ),
-        ),
-        GestureDetector(
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const SignUpScreen()),
-            );
-          },
-          child: Text(
-            'Sign Up',
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: theme.colorScheme.primary,
-            ),
-          ),
-        ),
-      ],
     );
   }
 }

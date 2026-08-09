@@ -1,93 +1,53 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class FirebaseAuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
 
   static final FirebaseAuthService instance = FirebaseAuthService._();
   FirebaseAuthService._();
 
-  String? _verificationId;
-  int? _resendToken;
-
-  /// Starts the phone authentication process by verifying the phone number.
-  Future<void> verifyPhoneNumber({
-    required String phoneNumber,
-    required Function(PhoneAuthCredential) verificationCompleted,
-    required Function(FirebaseAuthException) verificationFailed,
-    required Function(String, int?) codeSent,
-    required Function(String) codeAutoRetrievalTimeout,
-  }) async {
-    await _auth.verifyPhoneNumber(
-      phoneNumber: phoneNumber,
-      verificationCompleted: verificationCompleted,
-      verificationFailed: verificationFailed,
-      codeSent: (String verificationId, int? resendToken) {
-        _verificationId = verificationId;
-        _resendToken = resendToken;
-        codeSent(verificationId, resendToken);
-      },
-      codeAutoRetrievalTimeout: codeAutoRetrievalTimeout,
-      forceResendingToken: _resendToken,
+  /// Sign In with Email and Password
+  Future<UserCredential> signInWithEmailAndPassword(String email, String password) async {
+    return await _auth.signInWithEmailAndPassword(
+      email: email,
+      password: password,
     );
   }
 
-  /// Verifies the OTP code entered by the user.
-  Future<UserCredential> verifyOTP(String smsCode) async {
-    if (_verificationId == null) {
-      throw Exception('Verification ID is null. Please request OTP first.');
-    }
-
-    final credential = PhoneAuthProvider.credential(
-      verificationId: _verificationId!,
-      smsCode: smsCode,
+  /// Create User with Email and Password
+  Future<UserCredential> createUserWithEmailAndPassword(String email, String password) async {
+    return await _auth.createUserWithEmailAndPassword(
+      email: email,
+      password: password,
     );
-
-    return await _auth.signInWithCredential(credential);
   }
 
-  /// Checks if the user document exists in Firestore.
-  Future<bool> checkUserExists(String uid) async {
-    final userDoc = _firestore.collection('users').doc(uid);
-    final snapshot = await userDoc.get();
-
-    if (snapshot.exists) {
-      await userDoc.update({
-        'lastLogin': FieldValue.serverTimestamp(),
-      });
-      return true;
+  /// Sign In with Google
+  Future<UserCredential?> signInWithGoogle() async {
+    final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+    
+    if (googleUser != null) {
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final AuthCredential credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+      
+      return await _auth.signInWithCredential(credential);
     }
-    return false;
+    return null;
   }
 
-  /// Creates a new user profile in Firestore.
-  Future<void> createUserProfile({
-    required User user,
-    required String name,
-    required String email,
-    required String phone,
-  }) async {
-    final userDoc = _firestore.collection('users').doc(user.uid);
-    final now = FieldValue.serverTimestamp();
-
-    await userDoc.set({
-      'uid': user.uid,
-      'name': name,
-      'email': email,
-      'phone': phone,
-      'photoUrl': null,
-      'joinedDate': now,
-      'lastLogin': now,
-      'isPremium': false,
-      'activeSubscriptions': 0,
-      'totalSpent': 0.0,
-      'totalSaved': 0.0,
-    });
+  /// Send Password Reset Email
+  Future<void> sendPasswordResetEmail(String email) async {
+    await _auth.sendPasswordResetEmail(email: email);
   }
 
-  /// Optional: Sign out
+  /// Sign out
   Future<void> signOut() async {
+    await _googleSignIn.signOut();
     await _auth.signOut();
   }
 }
